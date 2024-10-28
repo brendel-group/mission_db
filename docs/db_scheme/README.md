@@ -1,5 +1,5 @@
 # Database Scheme #
-![ER Diagram](db_scheme/db_scheme_er_diagram.png)
+![ER Diagram](db_scheme_er_diagram.png)
 The above diagram is a ER Diagram. Information on how to read those diagrams can be found [here](https://www.pertuniti.com/documentation/eer/).
 
 The first table is the `missions` table. It has the columns `id`, `name`, `date`, `location` and `other`.\
