@@ -1,0 +1,6 @@
+frontend/node_modules
+
+frontend/.cache
+frontend/build
+frontend/.env
+frontend/.yarn/install-state.gz
