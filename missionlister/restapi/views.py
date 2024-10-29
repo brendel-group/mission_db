@@ -18,10 +18,32 @@ def create_mission(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET', 'PUT', 'DELETE'])
+def mission_detail(request, pk):
+    try:
+        mission = Mission.objects.get(pk=pk)
+    except mission.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = MissionSerializer(mission)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = MissionSerializer(mission, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        mission.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 '''
-id = models.IntegerField()
-    name = models.CharField(max_length=1000) # TODO: what should max_length be?
-    date = models.DateTimeField()
-    location = models.CharField(max_length=1000)
-    other = models.CharField()
+update db:
+python manage.py makemigrations
+python manage.py migrate
+
+start server
+python manage.py runserver
 '''
