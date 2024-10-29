@@ -11,4 +11,4 @@ class Mission(models.Model):
 
     # this function defines, what the value of print(mission) would be
     def __str__(self):
-        return self.id 
+        return self.id
