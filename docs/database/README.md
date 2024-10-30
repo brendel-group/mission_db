@@ -18,3 +18,17 @@ DATABASE_HOST=host
 DATABASE_PORT=5432
 ```
 and modify with your actual details.
+
+## initialize database
+cd into the missionlister directory and run the following commands:
+```python
+python manage.py makemigrations
+```
+```python
+python manage.py migrate
+```
+
+## check if everything is setup correctly
+In pgadmin4, navigate to the tables:![image](https://github.com/user-attachments/assets/249a4bf0-3735-415e-84e4-4a1a02fbd4ee)
+Search for the `restapi_mission` table, rightclick on it and view all rows, the result should look something like this![image](https://github.com/user-attachments/assets/06cc9590-f2e4-4073-8793-2e6bbb3d3e2d)
+
