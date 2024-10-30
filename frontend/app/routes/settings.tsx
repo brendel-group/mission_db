@@ -1,10 +1,9 @@
 import type { MetaFunction } from "@remix-run/node";
 import { CreateAppShell } from "~/layout/AppShell";
-import MissionsPage from "~/pages/MissionsPage";
-
+import SettingsPage from "~/pages/SettingsPage";
 export const meta: MetaFunction = () => {
   return [
-    { title: "Mission overview" },
+    { title: "Missions" },
     { name: "description", content: "Mission overview" },
   ];
 };
@@ -13,7 +12,7 @@ export default function Index() {
   return (
     <CreateAppShell>
       <div>
-        <MissionsPage />
+        <SettingsPage />
       </div>
     </CreateAppShell>
   );
