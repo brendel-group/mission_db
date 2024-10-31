@@ -4,3 +4,12 @@ frontend/.cache
 frontend/build
 frontend/.env
 frontend/.yarn/install-state.gz
+
+*.pyc
+
+**/__pycache__/
+**/migrations/
+db.sqlite3
+/env
+*.env
+.vscode
