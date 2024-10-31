@@ -6,7 +6,7 @@ frontend/.env
 frontend/.yarn/install-state.gz
 
 *.pyc
-__pycache__
+**/__pycache__/
 db.sqlite3
 /env
 *.env
