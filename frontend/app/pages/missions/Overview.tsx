@@ -104,7 +104,6 @@ export function Overview() {
   const [sortedData, setSortedData] = useState(data);
   const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
 
   const setSorting = (field: keyof RowData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -140,6 +139,15 @@ export function Overview() {
     </Table.Tr>
   ));
 
+  const columns: { key: keyof RowData; label: string }[] = [
+    { key: "name", label: "Name" },
+    { key: "location", label: "Location" },
+    { key: "duration", label: "Duration" },
+    { key: "size", label: "Size (MB)" },
+    { key: "robot", label: "Robot" },
+    { key: "other", label: "Other" },
+  ];
+
   return (
     <ScrollArea>
       <TextInput
@@ -162,48 +170,16 @@ export function Overview() {
       >
         <Table.Tbody>
           <Table.Tr>
-            <Th
-              sorted={sortBy === "name"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("name")}
-            >
-              Name
-            </Th>
-            <Th
-              sorted={sortBy === "location"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("location")}
-            >
-              Location
-            </Th>
-            <Th
-              sorted={sortBy === "duration"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("duration")}
-            >
-              Duration
-            </Th>
-            <Th
-              sorted={sortBy === "size"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("size")}
-            >
-              Size (MB)
-            </Th>
-            <Th
-              sorted={sortBy === "robot"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("robot")}
-            >
-              Robot
-            </Th>
-            <Th
-              sorted={sortBy === "other"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("other")}
-            >
-              Other
-            </Th>
+            {columns.map((col) => (
+              <Th
+                key={col.key}
+                sorted={sortBy === col.key}
+                reversed={reverseSortDirection}
+                onSort={() => setSorting(col.key)}
+              >
+                {col.label}
+              </Th>
+            ))}
           </Table.Tr>
         </Table.Tbody>
         <Table.Tbody>
