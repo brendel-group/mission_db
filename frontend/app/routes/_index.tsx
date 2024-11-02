@@ -1,6 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
 import { CreateAppShell } from "~/layout/AppShell";
-import MissionsPage from "~/pages/MissionsPage";
+import MissionsPage from "~/pages/missions/MissionsPage";
 
 export const meta: MetaFunction = () => {
   return [
