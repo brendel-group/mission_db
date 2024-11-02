@@ -16,4 +16,16 @@
      ```bash
      npm run dev
      ```
+
+## pre-commit-hooks Setup
+0. **virtual environment**
+make sure to create and activate a virtual environment
+
+1. **install pre-commit**
+run `pip install pre-commit` in the terminal
+or use `pip install -r requirements.txt`
+
+2. **install Hooks**
+run `pre-commit install` in the terminal
+
     
