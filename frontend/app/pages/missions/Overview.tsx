@@ -18,6 +18,7 @@ import {
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
 import data from "./RandomData";
+import RenderView from "./RenderView";
 
 export interface RowData {
   name: string;
@@ -104,6 +105,8 @@ export function Overview() {
   const [sortedData, setSortedData] = useState(data);
   const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [modalOpened, setModalOpened] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
 
   const setSorting = (field: keyof RowData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -120,9 +123,15 @@ export function Overview() {
     );
   };
 
+  const openModal = (row: RowData) => {
+    setSelectedRow(row);
+    setModalOpened(true);
+  };
+
   const rows = sortedData.map((row) => (
     <Table.Tr
       key={row.name}
+      onClick={() => openModal(row)}
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
@@ -196,6 +205,13 @@ export function Overview() {
           )}
         </Table.Tbody>
       </Table>
+
+      {/* Modal Component */}
+      <RenderView
+        modalOpened={modalOpened}
+        selectedRow={selectedRow}
+        onClose={() => setModalOpened(false)}
+      />
     </ScrollArea>
   );
 }
