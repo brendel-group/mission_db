@@ -11,20 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 import environ
 
 env = environ.Env()
 # reading .env file
 environ.Env.read_env()
-=======
->>>>>>> 493248b (initialized django project)
-=======
->>>>>>> 010ffa9 (initialized django project)
-=======
->>>>>>> bd63a4a9263e7d7a212373a47ef88ea7981e6329
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,20 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 #SECRET_KEY = 'django-insecure-l$iff@-ubs*i$b$9e08v13q1v1^%pcv4w!-$7@-(@np1-&rrfv'
 SECRET_KEY = env("SECRET_KEY", default="unsafe-secret-key")
-=======
-SECRET_KEY = 'django-insecure-l$iff@-ubs*i$b$9e08v13q1v1^%pcv4w!-$7@-(@np1-&rrfv'
->>>>>>> 493248b (initialized django project)
-=======
-SECRET_KEY = 'django-insecure-l$iff@-ubs*i$b$9e08v13q1v1^%pcv4w!-$7@-(@np1-&rrfv'
->>>>>>> 010ffa9 (initialized django project)
-=======
-SECRET_KEY = 'django-insecure-l$iff@-ubs*i$b$9e08v13q1v1^%pcv4w!-$7@-(@np1-&rrfv'
->>>>>>> bd63a4a9263e7d7a212373a47ef88ea7981e6329
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -104,27 +83,12 @@ WSGI_APPLICATION = 'missionlister.wsgi.application'
 
 DATABASES = {
     'default': {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': env("DATABASE_NAME"),
         'USER': env("DATABASE_USER"),
         'PASSWORD': env("DATABASE_PASSWORD"),
         'HOST': env("DATABASE_HOST"),
         'PORT': env("DATABASE_PORT"),
-=======
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
->>>>>>> 493248b (initialized django project)
-=======
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
->>>>>>> 010ffa9 (initialized django project)
-=======
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
->>>>>>> bd63a4a9263e7d7a212373a47ef88ea7981e6329
     }
 }
 
