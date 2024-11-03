@@ -14,7 +14,7 @@ To test the API, one can use the django webserver. The missionlister/restapi/url
 - GET Requests
     - [GET Missions](http://127.0.0.1:8000/restapi/missions/) shows all stored missions in our database
 - POST Requests
-    - [POST Mission] lets you create a new entry in our Missions database.
+    - [POST Mission](http://127.0.0.1:8000/restapi/missions/create) lets you create a new entry in our Missions database.
     - in order to do that, you'll need to past your mission data into the content box in a json format. example data:
     - ```json
       {
@@ -22,7 +22,7 @@ To test the API, one can use the django webserver. The missionlister/restapi/url
         "name": "picking apples",
         "date": "2024-10-29 14:58:33.732505",
         "location": "Tuebingen",
-        "other": ""
+        "other": "good data"
       }  
       ```
 - GET, PUT and DELETE mission by id
