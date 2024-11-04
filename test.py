@@ -1,3 +1,1 @@
-liste = ["Hallo", "Welt", 
-         
-         "Formatter is working"]
+liste = ["Hallo", "Welt", "Formatter is working"]
