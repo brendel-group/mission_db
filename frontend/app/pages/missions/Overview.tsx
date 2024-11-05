@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   ScrollArea,
@@ -19,6 +19,7 @@ import {
 import classes from "./Overview.module.css";
 import data from "./RandomData";
 import RenderView from "./RenderView";
+import { Mission, getMissions } from 'app/utils/fetchapi'
 
 export interface RowData {
   name: string;
@@ -107,6 +108,30 @@ export function Overview() {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMissions = async () => {
+      try {
+        const data = await getMissions(); // Fetch data from API
+        setSortedData(data);
+      } catch (e: any) {
+        if (e instanceof Error) {
+          setError(e.message); // Display Error information
+        } else {
+          setError("An unknown error occurred"); // For non-Error types
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMissions();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   const setSorting = (field: keyof RowData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
