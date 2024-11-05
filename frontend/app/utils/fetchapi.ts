@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:5432/restapi';
+const BASE_URL = 'http://127.0.0.1:5432/missionlister/restapi';
 
 export interface Mission {
     id?: number; // Optional because its not needed when creating a new mission
