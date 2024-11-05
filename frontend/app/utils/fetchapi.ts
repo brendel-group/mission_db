@@ -1,10 +1,12 @@
 const BASE_URL = 'http://127.0.0.1:5432/restapi';
 
 export interface Mission {
-    id?: number; // Optional because its not there when creating a new mission
+    id?: number; // Optional because its not needed when creating a new mission
     name: string;
-    date: string;
     location: string;
+    duration: string;
+    size: string;
+    robot: string;
     other: string;
 }
 
