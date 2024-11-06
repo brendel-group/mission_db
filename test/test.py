@@ -10,8 +10,8 @@ CHARACTERS = (
     "Gimli",
     "Boromir",
     "Gandalf",
-    "Saruman",
-    "Sauron",
+    "Saruman", "Sauron"
+    
 )
 
 
