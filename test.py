@@ -19,12 +19,15 @@ def random_character():
     return random.choice(CHARACTERS)
 
 
-def ring_bearer():
-    return name in ("Frodo", "Sam")
+def ring_bearer(name):
+    return name in ("Frodo", 
+                    
+                    
+                    "Sam")
 
 
 if __name__ == "__main__":
-    character = random_character()
+    character =  random_character()
     if ring_bearer(character):
         print(f"{character} is a ring bearer")
     else:
