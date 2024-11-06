@@ -31,4 +31,4 @@ if __name__ == "__main__":
     if ring_bearer(character):
         print(f"{character} is a ring bearer")
     else:
-        print(f"{character} is not a ring bearer  ")
+        print(f"{character} is not a ring bearer   ")
