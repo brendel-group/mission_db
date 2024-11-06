@@ -5,7 +5,7 @@ CHARACTERS = ("Frodo", "Sam", "Merry", "Pippin", "Aragorn", "Legolas", "Gimli", 
 def random_character():
     return random.choice(CHARACTERS)
 
-def ring_bearer():
+def ring_bearer(name):
     return name in ("Frodo", "Sam")
 
 if __name__ == "__main__":
