@@ -1,6 +1,16 @@
 import random
 
-CHARACTERS = ("Frodo", "Sam", "Merry", "Pippin", "Aragorn", "Legolas", "Gimli", "Boromir", "Gandalf", "Saruman", "Sauron")
+CHARACTERS = ("Frodo", 
+              "Sam", 
+              "Merry", 
+              "Pippin", 
+              "Aragorn", 
+              "Legolas", 
+              "Gimli", 
+              "Boromir", 
+              "Gandalf", 
+              "Saruman", 
+              "Sauron")
 
 def random_character():
     return random.choice(CHARACTERS)
