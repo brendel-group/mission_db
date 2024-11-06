@@ -19,7 +19,7 @@ def random_character():
     return random.choice(CHARACTERS)
 
 
-def ring_bearer():
+def ring_bearer(name):
     return name in ("Frodo", "Sam")
 
 
