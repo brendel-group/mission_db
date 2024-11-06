@@ -1,3 +1,3 @@
-import os
-
-print("hopefully ruff rejects it")
+list = ["a", 
+             "b", 
+           "c"]
