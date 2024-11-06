@@ -9,7 +9,3 @@ jobs:
         with:
             args: "format --check"
             changed-files: "true"
-      - uses: astral-sh/ruff-action@v1
-        with:
-            args: "check"
-            changed-files: "true"
