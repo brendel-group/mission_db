@@ -5,7 +5,7 @@ class Mission(models.Model):
     # our datastructure is defined here
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=65536) 
-    date = models.DateTimeField()
+    date = models.DateField()
     location = models.CharField(max_length=65536)
     other = models.CharField(max_length=65536)
 

@@ -15,6 +15,17 @@ from restapi.models import Mission  # Adjust as needed
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
+# Extract date and name from folder name
+def extract_info_from_folder(folder_name):
+    try:
+        date_str, name = folder_name.split('_', 1)
+        date_str = convert_date(date_str)
+        date = datetime.strptime(date_str, '%Y-%m-%d')
+        return date, name
+    except ValueError:
+        logging.error(f"Folder name '{folder_name}' does not match the expected format (YYYY-MM-DD_missionname).")
+        return None, None
+
 # Check if mission exists
 def check_mission_exists(id):
     return Mission.objects.filter(id=id).exists()
@@ -26,6 +37,27 @@ def validate_datetime(datetime_str):
     except ValueError:
         logging.error("Date and time format should be YYYY-MM-DD HH:MM:SS.")
         return None
+
+# Add mission to DB
+def add_mission_from_folder(id, folder_path, location, other):
+    folder_name = os.path.basename(folder_path)
+    date, name = extract_info_from_folder(folder_name)
+
+    if date and name:
+        mission = Mission(
+            id=id,
+            name=name,
+            date=date,
+            location=location,  
+            other=other  
+        )
+        try:
+            mission.save()
+            logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
+        except Exception as e:
+            logging.error(f"Error adding mission: {e}")
+    else:
+        logging.warning("Skipping folder due to naming issues.")
 
 # Add mission to DB
 def add_mission(id, name, date, location, other):
@@ -55,6 +87,9 @@ def remove_mission(mission_id):
     except Mission.DoesNotExist:
         print(f"No mission found with ID {mission_id}.")
 
+def convert_date(date):
+    return date.replace(".", "-")
+
 
 def main():
     # Arg parser
@@ -66,12 +101,18 @@ def main():
     add_parser.add_argument("--id", required=True, help="ID")
     add_parser.add_argument("--name", required=True, help="Mission name")
     add_parser.add_argument("--datetime", required=True, help="Mission date and time (YYYY-MM-DD HH:MM:SS)")
-    add_parser.add_argument("--location", required=True, help="Mission location")
-    add_parser.add_argument("--other", required=True, help="Other mission details")
+    add_parser.add_argument("--location", required=False, help="Mission location", default="unknown")
+    add_parser.add_argument("--other", required=False, help="Other mission details", default="-")
 
     #remove command
     remove_parser = subparser.add_parser("remove", help="Remove mission")
     remove_parser.add_argument("--id", required=True, help="ID")
+
+    folder_parser = subparser.add_parser("addfolder", help="adds details from folder")
+    folder_parser.add_argument("--id", required=True, help="ID")
+    folder_parser.add_argument("--path", required=True, help="Filepath")
+    folder_parser.add_argument("--location", required=False, help="location", default="unknown")
+    folder_parser.add_argument("--other", required=False, help="other mission details", default="-")
 
     args = parser.parse_args()
 
@@ -93,6 +134,13 @@ def main():
         )
     elif args.command == "remove":
         remove_mission(args.id)
+    elif args.command == "addfolder":
+        add_mission_from_folder(
+            args.id,
+            args.path,
+            args.location,
+            args.other
+            )
     else:
         parser.print_help()
 
