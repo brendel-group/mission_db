@@ -18,9 +18,9 @@ class Mission(models.Model):
 class Tag(models.Model):
     '''The tags table'''
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=65536)
+    name = models.CharField(max_length=65536, unique=True)
 
 class Mission_tags(models.Model):
     '''The relationship table to connect Misson and Tag'''
-    mission_id = models.ForeignKey(Mission, on_delete=models.CASCADE)
-    tag_id = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
