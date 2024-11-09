@@ -1,7 +1,18 @@
 # primary database
 ## install postgreSQL
-Download postgreSQL from the official webpage and open the newly installed pgAdmin4.
-Rightclick the desired server and create a new database.
+- Download postgreSQL and pgAdmin4 from the official webpage and open the newly installed pgAdmin4.
+- Rightclick the desired server and create a new database.
+- (for Linux do the following to create a new server and user. In this example with Ubuntu):
+    - access the PostgreSQL database shell:
+    ```bash
+    sudo su - postgres
+    ```
+    you will see this: `postgres=#`
+    - create new server and user. For example user bob with password 'admin'
+    ```bash
+    postgres=# create user bob with superuser password 'admin';
+    ```
+    - now go to pgadmin4 and add the server with the usere data from the step before
 
 ## defining server details
 We're using postreSQL, for which we need to specify our database name/ip/password/etc in the missionlister/missionlister/settings.py file.
@@ -18,6 +29,11 @@ DATABASE_HOST=host
 DATABASE_PORT=5432
 ```
 and modify with your actual details.
+- The secret key can be found in settings.py as a comment
+- name should be postgres
+- user is you user name (in our linux example from above it is "bob")
+- passwort is you password (in our linux example from above it is "admin")
+- host should be localhost
 
 ## initialize database
 cd into the missionlister directory and run the following commands:
