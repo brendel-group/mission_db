@@ -4,5 +4,14 @@ frontend/build
 frontend/.env
 frontend/.yarn/install-state.gz
 
-# ignore virtual environment
 env/
+
+*.pyc
+
+**/__pycache__/
+**/migrations/
+db.sqlite3
+/env
+*.env
+.vscode
+
