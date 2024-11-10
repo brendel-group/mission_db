@@ -169,3 +169,36 @@ class RestAPIMissionTagsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['name'], self.tags[0].name)
+
+class MissionTagCascadeDeleteTests(APITestCase):
+
+    def setUp(self):
+        # Create a mission and some tags
+        self.mission1 = Mission.objects.create(
+            name="TestMission",
+            date=timezone.now()
+        )
+        self.mission2 = Mission.objects.create(
+            name="TestMission2",
+            date=timezone.now()
+        )
+        self.tag1 = Tag.objects.create(name="TestTag1")
+        self.tag2 = Tag.objects.create(name="TestTag2")
+
+        # Create mission-tag relationships
+        self.mission_tag1 = Mission_tags.objects.create(mission=self.mission1, tag=self.tag1)
+        self.mission_tag2 = Mission_tags.objects.create(mission=self.mission2, tag=self.tag2)
+
+    def test_mission_deletes_mission_tags(self):
+        self.mission1.delete()
+        self.mission1.save()
+        mission_tags_exist = Mission_tags.objects.filter(mission=self.mission1).exists()
+        self.assertFalse(mission_tags_exist)
+
+    def test_tag_deletes_mission_tags(self):
+        self.tag2.delete()
+        self.tag2.save()
+        mission_tags_exist = Mission_tags.objects.filter(tag=self.tag2).exists()
+        self.assertFalse(mission_tags_exist)
+
+
