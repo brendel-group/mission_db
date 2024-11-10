@@ -106,6 +106,38 @@ class TagByMissionAPI(generics.ListAPIView):
         tag_ids = Mission_tags.objects.filter(mission=mission).values_list('tag_id', flat=True)
         return  Tag.objects.filter(id__in=tag_ids)
 
+
+@api_view(["POST"])
+def add_tag_to_mission(request):
+    serializer = MissionTagSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["DELETE"])
+def delete_mission_tag(request, mission_id, tag_name):
+    try:
+        # Retrieve the mission using the mission_id
+        mission = Mission.objects.get(id=mission_id)
+    except Mission.DoesNotExist:
+        return Response({'error': 'Mission not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        # Retrieve the tag using the tag_name
+        tag = Tag.objects.get(name=tag_name)
+    except Tag.DoesNotExist:
+        return Response({'error': 'Tag not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        # Find the Mission_tags entry
+        mission_tag = Mission_tags.objects.get(mission=mission, tag=tag)
+    except Mission_tags.DoesNotExist:
+        return Response({'error': 'Mission_tags entry not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Delete the Mission_tags entry
+    mission_tag.delete()
+    return Response({'success': 'Mission_tags entry deleted.'}, status=status.HTTP_204_NO_CONTENT)
 """
 update db:
 python manage.py makemigrations
