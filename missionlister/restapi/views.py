@@ -138,11 +138,3 @@ def delete_mission_tag(request, mission_id, tag_name):
     # Delete the Mission_tags entry
     mission_tag.delete()
     return Response({'success': 'Mission_tags entry deleted.'}, status=status.HTTP_204_NO_CONTENT)
-"""
-update db:
-python manage.py makemigrations
-python manage.py migrate
-
-start server
-python manage.py runserver
-"""
