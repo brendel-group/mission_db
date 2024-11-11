@@ -30,6 +30,14 @@ class MissionTagSerializer(serializers.ModelSerializer):
         }
 
     def create(self,validated_data):
+        '''
+        Create tag mission-tag using mission id and tag name
+        Creates new tag when tag doesn't exist
+        ### Parameters
+        validated_data: data that contains the mission id and tag name 
+        ### Raises
+        NotFound: if mission with mission id is not found
+        '''
         mission_id = validated_data.pop('mission').get('id')
         tag_name = validated_data.pop('tag').get('name')
         try:

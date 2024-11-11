@@ -47,12 +47,25 @@ def mission_detail(request, pk):
 
 @api_view(['GET'])
 def get_tags(request):
+    '''
+    List all tags in database
+    ### Returns
+    List of tags in json format as Response
+    '''
     tags = Tag.objects.all()
     serializer = TagSerializer(tags, many=True)
     return Response(serializer.data)
 
 @api_view(["POST"])
 def create_tag(request):
+    '''
+    Create new tag
+    ### Parameters
+    request: POST Request containing tag name in json format
+    ### Returns
+    Response with data of created tag object containing id and name\
+    Or HTTP_400_BAD_REQUEST Response
+    '''
     serializer = TagSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -61,6 +74,14 @@ def create_tag(request):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def tag_detail(request, name):
+    '''
+    Alter a tag or get data
+    ### Parameters
+    request: GET, PUT or DELETE request.
+    PUT request has to contain updated data of Tag
+    ### Returns
+    Tag data or HTTP error in Response
+    '''
     try:
         tag = Tag.objects.get(name=name)
     except Tag.DoesNotExist:
@@ -86,6 +107,13 @@ class MissionByTagAPI(generics.ListAPIView):
     name="Get Missions by Tag"
 
     def get_queryset(self):
+        '''
+        Lists Missions that have a Tag with a given name 
+        ### Returns
+        Missions list
+        ### Raises
+        NotFound if Tag with given name not found
+        '''
         try:
             tag = Tag.objects.get(name=self.kwargs['name'])
         except Tag.DoesNotExist:
@@ -98,6 +126,13 @@ class TagByMissionAPI(generics.ListAPIView):
     name="Get Tags by Mission id"
 
     def get_queryset(self):
+        '''
+        List Tags of a Mission
+        ### Returns
+        List of Tags
+        ### Raises
+        NotFound if no Mission with given id exists
+        '''
         try:
             mission = Mission.objects.get(id=self.kwargs['id'])
         except Mission.DoesNotExist:
@@ -108,6 +143,14 @@ class TagByMissionAPI(generics.ListAPIView):
 
 @api_view(["POST"])
 def add_tag_to_mission(request):
+    '''
+    Assign/add a tag to a misison
+    ### Parameters
+    request: POST Request containing mission_id and tag_name
+    ### Returns
+    json with given mission_id and tag_name
+    or HTTP_400_BAD_REQUEST Response
+    '''
     serializer = MissionTagSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -116,6 +159,16 @@ def add_tag_to_mission(request):
 
 @api_view(["DELETE"])
 def delete_mission_tag(request, mission_id, tag_name):
+    '''
+    Delete a tag from a mission
+    ### Parameters
+    request: DELETE request with no data\\
+    mission_id: Mission id\\
+    tag_name: name of Tag
+    ### Returns
+    success response or
+    HTTP_404_NOT_FOUND if mission, tag or relation not found
+    '''
     try:
         # Retrieve the mission using the mission_id
         mission = Mission.objects.get(id=mission_id)
