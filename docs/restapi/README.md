@@ -50,17 +50,17 @@ To test the API, one can use the django webserver. The missionlister/restapi/url
     - The repsonse is a json with the `id` and `name`
 - GET, PUT and DELETE tag using name
     - Tags can be addressed using the name, because the name is unique.
-    - With (GET)[http://localhost:8000/restapi/tags/test%20tag] you can get details about a tag.
+    - With [GET](http://localhost:8000/restapi/tags/test%20tag) you can get details about a tag.
     - The URL is of the format `restapi/tags/<str:tag_name>`
     - With the same url using a PUT Request a tag can be edited. The PUT Request has to contain the complete updated tag data.
     - With the same url using a DELETE Request a tag can be deleted.
 
 - GET Request to list missions by tag name
-  - Using a (GET Request)[http://localhost:8000/restapi/tags/missions/test%20tag] the missions with the same tag can be listed.
+  - Using a [GET Request](http://localhost:8000/restapi/tags/missions/test%20tag) the missions with the same tag can be listed.
   - The URL is of the format `restapi/tags/missions/<str:tag_name>`
   - The result is of the same format as when listing tags by mission but with missions being listed.
 - POST Request to add tag to mission
-  - With a (POST Request)[http://localhost:8000/restapi/mission-tags/create/] a tag can be added to a mission giving the mission id and a tag name.
+  - With a [POST Request](http://localhost:8000/restapi/mission-tags/create/) a tag can be added to a mission giving the mission id and a tag name.
   - Example:
   ```json
   {
@@ -71,7 +71,7 @@ To test the API, one can use the django webserver. The missionlister/restapi/url
   - <span style="color:red">If there exists no tag with that name a new one will be created.</span>
 
 - DELETE tag from misison
-  - With a (DELETE Request)[http://localhost:8000/restapi/mission-tags/delete/6/test] a tag can be removed from a mission.
+  - With a [DELETE Request](http://localhost:8000/restapi/mission-tags/delete/6/test) a tag can be removed from a mission.
   - The URL is of the format `restapi/mission-tags/delete/<int:mission_id>/<str:tag_name>`
   - Neither the mission nor the tag itself will be deleted. Only the relation.
 
