@@ -201,4 +201,55 @@ class MissionTagCascadeDeleteTests(APITestCase):
         mission_tags_exist = Mission_tags.objects.filter(tag=self.tag2).exists()
         self.assertFalse(mission_tags_exist)
 
+class NotFoundErrors(APITestCase):
+
+    def setUp(self):
+        self.mission = Mission.objects.create(
+            name="TestMission",
+            date=timezone.now()
+        )
+        self.tag = Tag.objects.create(name="test tag")
+
+    def test_tag_detail_not_found(self):
+        response = self.client.get(reverse(tag_detail, kwargs={'name': "notfound"}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_mission_tag(self):
+        #Tag not found
+        response = self.client.delete(reverse(delete_mission_tag, 
+                                           kwargs={'mission_id': self.mission.id, 'tag_name': "notfound"}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {'error': 'Tag not found.'})
+
+        #Misison not found
+        response = self.client.delete(reverse(delete_mission_tag, 
+                                           kwargs={'mission_id': self.mission.id+1, 'tag_name': "test tag"}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {'error': 'Mission not found.'})
+
+        #Mission-tag not found
+        response = self.client.delete(reverse(delete_mission_tag, 
+                                           kwargs={'mission_id': self.mission.id, 'tag_name': "test tag"}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {'error': 'Mission_tags entry not found.'})
+
+    def test_get_missions_by_tag(self):
+        response = self.client.get(reverse('get_missions_by_tag',
+                                           kwargs={"name": "notfound"}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {'detail': "Tag with name notfound not found"})
+
+    def test_get_tags_by_mission(self):
+        response = self.client.get(reverse('get_tags_by_mission_id',
+                                           kwargs={"id": self.mission.id+1}))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {'detail': f"Mission with id {self.mission.id+1} not found"})
+
+    def test_create_mission_tag(self):
+        response = self.client.post(reverse('add_tag_to_mission'),
+                                    { "mission_id": self.mission.id+1,
+                                     "tag_name": "test tag"})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {'detail': f"Mission with id {self.mission.id+1} not found"})
+    
 
