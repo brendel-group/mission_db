@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 from .models import Mission
 from .models import Tag
 from .models import Mission_tags
@@ -31,7 +32,10 @@ class MissionTagSerializer(serializers.ModelSerializer):
     def create(self,validated_data):
         mission_id = validated_data.pop('mission').get('id')
         tag_name = validated_data.pop('tag').get('name')
-        mission = Mission.objects.get(id=mission_id)
+        try:
+            mission = Mission.objects.get(id=mission_id)
+        except Mission.DoesNotExist:
+            raise NotFound(f"Mission with id {mission_id} not found")
         tag,_ = Tag.objects.get_or_create(name=tag_name)
         mission_tag,_ = Mission_tags.objects.get_or_create(
             mission=mission,

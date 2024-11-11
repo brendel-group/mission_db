@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from rest_framework import status
 from .models import *
 from .serializer import *
@@ -26,7 +27,7 @@ def create_mission(request):
 def mission_detail(request, pk):
     try:
         mission = Mission.objects.get(pk=pk)
-    except mission.DoesNotExist:
+    except Mission.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
@@ -62,7 +63,7 @@ def create_tag(request):
 def tag_detail(request, name):
     try:
         tag = Tag.objects.get(name=name)
-    except tag.DoesNotExist:
+    except Tag.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
@@ -87,9 +88,8 @@ class MissionByTagAPI(generics.ListAPIView):
     def get_queryset(self):
         try:
             tag = Tag.objects.get(name=self.kwargs['name'])
-        except tag.DoesNotExist:
-            return Mission.objects.none()
-
+        except Tag.DoesNotExist:
+            raise NotFound(f"Tag with name {self.kwargs['name']} not found")
         mission_ids = Mission_tags.objects.filter(tag=tag).values_list('mission_id', flat=True)
         return  Mission.objects.filter(id__in=mission_ids)
 
@@ -100,9 +100,8 @@ class TagByMissionAPI(generics.ListAPIView):
     def get_queryset(self):
         try:
             mission = Mission.objects.get(id=self.kwargs['id'])
-        except mission.DoesNotExist:
-            return Tag.objects.none()
-
+        except Mission.DoesNotExist:
+            raise NotFound(f"Mission with id {self.kwargs['id']} not found")
         tag_ids = Mission_tags.objects.filter(mission=mission).values_list('tag_id', flat=True)
         return  Tag.objects.filter(id__in=tag_ids)
 
