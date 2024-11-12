@@ -3,10 +3,7 @@ import { CreateAppShell } from "~/layout/AppShell";
 import MissionsPage from "~/pages/missions/MissionsPage";
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Mission overview" },
-    { name: "description", content: "Mission overview" },
-  ];
+  return [{ title: "Missions" }];
 };
 
 export default function Index() {

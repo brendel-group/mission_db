@@ -2,10 +2,7 @@ import type { MetaFunction } from "@remix-run/node";
 import { CreateAppShell } from "~/layout/AppShell";
 import SettingsPage from "~/pages/SettingsPage";
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Missions" },
-    { name: "description", content: "Mission overview" },
-  ];
+  return [{ title: "Settings" }];
 };
 
 export default function Index() {
