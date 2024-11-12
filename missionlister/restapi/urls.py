@@ -1,6 +1,16 @@
 from django.urls import path
-from .views import get_missions,create_mission,mission_detail,get_tags,create_tag,\
-                    tag_detail,MissionByTagAPI,TagByMissionAPI,add_tag_to_mission,delete_mission_tag
+from .views import (
+    get_missions,
+    create_mission,
+    mission_detail,
+    get_tags,
+    create_tag,
+    tag_detail,
+    MissionByTagAPI,
+    TagByMissionAPI,
+    add_tag_to_mission,
+    delete_mission_tag,
+)
 
 urlpatterns = [
     path("missions/", get_missions, name="get_missions"),
