@@ -5,12 +5,12 @@
 - (for Linux do the following to create a new server and user. In this example with Ubuntu):
     - access the PostgreSQL database shell:
     ```bash
-    sudo su - postgres
+    sudo -u postgres psql
     ```
     you will see this: `postgres=#`
     - create new server and user. For example user bob with password 'admin'
     ```bash
-    postgres=# create user bob with superuser password 'admin';
+    postgres=# CREATE USER bob WITH SUPERUSER PASSWORD 'admin';
     ```
     - now go to pgadmin4 and add the server with the usere data from the step before
 
