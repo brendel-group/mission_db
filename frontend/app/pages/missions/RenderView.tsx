@@ -1,10 +1,10 @@
 import { Modal, Text } from "@mantine/core";
 import React from "react";
-import { RowData } from "./Overview";
+import { MissionData } from "~/data";
 
 interface RenderViewProps {
   modalOpened: boolean;
-  selectedRow: RowData | null;
+  selectedRow: MissionData | null;
   onClose: () => void;
 }
 
@@ -34,16 +34,16 @@ const RenderView: React.FC<RenderViewProps> = ({
             <strong>Location:</strong> {selectedRow.location}
           </Text>
           <Text>
-            <strong>Duration:</strong> {selectedRow.duration}
+            <strong>Total Duration:</strong> {selectedRow.total_duration}
           </Text>
           <Text>
-            <strong>Size:</strong> {selectedRow.size}
+            <strong>Total Size:</strong> {selectedRow.total_size}
           </Text>
           <Text>
             <strong>Robot:</strong> {selectedRow.robot}
           </Text>
           <Text>
-            <strong>Other:</strong> {selectedRow.other}
+            <strong>Remarks:</strong> {selectedRow.remarks}
           </Text>
         </div>
       )}
