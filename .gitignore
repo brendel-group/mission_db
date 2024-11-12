@@ -15,4 +15,4 @@ db.sqlite3
 *.env
 .vscode
 
-.ruff_cache/
+**/.ruff_cache/
