@@ -1,1 +1,5 @@
 pre-commit
+django
+django-environ
+psycopg2
+djangorestframework
