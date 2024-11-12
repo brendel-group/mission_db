@@ -18,8 +18,8 @@ import {
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
 import { mission_table_data } from "../../RandomData";
-import RenderView from "./RenderView";
 import { MissionData } from "~/data";
+import RenderView from "../details/DetailsView";
 
 interface ThProps {
   children: React.ReactNode;
