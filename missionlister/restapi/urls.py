@@ -2,16 +2,26 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('missions/', get_missions, name='get_missions'),
-    path('missions/create/', create_mission, name='create_mission'),
-    path('missions/<int:pk>', mission_detail, name="mission_detail"),
-    path('missions/tags/<int:id>', TagByMissionAPI.as_view(), name='get_tags_by_mission_id'),
-
-    path('tags/', get_tags, name='get_tags'),
-    path('tags/create/', create_tag, name='create_tag'),
-    path('tags/<str:name>', tag_detail, name='tag_detail'),
-    path('tags/missions/<str:name>', MissionByTagAPI.as_view(), name='get_missions_by_tag'),
-
-    path('mission-tags/create/', add_tag_to_mission, name='add_tag_to_mission'),
-    path('mission-tags/delete/<int:mission_id>/<str:tag_name>', delete_mission_tag, name='delete_mission_tag')
+    path("missions/", get_missions, name="get_missions"),
+    path("missions/create/", create_mission, name="create_mission"),
+    path("missions/<int:pk>", mission_detail, name="mission_detail"),
+    path(
+        "missions/tags/<int:id>",
+        TagByMissionAPI.as_view(),
+        name="get_tags_by_mission_id",
+    ),
+    path("tags/", get_tags, name="get_tags"),
+    path("tags/create/", create_tag, name="create_tag"),
+    path("tags/<str:name>", tag_detail, name="tag_detail"),
+    path(
+        "tags/missions/<str:name>",
+        MissionByTagAPI.as_view(),
+        name="get_missions_by_tag",
+    ),
+    path("mission-tags/create/", add_tag_to_mission, name="add_tag_to_mission"),
+    path(
+        "mission-tags/delete/<int:mission_id>/<str:tag_name>",
+        delete_mission_tag,
+        name="delete_mission_tag",
+    ),
 ]
