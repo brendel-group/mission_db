@@ -1,12 +1,10 @@
 from django.test import TestCase
 from rest_framework.test import APITestCase
+from rest_framework import status
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.utils import timezone
-from .models import *
-from .views import *
-from .serializer import *
-from datetime import datetime
+from .models import Tag,Mission,Mission_tags
 
 # Create your tests here.
 
@@ -109,7 +107,7 @@ class RestAPITagTestCase(APITestCase):
 
     def test_tag_detail_get(self):
         response = self.client.get(
-            reverse(tag_detail, kwargs={"name": self.test_names[0]}), format="json"
+            reverse("tag_detail", kwargs={"name": self.test_names[0]}), format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -122,7 +120,7 @@ class RestAPITagTestCase(APITestCase):
 
     def test_tag_detail_put(self):
         response = self.client.put(
-            reverse(tag_detail, kwargs={"name": self.test_names[0]}),
+            reverse("tag_detail", kwargs={"name": self.test_names[0]}),
             {"name": "test_detail_put"},
             format="json",
         )
@@ -138,7 +136,7 @@ class RestAPITagTestCase(APITestCase):
 
     def test_tag_detail_delete(self):
         response = self.client.delete(
-            reverse(tag_detail, kwargs={"name": self.test_names[0]})
+            reverse("tag_detail", kwargs={"name": self.test_names[0]})
         )
         del self.test_names[0]
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -252,14 +250,14 @@ class NotFoundErrors(APITestCase):
         self.tag = Tag.objects.create(name="test tag")
 
     def test_tag_detail_not_found(self):
-        response = self.client.get(reverse(tag_detail, kwargs={"name": "notfound"}))
+        response = self.client.get(reverse("tag_detail", kwargs={"name": "notfound"}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_mission_tag(self):
         # Tag not found
         response = self.client.delete(
             reverse(
-                delete_mission_tag,
+                "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id, "tag_name": "notfound"},
             )
         )
@@ -269,7 +267,7 @@ class NotFoundErrors(APITestCase):
         # Misison not found
         response = self.client.delete(
             reverse(
-                delete_mission_tag,
+                "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id + 1, "tag_name": "test tag"},
             )
         )
@@ -279,7 +277,7 @@ class NotFoundErrors(APITestCase):
         # Mission-tag not found
         response = self.client.delete(
             reverse(
-                delete_mission_tag,
+                "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id, "tag_name": "test tag"},
             )
         )
