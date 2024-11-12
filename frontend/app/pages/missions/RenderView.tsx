@@ -43,7 +43,7 @@ const RenderView: React.FC<RenderViewProps> = ({
             <strong>Robot:</strong> {selectedRow.robot}
           </Text>
           <Text>
-            <strong>Other:</strong> {selectedRow.other}
+            <strong>Tags:</strong> {selectedRow.tags.join(", ")}
           </Text>
         </div>
       )}

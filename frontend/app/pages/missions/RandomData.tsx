@@ -5,7 +5,7 @@ const data = [
     duration: "02:15:30",
     size: "1250",
     robot: "Spot",
-    other: "here",
+    tags: ["tag1", "tag2"],
   },
   {
     name: "Bauer X",
@@ -13,7 +13,7 @@ const data = [
     duration: "01:45:20",
     size: "20",
     robot: "Spot",
-    other: "N/A",
+    tags: ["tag3"],
   },
   {
     name: "Obstwiese Y",
@@ -21,7 +21,7 @@ const data = [
     duration: "00:30:15",
     size: "25",
     robot: "Spot",
-    other: "is",
+    tags: ["tag4", "tag5", "tag6", "tag7", "tag8", "veryLooooooooooooooooooooooooooongTag"],
   },
   {
     name: "Bebenhausen Schloss",
@@ -29,7 +29,7 @@ const data = [
     duration: "03:10:45",
     size: "10",
     robot: "Spot",
-    other: "something",
+    tags: ["tag6"],
   },
   {
     name: "Bauernhof",
@@ -37,7 +37,7 @@ const data = [
     duration: "04:00:00",
     size: "30",
     robot: "Spot",
-    other: "extra",
+    tags: [],
   },
 ];
 

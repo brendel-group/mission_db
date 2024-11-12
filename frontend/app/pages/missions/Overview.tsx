@@ -26,7 +26,7 @@ export interface RowData {
   duration: string;
   size: string;
   robot: string;
-  other: string;
+  tags: string[];
 }
 
 interface ThProps {
@@ -61,7 +61,14 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
 function filterData(data: RowData[], search: string) {
   const query = search.toLowerCase().trim();
   return data.filter((item) =>
-    keys(data[0]).some((key) => item[key].toLowerCase().includes(query))
+    keys(data[0]).some((key) => {
+      const value = item[key];
+      if (Array.isArray(value)) {
+        // Durchsuche jedes Element im Array, falls `other` ein Array ist
+        return value.some((str) => str.toLowerCase().includes(query));
+      }
+      return typeof value === 'string' && value.toLowerCase().includes(query);
+    })
   );
 }
 
@@ -87,6 +94,16 @@ function sortData(
         }
 
         return durationA - durationB;
+      }
+
+      // Sortierung für `tags`, basierend auf dem ersten Element im Array
+      if (sortBy === "tags") {
+        const tagA = a.tags[0] || "";  // Fallback, falls Array leer ist
+        const tagB = b.tags[0] || "";
+
+        return payload.reversed
+          ? tagB.localeCompare(tagA)
+          : tagA.localeCompare(tagB);
       }
 
       // Other fields can be sorted alphabetically
@@ -144,7 +161,7 @@ export function Overview() {
       <Table.Td>{row.duration}</Table.Td>
       <Table.Td>{row.size}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
-      <Table.Td>{row.other}</Table.Td>
+      <Table.Td>{row.tags.join(", ")}</Table.Td>
     </Table.Tr>
   ));
 
@@ -154,7 +171,7 @@ export function Overview() {
     { key: "duration", label: "Duration" },
     { key: "size", label: "Size (MB)" },
     { key: "robot", label: "Robot" },
-    { key: "other", label: "Other" },
+    { key: "tags", label: "Tags" },
   ];
 
   return (
