@@ -149,12 +149,18 @@ def add_tag_to_mission(request):
     request: POST Request containing mission_id and tag_name
     ### Returns
     json with given mission_id and tag_name
-    or HTTP_400_BAD_REQUEST Response
+    ### Response codes
+    HTTP_201_CREATED\\
+    HTTP_200_OK\\
+    HTTP_400_BAD_REQUEST\\
+    HTTP_404_NOT_FOUND
     '''
     serializer = MissionTagSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if serializer.tag_created:
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["DELETE"])

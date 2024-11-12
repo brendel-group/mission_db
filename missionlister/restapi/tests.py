@@ -139,12 +139,19 @@ class RestAPIMissionTagsTestCase(APITestCase):
 
     def test_add_tag_to_mission(self):
         # Add a new tag to a mission using the API
-        data = {'mission_id': self.mission.id, 'tag_name': "TestTag1"}
+        data = {'mission_id': self.mission.id, 'tag_name': "TestTag4"}
         response = self.client.post(reverse('add_tag_to_mission'), data, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # Check if the mission is now associated with the new tag
-        self.assertTrue(Mission_tags.objects.filter(mission=self.mission, tag=self.tags[1]).exists())
+        tag = Tag.objects.get(name="TestTag4")
+        self.assertTrue(Mission_tags.objects.filter(mission=self.mission, tag=tag).exists())
+
+        # Add an exsiting tag to confirm different status code
+        data = {'mission_id': self.mission.id, 'tag_name': "TestTag1"}
+        response = self.client.post(reverse('add_tag_to_mission'), data, format='json')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         
     def test_delete_mission_tag(self):
         # Remove tag association using the API

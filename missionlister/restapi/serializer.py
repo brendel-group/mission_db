@@ -44,7 +44,7 @@ class MissionTagSerializer(serializers.ModelSerializer):
             mission = Mission.objects.get(id=mission_id)
         except Mission.DoesNotExist:
             raise NotFound(f"Mission with id {mission_id} not found")
-        tag,_ = Tag.objects.get_or_create(name=tag_name)
+        tag,self.tag_created = Tag.objects.get_or_create(name=tag_name)
         mission_tag,_ = Mission_tags.objects.get_or_create(
             mission=mission,
             tag=tag
