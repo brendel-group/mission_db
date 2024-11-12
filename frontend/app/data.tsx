@@ -1,10 +1,5 @@
 //This represents a single mission in the missions table
 
-export interface Tag {
-  name: string;
-  color: string;
-}
-
 export interface MissionData {
   mission_id: number;
 
@@ -15,7 +10,7 @@ export interface MissionData {
   robot: string;
   remarks: string;
 
-  tags: Tag[];
+  tags: string[];
 }
 
 //Fetch this data by mission_id from MissionTableData

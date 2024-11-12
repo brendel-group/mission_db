@@ -45,6 +45,9 @@ const RenderView: React.FC<RenderViewProps> = ({
           <Text>
             <strong>Remarks:</strong> {selectedRow.remarks}
           </Text>
+          <Text>
+            <strong>Tags:</strong> {selectedRow.tags.join(", ")}
+          </Text>
         </div>
       )}
     </Modal>

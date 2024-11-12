@@ -2,12 +2,6 @@
 
 import { DetailViewData, MissionData } from "./data";
 
-const colors = ["blue", "green", "red", "cyan", "pink"];
-
-function getRandomColor() {
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
 const mission_table_data: MissionData[] = [
   {
     mission_id: 0,
@@ -17,11 +11,7 @@ const mission_table_data: MissionData[] = [
     total_size: "1250",
     robot: "Spot",
     remarks: "here",
-    tags: [
-      { name: "apple", color: getRandomColor() },
-      { name: "field", color: getRandomColor() },
-      { name: "Müller", color: getRandomColor() },
-    ],
+    tags: ["apple", "field", "Müller"],
   },
   {
     mission_id: 1,
@@ -31,10 +21,7 @@ const mission_table_data: MissionData[] = [
     total_size: "20",
     robot: "Spot",
     remarks: "N/A",
-    tags: [
-      { name: "hallo", color: getRandomColor() },
-      { name: "welt", color: getRandomColor() },
-    ],
+    tags: ["hallo", "welt"],
   },
   {
     mission_id: 2,
@@ -44,13 +31,7 @@ const mission_table_data: MissionData[] = [
     total_size: "25",
     robot: "Spot",
     remarks: "is",
-    tags: [
-      { name: "Hier", color: getRandomColor() },
-      { name: "könnte", color: getRandomColor() },
-      { name: "Ihre", color: getRandomColor() },
-      { name: "Werbung", color: getRandomColor() },
-      { name: "stehen", color: getRandomColor() },
-    ],
+    tags: ["Hier", "könnte", "Ihre", "Werbung", "stehen"],
   },
   {
     mission_id: 3,
@@ -70,7 +51,7 @@ const mission_table_data: MissionData[] = [
     total_size: "30",
     robot: "Spot",
     remarks: "extra",
-    tags: [{ name: "Buggy", color: getRandomColor() }],
+    tags: ["Buggy"],
   },
 ];
 
