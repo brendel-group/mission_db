@@ -5,7 +5,7 @@ from django.db import models
 class Mission(models.Model):
     # our datastructure is defined here
     id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=65536) 
+    name = models.CharField(max_length=65536)
     date = models.DateField()
     location = models.CharField(max_length=65536)
     other = models.CharField(max_length=65536)
