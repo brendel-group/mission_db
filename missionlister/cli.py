@@ -1,5 +1,4 @@
 import os
-import sys
 import argparse
 import django
 import logging
@@ -31,11 +30,11 @@ def check_mission_exists(id):
     return Mission.objects.filter(id=id).exists()
 
 # Validate datetime format
-def validate_datetime(datetime_str):
+def validate_date(date_str):
     try:
-        return datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+        return datetime.strptime(date_str, '%Y-%m-%d')
     except ValueError:
-        logging.error("Date and time format should be YYYY-MM-DD HH:MM:SS.")
+        logging.error("Date and time format should be YYYY-MM-DD.")
         return None
 
 # Add mission to DB
@@ -100,7 +99,7 @@ def main():
     add_parser = subparser.add_parser("add", help="Add mission")
     add_parser.add_argument("--id", required=True, help="ID")
     add_parser.add_argument("--name", required=True, help="Mission name")
-    add_parser.add_argument("--datetime", required=True, help="Mission date and time (YYYY-MM-DD HH:MM:SS)")
+    add_parser.add_argument("--date", required=True, help="Mission date (YYYY-MM-DD)")
     add_parser.add_argument("--location", required=False, help="Mission location", default="unknown")
     add_parser.add_argument("--other", required=False, help="Other mission details", default="-")
 
@@ -120,15 +119,15 @@ def main():
 
     # Execute command
     if args.command == "add":
-        # Validate datetime
-        validated_datetime = validate_datetime(args.datetime)
-        if validated_datetime is None:
+        # Validate date
+        validated_date = validate_date(args.date)
+        if validated_date is None:
             return
         
         add_mission(
             args.id,
             args.name,
-            validated_datetime,  # Pass the validated datetime
+            validated_date,  # Pass the validated date
             args.location,
             args.other
         )
