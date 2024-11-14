@@ -60,7 +60,7 @@ function filterData(data: MissionData[], search: string) {
       const value = item[key];
       if (Array.isArray(value)) {
         // Durchsuche jedes Element im Array, falls `other` ein Array ist
-        return value.some((str) => str.toLowerCase().includes(query));
+        return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
     }),
@@ -97,8 +97,8 @@ function sortData(
 
       // Sortierung für `tags`, basierend auf dem ersten Element im Array
       if (sortBy === "tags") {
-        const tagA = a.tags[0] || ""; // Fallback, falls Array leer ist
-        const tagB = b.tags[0] || "";
+        const tagA = a.tags[0].name || ""; // Fallback, falls Array leer ist
+        const tagB = b.tags[0].name || "";
 
         return payload.reversed
           ? tagB.localeCompare(tagA)
@@ -178,9 +178,8 @@ export function Overview() {
           </Menu.Target>
           {/*Actions for the Tag Picker*/}
           <Menu.Dropdown>
-            {row.tags.map((tag, index) => (
-              <Menu.Item key={index}>Aktion für {tag}</Menu.Item>
-            ))}
+            {/*TODO: Implement tag picker*/}
+            <h3>Tag Picker</h3>
           </Menu.Dropdown>
         </Menu>
       </Table.Td>

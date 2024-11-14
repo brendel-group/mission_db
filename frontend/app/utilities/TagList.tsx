@@ -1,15 +1,22 @@
 import { Badge, Group, Menu } from "@mantine/core";
 import { getRandomColor } from "~/utilities/ColorHelper";
 import { IconPencil } from "@tabler/icons-react";
+import { Tag } from "~/data";
 
-export function RenderTagsDetailsView({ tags }: { tags: string[] }) {
+export function RenderTagsDetailsView({ tags }: { tags: Tag[] }) {
   return (
     <Group gap="xs">
       {tags.map((item) => (
-        <Badge key={item} color={getRandomColor()} variant="light">
-          {item}
+        <Badge
+          key={item.name}
+          color={item.color}
+          variant="light"
+          style={{ textTransform: "none" }}
+        >
+          {item.name}
         </Badge>
       ))}
+      {/*edit button*/}
       {
         <Menu>
           <Menu.Target>
@@ -18,6 +25,7 @@ export function RenderTagsDetailsView({ tags }: { tags: string[] }) {
             </Badge>
           </Menu.Target>
           <Menu.Dropdown>
+            {/*TODO: Implement tag picker*/}
             <h3>Tag Picker</h3>
           </Menu.Dropdown>
         </Menu>
@@ -26,12 +34,17 @@ export function RenderTagsDetailsView({ tags }: { tags: string[] }) {
   );
 }
 
-export function RenderTagsOverview({ tags }: { tags: string[] }) {
+export function RenderTagsOverview({ tags }: { tags: Tag[] }) {
   return (
     <Group gap="xs">
       {tags.map((item) => (
-        <Badge key={item} color={getRandomColor()} variant="light">
-          {item}
+        <Badge
+          key={item.name}
+          color={item.color}
+          variant="light"
+          style={{ textTransform: "none" }}
+        >
+          {item.name}
         </Badge>
       ))}
     </Group>
