@@ -1,6 +1,6 @@
 import { Modal, Container, Grid, Text, rem } from "@mantine/core";
 import React from "react";
-import { RenderTags } from "./TagList";
+import { RenderTags } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { ShowStatsView } from "./StatsView";
 import { MissionData } from "~/data";
