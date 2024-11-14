@@ -10,7 +10,6 @@ import {
   rem,
   keys,
   Menu,
-  Button,
 } from "@mantine/core";
 import {
   IconSelector,
