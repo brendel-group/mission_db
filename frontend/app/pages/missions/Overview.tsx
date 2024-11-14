@@ -94,10 +94,10 @@ function sortData(
         return durationA - durationB;
       }
 
-      // Sortierung für `tags`, basierend auf dem ersten Element im Array
+      // sorting for tags based on the first tag of the tags list
       if (sortBy === "tags") {
-        const tagA = a.tags[0].name || ""; // Fallback, falls Array leer ist
-        const tagB = b.tags[0].name || "";
+        const tagA = a.tags && a.tags.length > 0 ? a.tags[0]?.name ?? "" : "";
+        const tagB = b.tags && b.tags.length > 0 ? b.tags[0]?.name ?? "" : "";
 
         return payload.reversed
           ? tagB.localeCompare(tagA)
