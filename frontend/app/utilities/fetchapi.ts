@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:5432/missionlister/restapi';
+const BASE_URL = 'http://127.0.0.1:8000/missionlister/restapi';
 
 import { MissionData } from "~/data";
 
