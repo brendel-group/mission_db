@@ -40,6 +40,7 @@ To test the API, one can use the django webserver. The missionlister/restapi/url
 - POST Requests for tags
     - [POST Tag](http://localhost:8000/restapi/tags/create/) lets you create a new tag.
     - The id is optional so you can create a new tag using only a name
+    - The max length of the name is 42 characters
     - Example: 
     ```json
     {

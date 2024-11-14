@@ -19,7 +19,7 @@ class Tag(models.Model):
     """The tags table"""
 
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=65536, unique=True)
+    name = models.CharField(max_length=42, unique=True)
 
 
 class Mission_tags(models.Model):
