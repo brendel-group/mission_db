@@ -20,7 +20,7 @@ import classes from "./Overview.module.css";
 import { mission_table_data } from "../../RandomData";
 import { MissionData } from "~/data";
 import RenderView from "../details/DetailsView";
-import { getMissions } from 'app/utils/fetchapi'
+import { getMissions } from '~/utilities/fetchapi'
 
 interface ThProps {
   children: React.ReactNode;
