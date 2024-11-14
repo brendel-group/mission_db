@@ -20,7 +20,11 @@ export function CreateAppShell({ children }: BasicAppShellProps) {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <IconRobot size={30} />
+          <img
+            src="/polybotLogo.ico"
+            alt="Custom Icon"
+            style={{ width: 30, height: 30 }}
+          />
           <span style={{ fontSize: "1.5rem" }}>Mission Explorer</span>
         </Group>
       </AppShell.Header>

@@ -17,18 +17,10 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
-import data from "./RandomData";
-import RenderView from "./RenderView";
-import { Mission, getMissions } from 'app/utils/fetchapi'
-
-export interface RowData {
-  name: string;
-  location: string;
-  duration: string;
-  size: string;
-  robot: string;
-  other: string;
-}
+import { mission_table_data } from "../../RandomData";
+import { MissionData } from "~/data";
+import RenderView from "../details/DetailsView";
+import { getMissions } from 'app/utils/fetchapi'
 
 interface ThProps {
   children: React.ReactNode;
@@ -59,16 +51,27 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
   );
 }
 
-function filterData(data: RowData[], search: string) {
+function filterData(data: MissionData[], search: string) {
   const query = search.toLowerCase().trim();
   return data.filter((item) =>
-    keys(data[0]).some((key) => item[key].toLowerCase().includes(query))
+    keys(data[0]).some((key) => {
+      const value = item[key];
+      if (Array.isArray(value)) {
+        // Durchsuche jedes Element im Array, falls `other` ein Array ist
+        return value.some((str) => str.toLowerCase().includes(query));
+      }
+      return typeof value === "string" && value.toLowerCase().includes(query);
+    }),
   );
 }
 
 function sortData(
-  data: RowData[],
-  payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
+  data: MissionData[],
+  payload: {
+    sortBy: keyof MissionData | null;
+    reversed: boolean;
+    search: string;
+  },
 ) {
   const { sortBy } = payload;
 
@@ -78,7 +81,7 @@ function sortData(
 
   return filterData(
     [...data].sort((a, b) => {
-      if (sortBy === "size") {
+      if (sortBy === "total_size") {
         // Duration needs a numeric sort
         const durationA = parseFloat(a[sortBy]);
         const durationB = parseFloat(b[sortBy]);
@@ -90,24 +93,34 @@ function sortData(
         return durationA - durationB;
       }
 
-      // Other fields can be sorted alphabetically
-      if (payload.reversed) {
-        return b[sortBy].localeCompare(a[sortBy]);
+      // Sortierung für `tags`, basierend auf dem ersten Element im Array
+      if (sortBy === "tags") {
+        const tagA = a.tags[0] || ""; // Fallback, falls Array leer ist
+        const tagB = b.tags[0] || "";
+
+        return payload.reversed
+          ? tagB.localeCompare(tagA)
+          : tagA.localeCompare(tagB);
       }
 
-      return a[sortBy].localeCompare(b[sortBy]);
+      // Other fields can be sorted alphabetically
+      if (payload.reversed) {
+        return String(b[sortBy]).localeCompare(String(a[sortBy]));
+      }
+
+      return String(a[sortBy]).localeCompare(String(b[sortBy]));
     }),
-    payload.search
+    payload.search,
   );
 }
 
 export function Overview() {
   const [search, setSearch] = useState("");
-  const [sortedData, setSortedData] = useState(data);
-  const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
+  const [sortedData, setSortedData] = useState(mission_table_data);
+  const [sortBy, setSortBy] = useState<keyof MissionData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
+  const [selectedRow, setSelectedRow] = useState<MissionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,22 +146,28 @@ export function Overview() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  const setSorting = (field: keyof RowData) => {
+  const setSorting = (field: keyof MissionData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(data, { sortBy: field, reversed, search }));
+    setSortedData(
+      sortData(mission_table_data, { sortBy: field, reversed, search }),
+    );
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
     setSearch(value);
     setSortedData(
-      sortData(data, { sortBy, reversed: reverseSortDirection, search: value })
+      sortData(mission_table_data, {
+        sortBy,
+        reversed: reverseSortDirection,
+        search: value,
+      }),
     );
   };
 
-  const openModal = (row: RowData) => {
+  const openModal = (row: MissionData) => {
     setSelectedRow(row);
     setModalOpened(true);
   };
@@ -166,20 +185,22 @@ export function Overview() {
     >
       <Table.Td>{row.name}</Table.Td>
       <Table.Td>{row.location}</Table.Td>
-      <Table.Td>{row.duration}</Table.Td>
-      <Table.Td>{row.size}</Table.Td>
+      <Table.Td>{row.total_duration}</Table.Td>
+      <Table.Td>{row.total_size}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
-      <Table.Td>{row.other}</Table.Td>
+      <Table.Td>{row.remarks}</Table.Td>
+      <Table.Td>{row.tags.join(", ")}</Table.Td>
     </Table.Tr>
   ));
 
-  const columns: { key: keyof RowData; label: string }[] = [
+  const columns: { key: keyof MissionData; label: string }[] = [
     { key: "name", label: "Name" },
     { key: "location", label: "Location" },
-    { key: "duration", label: "Duration" },
-    { key: "size", label: "Size (MB)" },
+    { key: "total_duration", label: "Duration" },
+    { key: "total_size", label: "Size (MB)" },
     { key: "robot", label: "Robot" },
-    { key: "other", label: "Other" },
+    { key: "remarks", label: "Remarks" },
+    { key: "tags", label: "Tags" },
   ];
 
   return (
@@ -221,7 +242,7 @@ export function Overview() {
             rows
           ) : (
             <Table.Tr>
-              <Table.Td colSpan={Object.keys(data[0]).length}>
+              <Table.Td colSpan={Object.keys(mission_table_data[0]).length}>
                 <Text fw={500} ta="center">
                   Nothing found
                 </Text>
