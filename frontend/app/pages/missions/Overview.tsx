@@ -9,6 +9,8 @@ import {
   TextInput,
   rem,
   keys,
+  Menu,
+  Button,
 } from "@mantine/core";
 import {
   IconSelector,
@@ -20,6 +22,7 @@ import classes from "./Overview.module.css";
 import { mission_table_data } from "../../RandomData";
 import { MissionData } from "~/data";
 import RenderView from "../details/DetailsView";
+import { RenderTagsOverview } from "../../utilities/TagList";
 
 interface ThProps {
   children: React.ReactNode;
@@ -164,7 +167,23 @@ export function Overview() {
       <Table.Td>{row.total_size}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
-      <Table.Td>{row.tags.join(", ")}</Table.Td>
+      <Table.Td
+        onClick={(e) => e.stopPropagation()} // stops opening openModal
+      >
+        <Menu>
+          <Menu.Target>
+            <div>
+              <RenderTagsOverview tags={row.tags} />
+            </div>
+          </Menu.Target>
+          {/*Actions for the Tag Picker*/}
+          <Menu.Dropdown>
+            {row.tags.map((tag, index) => (
+              <Menu.Item key={index}>Aktion für {tag}</Menu.Item>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
+      </Table.Td>
     </Table.Tr>
   ));
 

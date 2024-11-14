@@ -1,6 +1,6 @@
 import { Modal, Container, Grid, Text, rem } from "@mantine/core";
 import React from "react";
-import { RenderTags } from "../../utilities/TagList";
+import { RenderTagsDetailsView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { ShowStatsView } from "./StatsView";
 import { MissionData } from "~/data";
@@ -44,7 +44,9 @@ const RenderView: React.FC<RenderViewProps> = ({
             <Grid>
               {/* Tags */}
               <Grid.Col span={12}>
-                {selectedRow && <RenderTags tags={selectedRow.tags} />}
+                {selectedRow && (
+                  <RenderTagsDetailsView tags={selectedRow.tags} />
+                )}
               </Grid.Col>
               {/* Table */}
               <Grid.Col span={12}>
