@@ -53,9 +53,6 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
 
 function filterData(data: MissionData[], search: string) {
   const query = search.toLowerCase().trim();
-  if (data.length === 0) {
-    data = mission_table_data;
-  } // If no data => use example data
   return data.filter((item) =>
     keys(data[0]).some((key) => {
       const value = item[key];
@@ -130,9 +127,9 @@ export function Overview() {
   useEffect(() => {
     const fetchMissions = async () => {
       try {
-        let data = await getMissions(); // Fetch data from API
-        if (data.length === 0) {
-          data = mission_table_data; // If no data => use example data
+        const data = await getMissions(); // Fetch data from API
+        if (data.length <= 0) {
+          throw new Error("Data is empty");
         }
         setSortedData(data);
       } catch (e: any) {
