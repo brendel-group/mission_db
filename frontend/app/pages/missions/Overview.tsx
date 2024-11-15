@@ -58,7 +58,7 @@ function filterData(data: MissionData[], search: string) {
     keys(data[0]).some((key) => {
       const value = item[key];
       if (Array.isArray(value)) {
-        // Durchsuche jedes Element im Array, falls `other` ein Array ist
+        // Search every element in the array if value is an array (needed for tags)
         return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
