@@ -4,7 +4,13 @@ import { MissionData } from "~/data";
 
 // Function to fetch all missions
 export const getMissions = async (): Promise<MissionData[]> => {
-    const response = await fetch(`${BASE_URL}/missions/`);
+    const response = await fetch(`${BASE_URL}/missions/`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
     if (!response.ok) {
         throw new Error('Failed to fetch missions');
     }
@@ -15,6 +21,7 @@ export const getMissions = async (): Promise<MissionData[]> => {
 export const createMission = async (mission: Omit<MissionData, 'id'>): Promise<MissionData> => {
     const response = await fetch(`${BASE_URL}/missions/create`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -28,7 +35,13 @@ export const createMission = async (mission: Omit<MissionData, 'id'>): Promise<M
 
 // Function to fetch a single mission by ID
 export const getMission = async (id: number): Promise<MissionData> => {
-    const response = await fetch(`${BASE_URL}/missions/${id}`);
+    const response = await fetch(`${BASE_URL}/missions/${id}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
     if (!response.ok) {
         throw new Error(`Failed to fetch mission with id ${id}`);
     }
@@ -39,6 +52,7 @@ export const getMission = async (id: number): Promise<MissionData> => {
 export const updateMission = async (mission: MissionData): Promise<MissionData> => {
     const response = await fetch(`${BASE_URL}/missions/${mission.mission_id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
