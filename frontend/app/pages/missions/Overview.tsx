@@ -21,7 +21,7 @@ import classes from "./Overview.module.css";
 import { mission_table_data } from "../../RandomData";
 import { MissionData } from "~/data";
 import RenderView from "../details/DetailsView";
-import { getMissions } from "~/utilities/fetchapi";
+import { fetchAndTransformMissions } from "~/utilities/fetchapi";
 import { RenderTagsOverview } from "../../utilities/TagList";
 
 interface ThProps {
@@ -129,7 +129,7 @@ export function Overview() {
   useEffect(() => {
     const fetchMissions = async () => {
       try {
-        const data = await getMissions(); // Fetch data from API
+        const data = await fetchAndTransformMissions(); // Fetch data from API
         if (data.length <= 0) {
           throw new Error("Data is empty");
         }
@@ -187,19 +187,18 @@ export function Overview() {
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
     >
       <Table.Td>{row.name}</Table.Td>
-      <Table.Td>{row.location || "N/A"}</Table.Td>
-      <Table.Td>{row.total_duration || "N/A"}</Table.Td>
-      <Table.Td>{row.total_size || "N/A"}</Table.Td>
-      <Table.Td>{row.robot || "N/A"}</Table.Td>
-      <Table.Td>{row.remarks || "N/A"}</Table.Td>
+      <Table.Td>{row.location}</Table.Td>
+      <Table.Td>{row.total_duration}</Table.Td>
+      <Table.Td>{row.total_size}</Table.Td>
+      <Table.Td>{row.robot}</Table.Td>
+      <Table.Td>{row.remarks}</Table.Td>
       <Table.Td
         onClick={(e) => e.stopPropagation()} // stops opening openModal
       >
         <Menu>
           <Menu.Target>
             <div>
-              <RenderTagsOverview tags={row.tags || []} />{" "}
-              {/* Empty array if undefined */}
+              <RenderTagsOverview tags={row.tags} />
             </div>
           </Menu.Target>
           {/*Actions for the Tag Picker*/}
