@@ -185,12 +185,12 @@ export function Overview() {
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
     >
       <Table.Td>{row.name}</Table.Td>
-      <Table.Td>{row.location}</Table.Td>
-      <Table.Td>{row.total_duration}</Table.Td>
-      <Table.Td>{row.total_size}</Table.Td>
-      <Table.Td>{row.robot}</Table.Td>
-      <Table.Td>{row.remarks}</Table.Td>
-      <Table.Td>{row.tags.join(", ")}</Table.Td>
+      <Table.Td>{row.location || "N/A"}</Table.Td>
+      <Table.Td>{row.total_duration || "N/A"}</Table.Td>
+      <Table.Td>{row.total_size || "N/A"}</Table.Td>
+      <Table.Td>{row.robot || "N/A"}</Table.Td>
+      <Table.Td>{row.remarks || "N/A"}</Table.Td>
+      <Table.Td>{row.tags?.join(", ") || "N/A"}</Table.Td>
     </Table.Tr>
   ));
 
