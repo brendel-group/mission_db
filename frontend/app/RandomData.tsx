@@ -11,7 +11,11 @@ const mission_table_data: MissionData[] = [
     total_size: "1250",
     robot: "Spot",
     remarks: "here",
-    tags: ["apple", "field", "Müller"],
+    tags: [
+      { name: "Apple", color: "blue" },
+      { name: "Field", color: "green" },
+      { name: "Müller", color: "red" },
+    ],
   },
   {
     mission_id: 1,
@@ -21,7 +25,10 @@ const mission_table_data: MissionData[] = [
     total_size: "20",
     robot: "Spot",
     remarks: "N/A",
-    tags: ["hallo", "welt"],
+    tags: [
+      { name: "Hallo", color: "cyan" },
+      { name: "Welt", color: "pink" },
+    ],
   },
   {
     mission_id: 2,
@@ -31,7 +38,13 @@ const mission_table_data: MissionData[] = [
     total_size: "25",
     robot: "Spot",
     remarks: "is",
-    tags: ["Hier", "könnte", "Ihre", "Werbung", "stehen"],
+    tags: [
+      { name: "Hier", color: "blue" },
+      { name: "könnte", color: "green" },
+      { name: "Ihre", color: "red" },
+      { name: "Werbung", color: "cyan" },
+      { name: "stehen", color: "pink" },
+    ],
   },
   {
     mission_id: 3,
@@ -51,7 +64,10 @@ const mission_table_data: MissionData[] = [
     total_size: "30",
     robot: "Spot",
     remarks: "extra",
-    tags: ["Buggy"],
+    tags: [
+      { name: "veryLongTagThatGetsTruncated", color: "blue" },
+      { name: "Farm", color: "green" },
+    ],
   },
 ];
 

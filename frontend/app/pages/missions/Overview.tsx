@@ -9,6 +9,7 @@ import {
   TextInput,
   rem,
   keys,
+  Menu,
 } from "@mantine/core";
 import {
   IconSelector,
@@ -21,6 +22,7 @@ import { mission_table_data } from "../../RandomData";
 import { MissionData } from "~/data";
 import RenderView from "../details/DetailsView";
 import { getMissions } from "~/utilities/fetchapi";
+import { RenderTagsOverview } from "../../utilities/TagList";
 
 interface ThProps {
   children: React.ReactNode;
@@ -57,8 +59,8 @@ function filterData(data: MissionData[], search: string) {
     keys(data[0]).some((key) => {
       const value = item[key];
       if (Array.isArray(value)) {
-        // Durchsuche jedes Element im Array, falls `other` ein Array ist
-        return value.some((str) => str.toLowerCase().includes(query));
+        // Search every element in the array if value is an array (needed for tags)
+        return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
     }),
@@ -93,10 +95,10 @@ function sortData(
         return durationA - durationB;
       }
 
-      // Sortierung für `tags`, basierend auf dem ersten Element im Array
+      // sorting for tags based on the first tag of the tags list
       if (sortBy === "tags") {
-        const tagA = a.tags[0] || ""; // Fallback, falls Array leer ist
-        const tagB = b.tags[0] || "";
+        const tagA = a.tags && a.tags.length > 0 ? a.tags[0]?.name ?? "" : "";
+        const tagB = b.tags && b.tags.length > 0 ? b.tags[0]?.name ?? "" : "";
 
         return payload.reversed
           ? tagB.localeCompare(tagA)
@@ -190,7 +192,22 @@ export function Overview() {
       <Table.Td>{row.total_size || "N/A"}</Table.Td>
       <Table.Td>{row.robot || "N/A"}</Table.Td>
       <Table.Td>{row.remarks || "N/A"}</Table.Td>
-      <Table.Td>{row.tags?.join(", ") || "N/A"}</Table.Td>
+      <Table.Td
+        onClick={(e) => e.stopPropagation()} // stops opening openModal
+      >
+        <Menu>
+          <Menu.Target>
+            <div>
+              <RenderTagsOverview tags={row.tags} />
+            </div>
+          </Menu.Target>
+          {/*Actions for the Tag Picker*/}
+          <Menu.Dropdown>
+            {/*TODO: Implement tag picker*/}
+            <h3>Tag Picker</h3>
+          </Menu.Dropdown>
+        </Menu>
+      </Table.Td>
     </Table.Tr>
   ));
 
