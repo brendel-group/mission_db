@@ -1,9 +1,10 @@
 const BASE_URL = 'http://127.0.0.1:8000/restapi';
 
-import { MissionData } from "~/data";
+import { MissionData, BackendMissionData } from "~/data";
+import { mission_table_data } from "../RandomData"
 
 // Function to fetch all missions
-export const getMissions = async (): Promise<MissionData[]> => {
+export const getMissions = async (): Promise<BackendMissionData[]> => {
     const response = await fetch(`${BASE_URL}/missions/`, {
         method: 'GET',
         credentials: 'include',
@@ -18,7 +19,7 @@ export const getMissions = async (): Promise<MissionData[]> => {
 };
 
 // Function to create a new mission
-export const createMission = async (mission: Omit<MissionData, 'id'>): Promise<MissionData> => {
+export const createMission = async (mission: Omit<BackendMissionData, 'id'>): Promise<MissionData> => {
     const response = await fetch(`${BASE_URL}/missions/create`, {
         method: 'POST',
         credentials: 'include',
@@ -34,7 +35,7 @@ export const createMission = async (mission: Omit<MissionData, 'id'>): Promise<M
 };
 
 // Function to fetch a single mission by ID
-export const getMission = async (id: number): Promise<MissionData> => {
+export const getMission = async (id: number): Promise<BackendMissionData> => {
     const response = await fetch(`${BASE_URL}/missions/${id}`, {
         method: 'GET',
         credentials: 'include',
@@ -49,8 +50,8 @@ export const getMission = async (id: number): Promise<MissionData> => {
 };
 
 // Function to update an existing mission
-export const updateMission = async (mission: MissionData): Promise<MissionData> => {
-    const response = await fetch(`${BASE_URL}/missions/${mission.mission_id}`, {
+export const updateMission = async (mission: BackendMissionData): Promise<BackendMissionData> => {
+    const response = await fetch(`${BASE_URL}/missions/${mission.id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -59,7 +60,7 @@ export const updateMission = async (mission: MissionData): Promise<MissionData> 
         body: JSON.stringify(mission),
     });
     if (!response.ok) {
-        throw new Error(`Failed to update mission with id ${mission.mission_id}`);
+        throw new Error(`Failed to update mission with id ${mission.id}`);
     }
     return response.json();
 };
@@ -73,3 +74,31 @@ export const deleteMission = async (id: number): Promise<void> => {
         throw new Error(`Failed to delete mission with id ${id}`);
     }
 };
+
+export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
+    try {
+      const missions: BackendMissionData[] = await getMissions(); // Fetch the missions using the REST API
+  
+      // Map Hihi missions to MissionData
+      let renderedMissions: MissionData[] = [];
+      for (let i = 0; i < missions.length; i++) {
+        renderedMissions.push(
+            {
+            mission_id: missions[i].id,
+            name: missions[i].name,
+            location: missions[i].location,
+            total_duration: mission_table_data.at(0)?.total_duration || "",
+            total_size: mission_table_data.at(0)?.total_size || "",
+            robot: mission_table_data.at(0)?.robot || "",
+            remarks: missions[i].other[0],
+            tags: mission_table_data.at(0)?.tags || []
+            }
+        )
+      }
+  
+      return renderedMissions;
+    } catch (error) {
+      console.error('Failed to fetch and transform missions:', error);
+      throw error; // Re-throw the error to handle it upstream if needed
+    }
+  };
