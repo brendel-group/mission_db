@@ -14,5 +14,6 @@ db.sqlite3
 /env
 *.env
 .vscode
+.venv
 
 **/.ruff_cache/
