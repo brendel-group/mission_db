@@ -198,7 +198,8 @@ export function Overview() {
         <Menu>
           <Menu.Target>
             <div>
-              <RenderTagsOverview tags={row.tags} />
+              <RenderTagsOverview tags={row.tags || []} />{" "}
+              {/* Empty array if undefined */}
             </div>
           </Menu.Target>
           {/*Actions for the Tag Picker*/}
