@@ -78,20 +78,21 @@ export const deleteMission = async (id: number): Promise<void> => {
 export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
     try {
       const missions: BackendMissionData[] = await getMissions(); // Fetch the missions using the REST API
-  
-      // Map Hihi missions to MissionData
+    
+      // Map BackendMissionData missions to MissionData
       let renderedMissions: MissionData[] = [];
       for (let i = 0; i < missions.length; i++) {
+        const exampleData = mission_table_data.at(i % 5);
         renderedMissions.push(
             {
             mission_id: missions[i].id,
             name: missions[i].name,
             location: missions[i].location,
-            total_duration: mission_table_data.at(0)?.total_duration || "",
-            total_size: mission_table_data.at(0)?.total_size || "",
-            robot: mission_table_data.at(0)?.robot || "",
+            total_duration: exampleData?.total_duration || "",
+            total_size: exampleData?.total_size || "",
+            robot: exampleData?.robot || "",
             remarks: missions[i].other[0],
-            tags: mission_table_data.at(0)?.tags || []
+            tags: exampleData?.tags || []
             }
         )
       }
