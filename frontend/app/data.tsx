@@ -30,5 +30,5 @@ export interface BackendMissionData {
   name: string;
   location: string;
   date: string;
-  other: string[];
+  other: string;
 }

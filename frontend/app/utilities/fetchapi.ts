@@ -91,7 +91,7 @@ export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
             total_duration: exampleData?.total_duration || "",
             total_size: exampleData?.total_size || "",
             robot: exampleData?.robot || "",
-            remarks: missions[i].other[0],
+            remarks: missions[i].other || "",
             tags: exampleData?.tags || []
             }
         )
