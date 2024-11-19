@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from .models import Mission
+from .models import File
+from .models import Mission_files
 from .models import Tag
 from .models import Mission_tags
 
@@ -9,6 +11,25 @@ class MissionSerializer(serializers.ModelSerializer):
     class Meta:  # definition of which data to serialize
         model = Mission
         fields = "__all__"
+
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = "__all__"
+
+class MissionFileSerializer(serializers.ModelSerializer):
+    file = FileSerializer(read_only=True)
+
+    class Meta:
+        model = Mission_files
+        fields = "__all__"
+
+class MissionDetailSerializer(serializers.ModelSerializer):
+    files = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Mission
+        fields = ['id', 'name', 'date', 'location', 'other', 'files']
 
 
 class TagSerializer(serializers.ModelSerializer):
