@@ -41,6 +41,7 @@ To test the API, one can use the django webserver. The missionlister/restapi/url
     - [POST Tag](http://localhost:8000/restapi/tags/create/) lets you create a new tag.
     - The id is optional so you can create a new tag using only a name
     - The max length of the name is 42 characters
+    - The color is also optional and will default to #FFFFFF (white)
     - Example: 
     ```json
     {
@@ -48,7 +49,7 @@ To test the API, one can use the django webserver. The missionlister/restapi/url
     }
     ```
     - If an id is given but already in use the database will use another id
-    - The repsonse is a json with the `id` and `name`
+    - The repsonse is a json with the `id`, `name` and `color`.
 - GET, PUT and DELETE tag using name
     - Tags can be addressed using the name, because the name is unique.
     - With [GET](http://localhost:8000/restapi/tags/test%20tag) you can get details about a tag.
