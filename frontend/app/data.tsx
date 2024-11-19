@@ -23,3 +23,12 @@ export interface DetailViewData {
   durations: string[];
   sizes: string[];
 }
+
+export interface BackendMissionData {
+  id: number;
+
+  name: string;
+  location: string;
+  date: string;
+  other: string;
+}

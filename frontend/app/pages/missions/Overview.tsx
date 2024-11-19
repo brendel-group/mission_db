@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   ScrollArea,
@@ -21,6 +21,7 @@ import classes from "./Overview.module.css";
 import { mission_table_data } from "../../RandomData";
 import { MissionData } from "~/data";
 import RenderView from "../details/DetailsView";
+import { fetchAndTransformMissions } from "~/utilities/fetchapi";
 import { RenderTagsOverview } from "../../utilities/TagList";
 
 interface ThProps {
@@ -117,26 +118,51 @@ function sortData(
 
 export function Overview() {
   const [search, setSearch] = useState("");
-  const [sortedData, setSortedData] = useState(mission_table_data);
+  const [sortedData, setSortedData] = useState<MissionData[]>([]);
   const [sortBy, setSortBy] = useState<keyof MissionData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedRow, setSelectedRow] = useState<MissionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMissions = async () => {
+      try {
+        const data = await fetchAndTransformMissions(); // Fetch data from API
+        if (data.length <= 0) {
+          throw new Error("Data is empty");
+        }
+        setSortedData(data);
+      } catch (e: any) {
+        if (e instanceof Error) {
+          setError(e.message); // Display Error information
+        } else {
+          setError("An unknown error occurred"); // For non-Error types
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMissions();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   const setSorting = (field: keyof MissionData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(
-      sortData(mission_table_data, { sortBy: field, reversed, search }),
-    );
+    setSortedData(sortData(sortedData, { sortBy: field, reversed, search }));
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
     setSearch(value);
     setSortedData(
-      sortData(mission_table_data, {
+      sortData(sortedData, {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
@@ -234,7 +260,7 @@ export function Overview() {
             rows
           ) : (
             <Table.Tr>
-              <Table.Td colSpan={Object.keys(mission_table_data[0]).length}>
+              <Table.Td colSpan={Object.keys(sortedData[0]).length}>
                 <Text fw={500} ta="center">
                   Nothing found
                 </Text>

@@ -3,4 +3,5 @@ django
 django-environ
 psycopg2-binary
 djangorestframework
+django-cors-headers
 django-colorfield
