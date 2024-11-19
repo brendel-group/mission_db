@@ -23,5 +23,7 @@
      npm start
      ```
 
+## Frontend Configuration
+   In the frontend configuration ```frontend/app/config.tsx``` you can set the base url for backend fetching, it is also possible to disable fetching from backend.
 
 
