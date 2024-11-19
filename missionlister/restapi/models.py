@@ -1,4 +1,5 @@
 from django.db import models
+from colorfield.fields import ColorField
 
 
 # Create your models here.
@@ -20,6 +21,7 @@ class Tag(models.Model):
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=42, unique=True)
+    color = ColorField()
 
 
 class Mission_tags(models.Model):
