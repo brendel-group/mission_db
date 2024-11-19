@@ -1,3 +1,6 @@
+// Variable to switch between backend data and RandomData
+var useRandomData = true;
+// BASE_URL of the Rest API
 const BASE_URL = 'http://127.0.0.1:8000/restapi';
 
 import { MissionData, BackendMissionData } from "~/data";
@@ -76,6 +79,7 @@ export const deleteMission = async (id: number): Promise<void> => {
 };
 
 export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
+    if (useRandomData) { return mission_table_data } // Return only the RandomData
     try {
       const missions: BackendMissionData[] = await getMissions(); // Fetch the missions using the REST API
     
