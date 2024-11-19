@@ -14,10 +14,12 @@ export function ShowDatasets({ data }: { data: DetailViewData }) {
     setOpened(true);
   };
 
+  // Creates rows of table
   const rows = data.files.map((file, index) => (
     <Table.Tr
       key={file}
       onClick={() => handleRowClick(file, index)}
+      // Change color on mouse hover
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
@@ -25,12 +27,14 @@ export function ShowDatasets({ data }: { data: DetailViewData }) {
       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f1f3f5")}
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
     >
+      {/* Inserts data from DetailViewData, see data.tsx */}
       <Table.Td>{file}</Table.Td>
       <Table.Td>{data.durations[index]}</Table.Td>
       <Table.Td>{data.sizes[index]}</Table.Td>
     </Table.Tr>
   ));
 
+  // Returns the filled table with DatasetView, which is opend on state change
   return (
     <>
       <Table>

@@ -1,5 +1,6 @@
 import { Modal, Text } from "@mantine/core";
 
+// Interface describing expected properties of DatasetView
 interface DatasetViewProps {
   opened: boolean;
   onClose: () => void;
@@ -15,6 +16,7 @@ export function DatasetView({
   duration,
   size,
 }: DatasetViewProps) {
+  //Create a modal view for the dataset
   return (
     <Modal
       opened={opened}
