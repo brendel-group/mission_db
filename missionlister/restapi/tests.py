@@ -61,37 +61,60 @@ class RestAPITagTestCase(APITestCase):
                 {
                     "id": Tag.objects.get(name=self.test_names[0]).id,
                     "name": self.test_names[0],
+                    "color": "#FFFFFF",
                 },
                 {
                     "id": Tag.objects.get(name=self.test_names[1]).id,
                     "name": self.test_names[1],
+                    "color": "#FFFFFF",
                 },
                 {
                     "id": Tag.objects.get(name=self.test_names[2]).id,
                     "name": self.test_names[2],
+                    "color": "#FFFFFF",
                 },
                 {
                     "id": Tag.objects.get(name=self.test_names[3]).id,
                     "name": self.test_names[3],
+                    "color": "#FFFFFF",
                 },
                 {
                     "id": Tag.objects.get(name=self.test_names[4]).id,
                     "name": self.test_names[4],
+                    "color": "#FFFFFF",
                 },
             ],
         )
 
-    def test_create_tag(self):
+    def test_create_tag_only_name(self):
         response = self.client.post(
             reverse("create_tag"), {"name": "test_create_tag"}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 3)
         self.assertEqual(
             response.data,
             {
                 "id": Tag.objects.get(name="test_create_tag").id,
                 "name": "test_create_tag",
+                "color": "#FFFFFF",
+            },
+        )
+
+    def test_create_tag(self):
+        response = self.client.post(
+            reverse("create_tag"),
+            {"name": "test_create_tag2", "color": "#00FF00"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(
+            response.data,
+            {
+                "id": Tag.objects.get(name="test_create_tag2").id,
+                "name": "test_create_tag2",
+                "color": "#00FF00",
             },
         )
 
@@ -115,6 +138,7 @@ class RestAPITagTestCase(APITestCase):
             {
                 "id": Tag.objects.get(name=self.test_names[0]).id,
                 "name": self.test_names[0],
+                "color": "#FFFFFF",
             },
         )
 
@@ -131,6 +155,7 @@ class RestAPITagTestCase(APITestCase):
             {
                 "id": Tag.objects.get(name="test_detail_put").id,
                 "name": "test_detail_put",
+                "color": "#FFFFFF",
             },
         )
 
