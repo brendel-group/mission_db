@@ -23,6 +23,8 @@ import { MissionData } from "~/data";
 import RenderView from "../details/DetailsView";
 import { fetchAndTransformMissions } from "~/utilities/fetchapi";
 import { RenderTagsOverview } from "../../utilities/TagList";
+import { TagPicker } from "~/utilities/TagPicker";
+import { IconPlus } from "@tabler/icons-react";
 
 interface ThProps {
   children: React.ReactNode;
@@ -199,12 +201,28 @@ export function Overview() {
           <Menu.Target>
             <div>
               <RenderTagsOverview tags={row.tags} />
+              {row.tags.length === 0 && (
+                <Center>
+                  <IconPlus size={16} stroke={1.5} color="gray" />
+                </Center>
+              )}
             </div>
           </Menu.Target>
           {/*Actions for the Tag Picker*/}
           <Menu.Dropdown>
-            {/*TODO: Implement tag picker*/}
-            <h3>Tag Picker</h3>
+            <TagPicker
+              tags={row.tags}
+              onAddTag={(newTag) => {
+                // update tags in frontend. TODO: Implement API call to update tags in backend
+                row.tags.push(newTag);
+                setSortedData([...sortedData]);
+              }}
+              onRemoveTag={(tagName) => {
+                // update tags in frontend. TODO: Implement API call to update tags in backend
+                row.tags = row.tags.filter((tag) => tag.name !== tagName);
+                setSortedData([...sortedData]);
+              }}
+            />
           </Menu.Dropdown>
         </Menu>
       </Table.Td>
