@@ -21,7 +21,7 @@ export function CreateAppShell({ children }: BasicAppShellProps) {
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <img
-            src="/polybotLogo.ico"
+            src="/favicon.ico"
             alt="Custom Icon"
             style={{ width: 30, height: 30 }}
           />
