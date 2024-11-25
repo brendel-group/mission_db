@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { AppShell, Burger, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconRobot } from "@tabler/icons-react";
 import { Navbar } from "~/layout/NavBar/NavBar";
 
 interface BasicAppShellProps {

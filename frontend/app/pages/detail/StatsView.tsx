@@ -15,8 +15,8 @@ export const ShowStatsView: React.FC<ShowStatsViewProps> = ({
       <Text size="xl" mb="sm">
         Stats
       </Text>
-      <Text>Total Duration: {selectedRow.total_duration}</Text>
-      <Text>Total Size: {selectedRow.total_size} GB</Text>
+      <Text>Total Duration: {selectedRow.totalDuration}</Text>
+      <Text>Total Size: {selectedRow.totalSize} GB</Text>
       <Text>Remarks: {selectedRow.remarks}</Text>
     </div>
   );

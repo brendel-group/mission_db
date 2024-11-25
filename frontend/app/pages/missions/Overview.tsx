@@ -18,9 +18,8 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
-import { mission_table_data } from "../../RandomData";
 import { MissionData } from "~/data";
-import RenderView from "../details/DetailsView";
+import RenderView from "../detail/DetailView";
 import { fetchAndTransformMissions } from "~/utilities/fetchapi";
 import { RenderTagsOverview } from "../../utilities/TagList";
 
@@ -83,7 +82,7 @@ function sortData(
 
   return filterData(
     [...data].sort((a, b) => {
-      if (sortBy === "total_size") {
+      if (sortBy === "totalSize") {
         // Duration needs a numeric sort
         const durationA = parseFloat(a[sortBy]);
         const durationB = parseFloat(b[sortBy]);
@@ -188,8 +187,8 @@ export function Overview() {
     >
       <Table.Td>{row.name}</Table.Td>
       <Table.Td>{row.location}</Table.Td>
-      <Table.Td>{row.total_duration}</Table.Td>
-      <Table.Td>{row.total_size}</Table.Td>
+      <Table.Td>{row.totalDuration}</Table.Td>
+      <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
       <Table.Td
@@ -214,8 +213,8 @@ export function Overview() {
   const columns: { key: keyof MissionData; label: string }[] = [
     { key: "name", label: "Name" },
     { key: "location", label: "Location" },
-    { key: "total_duration", label: "Duration" },
-    { key: "total_size", label: "Size (MB)" },
+    { key: "totalDuration", label: "Duration" },
+    { key: "totalSize", label: "Size (MB)" },
     { key: "robot", label: "Robot" },
     { key: "remarks", label: "Remarks" },
     { key: "tags", label: "Tags" },
@@ -273,7 +272,7 @@ export function Overview() {
       {/* Modal Component */}
       <RenderView
         modalOpened={modalOpened}
-        selectedRow={selectedRow}
+        missionData={selectedRow}
         onClose={() => setModalOpened(false)}
       />
     </ScrollArea>
