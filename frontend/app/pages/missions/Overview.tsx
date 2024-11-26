@@ -222,6 +222,14 @@ export function Overview() {
                 row.tags = row.tags.filter((tag) => tag.name !== tagName);
                 setSortedData([...sortedData]);
               }}
+              onChangeTagColor={(tagName, newColor) => {
+                // update tags in frontend. TODO: Implement API call to update tags in backend
+                const tag = row.tags.find((tag) => tag.name === tagName);
+                if (tag) {
+                  tag.color = newColor;
+                  setSortedData([...sortedData]);
+                }
+              }}
             />
           </Menu.Dropdown>
         </Menu>

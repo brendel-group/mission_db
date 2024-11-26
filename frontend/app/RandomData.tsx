@@ -12,9 +12,9 @@ const mission_table_data: MissionData[] = [
     robot: "Spot",
     remarks: "here",
     tags: [
-      { name: "Apple", color: "blue" },
-      { name: "Field", color: "green" },
-      { name: "Müller", color: "red" },
+      { name: "Apple", color: "#390099" },
+      { name: "Field", color: "#ff0054" },
+      { name: "Müller", color: "#2c7da0" },
     ],
   },
   {
@@ -26,8 +26,8 @@ const mission_table_data: MissionData[] = [
     robot: "Spot",
     remarks: "N/A",
     tags: [
-      { name: "Hallo", color: "cyan" },
-      { name: "Welt", color: "pink" },
+      { name: "Hallo", color: "#ff5400" },
+      { name: "Welt", color: "#007f5f" },
     ],
   },
   {
@@ -39,11 +39,11 @@ const mission_table_data: MissionData[] = [
     robot: "Spot",
     remarks: "is",
     tags: [
-      { name: "Hier", color: "blue" },
-      { name: "könnte", color: "green" },
-      { name: "Ihre", color: "red" },
-      { name: "Werbung", color: "cyan" },
-      { name: "stehen", color: "pink" },
+      { name: "Hier", color: "#ff0054" },
+      { name: "könnte", color: "#ffbd00" },
+      { name: "Ihre", color: "#007f5f" },
+      { name: "Werbung", color: "#2c7da0" },
+      { name: "stehen", color: "#9e0059" },
     ],
   },
   {
@@ -65,8 +65,8 @@ const mission_table_data: MissionData[] = [
     robot: "Spot",
     remarks: "extra",
     tags: [
-      { name: "veryLongTagThatGetsTruncated", color: "blue" },
-      { name: "Farm", color: "green" },
+      { name: "veryLongTagThatGetsTruncated", color: "#80b918" },
+      { name: "Farm", color: "#ff5400" },
     ],
   },
 ];
