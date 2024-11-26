@@ -1,24 +1,24 @@
 import { Modal, Container, Grid, Text, rem } from "@mantine/core";
 import React from "react";
-import { RenderTagsDetailsView } from "../../utilities/TagList";
+import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { ShowStatsView } from "./StatsView";
 import { MissionData } from "~/data";
 import { detail_view_data } from "~/RandomData";
 
-interface RenderViewProps {
+interface DetailViewProps {
   modalOpened: boolean;
-  selectedRow: MissionData | null;
+  missionData: MissionData | null;
   onClose: () => void;
 }
 
-const RenderView: React.FC<RenderViewProps> = ({
+const RenderView: React.FC<DetailViewProps> = ({
   modalOpened,
-  selectedRow,
+  missionData,
   onClose,
 }) => {
-  const detailViewData = selectedRow
-    ? detail_view_data[selectedRow.mission_id]
+  const detailViewData = missionData
+    ? detail_view_data[missionData.missionId]
     : null;
 
   return (
@@ -26,8 +26,8 @@ const RenderView: React.FC<RenderViewProps> = ({
       opened={modalOpened}
       onClose={onClose}
       title={
-        selectedRow
-          ? `${selectedRow.name}, ${selectedRow.location} with ${selectedRow.robot}`
+        missionData
+          ? `${missionData.name}, ${missionData.location} with ${missionData.robot}`
           : "Mission Details"
       }
       fullScreen
@@ -44,8 +44,8 @@ const RenderView: React.FC<RenderViewProps> = ({
             <Grid>
               {/* Tags */}
               <Grid.Col span={12}>
-                {selectedRow && (
-                  <RenderTagsDetailsView tags={selectedRow.tags} />
+                {missionData && (
+                  <RenderTagsDetailView tags={missionData.tags} />
                 )}
               </Grid.Col>
               {/* Table */}
@@ -57,7 +57,7 @@ const RenderView: React.FC<RenderViewProps> = ({
 
           {/* Stats */}
           <Grid.Col span={3}>
-            <ShowStatsView selectedRow={selectedRow} />
+            <ShowStatsView selectedRow={missionData} />
           </Grid.Col>
         </Grid>
       </Container>

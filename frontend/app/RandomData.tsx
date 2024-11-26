@@ -4,11 +4,11 @@ import { DetailViewData, MissionData } from "./data";
 
 const mission_table_data: MissionData[] = [
   {
-    mission_id: 0,
+    missionId: 0,
     name: "Apfelwiese Fa. Müller",
     location: "Tübingen",
-    total_duration: "02:15:30",
-    total_size: "1250",
+    totalDuration: "02:15:30",
+    totalSize: "1250",
     robot: "Spot",
     remarks: "here",
     tags: [
@@ -18,11 +18,11 @@ const mission_table_data: MissionData[] = [
     ],
   },
   {
-    mission_id: 1,
+    missionId: 1,
     name: "Bauer X",
     location: "San Francisco",
-    total_duration: "01:45:20",
-    total_size: "20",
+    totalDuration: "01:45:20",
+    totalSize: "20",
     robot: "Spot",
     remarks: "N/A",
     tags: [
@@ -31,11 +31,11 @@ const mission_table_data: MissionData[] = [
     ],
   },
   {
-    mission_id: 2,
+    missionId: 2,
     name: "Obstwiese Y",
     location: "Stuttgart",
-    total_duration: "00:30:15",
-    total_size: "25",
+    totalDuration: "00:30:15",
+    totalSize: "25",
     robot: "Spot",
     remarks: "is",
     tags: [
@@ -47,21 +47,21 @@ const mission_table_data: MissionData[] = [
     ],
   },
   {
-    mission_id: 3,
+    missionId: 3,
     name: "Bebenhausen Schloss",
     location: "Bebenhausen",
-    total_duration: "03:10:45",
-    total_size: "10",
+    totalDuration: "03:10:45",
+    totalSize: "10",
     robot: "Spot",
     remarks: "something",
     tags: [],
   },
   {
-    mission_id: 4,
+    missionId: 4,
     name: "Bauernhof",
     location: "Rottweil",
-    total_duration: "04:00:00",
-    total_size: "30",
+    totalDuration: "04:00:00",
+    totalSize: "30",
     robot: "Spot",
     remarks: "extra",
     tags: [

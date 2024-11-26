@@ -3,7 +3,7 @@ import { getRandomColor } from "~/utilities/ColorHelper";
 import { IconPencil } from "@tabler/icons-react";
 import { Tag } from "~/data";
 
-export function RenderTagsDetailsView({ tags }: { tags: Tag[] }) {
+export function RenderTagsDetailView({ tags }: { tags: Tag[] }) {
   return (
     <Group gap="xs">
       {tags.map((item) => (

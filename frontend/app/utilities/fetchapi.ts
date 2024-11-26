@@ -87,11 +87,11 @@ export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
             const exampleData = mission_table_data.at(i % 5);
             renderedMissions.push(
                 {
-                    mission_id: missions[i].id,
+                    missionId: missions[i].id,
                     name: missions[i].name,
                     location: missions[i].location,
-                    total_duration: exampleData?.total_duration || "",
-                    total_size: exampleData?.total_size || "",
+                    totalDuration: exampleData?.totalDuration || "",
+                    totalSize: exampleData?.totalSize || "",
                     robot: exampleData?.robot || "",
                     remarks: missions[i].other || "",
                     tags: exampleData?.tags || []
