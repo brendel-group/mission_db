@@ -25,10 +25,14 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   onChangeTagColor,
 }) => {
   const [newTagName, setNewTagName] = useState("");
-  const [selectedColor, setSelectedColor] = useState("black");
+  const [selectedColor, setSelectedColor] = useState("#390099");
 
   const handleAddTag = () => {
     if (newTagName) {
+      // check if tag already exists
+      if (tags.find((tag) => tag.name === newTagName)) {
+        return;
+      }
       onAddTag({ name: newTagName, color: selectedColor });
     }
   };
@@ -40,6 +44,9 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         value={newTagName}
         onChange={(e) => setNewTagName(e.target.value)}
         placeholder="add a new tag"
+        onKeyDown={(e) => {
+          e.key === "Enter" && handleAddTag();
+        }}
       />
       {/*custom color picker*/}
       <div style={{ display: "flex", gap: "8px" }}>

@@ -209,7 +209,7 @@ export function Overview() {
             </div>
           </Menu.Target>
           {/*Actions for the Tag Picker*/}
-          <Menu.Dropdown>
+          <Menu.Dropdown style={{ padding: "10px" }}>
             <TagPicker
               tags={row.tags}
               onAddTag={(newTag) => {
