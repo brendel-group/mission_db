@@ -26,6 +26,16 @@ export const TagPicker: React.FC<TagPickerProps> = ({
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("#390099");
+  const swatches = [
+    "#390099",
+    "#2c7da0",
+    "#9e0059",
+    "#ff0054",
+    "#ff5400",
+    "#ffbd00",
+    "#007f5f",
+    "#80b918",
+  ];
 
   const handleAddTag = () => {
     if (newTagName) {
@@ -50,16 +60,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       />
       {/*custom color picker*/}
       <div style={{ display: "flex", gap: "8px" }}>
-        {[
-          "#390099",
-          "#2c7da0",
-          "#9e0059",
-          "#ff0054",
-          "#ff5400",
-          "#ffbd00",
-          "#007f5f",
-          "#80b918",
-        ].map((swatch) => (
+        {swatches.map((swatch) => (
           <div
             key={swatch}
             style={{
@@ -110,16 +111,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                   onChange={(color) => onChangeTagColor(tag.name, color)}
                   withPicker={false}
                   swatchesPerRow={4}
-                  swatches={[
-                    "#390099",
-                    "#2c7da0",
-                    "#9e0059",
-                    "#ff0054",
-                    "#ff5400",
-                    "#ffbd00",
-                    "#007f5f",
-                    "#80b918",
-                  ]}
+                  swatches={swatches}
                 />
               </Menu.Dropdown>
             </Menu>
