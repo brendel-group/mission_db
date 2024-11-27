@@ -92,10 +92,10 @@ def main():
     add_parser.add_argument("--name", required=True, help="Mission name")
     add_parser.add_argument("--date", required=True, help="Mission date (YYYY-MM-DD)")
     add_parser.add_argument(
-        "--location", required=False, help="Mission location", default="unknown"
+        "--location", required=False, help="Mission location"
     )
     add_parser.add_argument(
-        "--other", required=False, help="Other mission details", default="-"
+        "--other", required=False, help="Other mission details"
     )
 
     # remove command
@@ -105,10 +105,10 @@ def main():
     folder_parser = subparser.add_parser("addfolder", help="adds details from folder")
     folder_parser.add_argument("--path", required=True, help="Filepath")
     folder_parser.add_argument(
-        "--location", required=False, help="location", default="unknown"
+        "--location", required=False, help="location"
     )
     folder_parser.add_argument(
-        "--other", required=False, help="other mission details", default="-"
+        "--other", required=False, help="other mission details"
     )
 
     args = parser.parse_args()
