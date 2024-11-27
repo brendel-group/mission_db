@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
-from .models import Tag, Mission, Mission_tags
+from .models import Tag, Mission, Mission_tags, File, Mission_files
 from .serializer import TagSerializer, MissionSerializer, MissionTagSerializer
 
 
