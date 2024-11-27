@@ -94,7 +94,16 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           </Badge>
           <Group gap="xs">
             {/* Button to change tag color */}
-            <Menu width={200} position="bottom" withArrow shadow="md">
+            <Menu
+              withArrow
+              shadow="md"
+              styles={{
+                dropdown: {
+                  border: "1px solid #ccc",
+                  padding: 4,
+                },
+              }}
+            >
               <Menu.Target>
                 <Button
                   size="xs"

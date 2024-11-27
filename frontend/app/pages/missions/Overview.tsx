@@ -197,7 +197,7 @@ export function Overview() {
       <Table.Td
         onClick={(e) => e.stopPropagation()} // stops opening openModal
       >
-        <Menu>
+        <Menu styles={{ dropdown: { border: "1px solid #ccc" } }}>
           <Menu.Target>
             <div>
               <RenderTagsOverview tags={row.tags} />
