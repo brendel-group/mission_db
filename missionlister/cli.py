@@ -3,13 +3,15 @@ import argparse
 import django
 import logging
 from datetime import datetime
-from restapi.models import Mission  # Importing Models, adjust as needed
 
 # Set up Django env
 os.environ.setdefault(
     "DJANGO_SETTINGS_MODULE", "missionlister.settings"
 )  # Adjust as needed
 django.setup()
+
+# Importing Models, adjust as needed
+from restapi.models import Mission  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
