@@ -22,12 +22,11 @@ logging.basicConfig(level=logging.INFO)
 def extract_info_from_folder(folder_name):
     try:
         date_str, name = folder_name.split("_", 1)
-        date_str = convert_date(date_str)
-        date = datetime.strptime(date_str, "%Y-%m-%d")
+        date = datetime.strptime(date_str, "%Y.%m.%d")
         return date, name
     except ValueError:
         logging.error(
-            f"Folder name '{folder_name}' does not match the expected format (YYYY-MM-DD_missionname)."
+            f"Folder name '{folder_name}' does not match the expected format (YYYY.MM.DD_missionname)."
         )
         return None, None
 
@@ -47,12 +46,12 @@ def validate_date(date_str):
 
 
 # Add mission to DB
-def add_mission_from_folder(id, folder_path, location, other):
+def add_mission_from_folder(folder_path, location, other):
     folder_name = os.path.basename(folder_path)
     date, name = extract_info_from_folder(folder_name)
 
     if date and name:
-        mission = Mission(id=id, name=name, date=date, location=location, other=other)
+        mission = Mission(name=name, date=date, location=location, other=other)
         try:
             mission.save()
             logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
@@ -63,13 +62,9 @@ def add_mission_from_folder(id, folder_path, location, other):
 
 
 # Add mission to DB
-def add_mission(id, name, date, location, other):
-    if check_mission_exists(id):
-        logging.warning(f"'{name}' on '{date}' with Id'{id}' already exists.")
-        return
-
+def add_mission(name, date, location, other):
     try:
-        mission = Mission(id=id, name=name, date=date, location=location, other=other)
+        mission = Mission.objects.create(name=name, date=date, location=location, other=other)
         mission.save()
         logging.info(f"'{name}' added.")
     except Exception as e:
@@ -86,9 +81,6 @@ def remove_mission(mission_id):
         print(f"No mission found with ID {mission_id}.")
 
 
-def convert_date(date):
-    return date.replace(".", "-")
-
 
 def main():
     # Arg parser
@@ -97,7 +89,6 @@ def main():
 
     # Add command
     add_parser = subparser.add_parser("add", help="Add mission")
-    add_parser.add_argument("--id", required=True, help="ID")
     add_parser.add_argument("--name", required=True, help="Mission name")
     add_parser.add_argument("--date", required=True, help="Mission date (YYYY-MM-DD)")
     add_parser.add_argument(
@@ -112,7 +103,6 @@ def main():
     remove_parser.add_argument("--id", required=True, help="ID")
 
     folder_parser = subparser.add_parser("addfolder", help="adds details from folder")
-    folder_parser.add_argument("--id", required=True, help="ID")
     folder_parser.add_argument("--path", required=True, help="Filepath")
     folder_parser.add_argument(
         "--location", required=False, help="location", default="unknown"
@@ -131,7 +121,6 @@ def main():
             return
 
         add_mission(
-            args.id,
             args.name,
             validated_date,  # Pass the validated date
             args.location,
@@ -140,7 +129,7 @@ def main():
     elif args.command == "remove":
         remove_mission(args.id)
     elif args.command == "addfolder":
-        add_mission_from_folder(args.id, args.path, args.location, args.other)
+        add_mission_from_folder(args.path, args.location, args.other)
     else:
         parser.print_help()
 
