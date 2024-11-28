@@ -72,6 +72,8 @@ def print_table(list_of_dict):
     header += line
     print(header)
 
+    # print content
+
     for entry in list_of_dict:
         line = ""
         for key in keys:
@@ -133,6 +135,8 @@ def mission_arg_parser(subparser):
     remove_parser = mission_subparser.add_parser("remove", help="Remove mission")
     remove_parser.add_argument("--id", required=True, help="ID")
 
+    return mission_parser
+
 def folder_arg_parser(subparser):
     folder_parser = subparser.add_parser("addfolder", help="adds details from folder")
     folder_parser.add_argument("--path", required=True, help="Filepath")
@@ -149,28 +153,31 @@ def main():
     parser = argparse.ArgumentParser(description="Mission CLI")
     subparser = parser.add_subparsers(dest="type")
 
-    mission_arg_parser(subparser)
+    mission_parser = mission_arg_parser(subparser)
 
     folder_arg_parser(subparser)
 
     args = parser.parse_args()
 
     # Execute command
-    if args.command == "add":
-        # Validate date
-        validated_date = validate_date(args.date)
-        if validated_date is None:
-            return
+    if args.type == "mission":
+        if args.command == "add":
+            # Validate date
+            validated_date = validate_date(args.date)
+            if validated_date is None:
+                return
 
-        add_mission(
-            args.name,
-            validated_date,  # Pass the validated date
-            args.location,
-            args.other,
-        )
-    elif args.command == "remove":
-        remove_mission(args.id)
-    elif args.command == "addfolder":
+            add_mission(
+                args.name,
+                validated_date,  # Pass the validated date
+                args.location,
+                args.other,
+            )
+        elif args.command == "remove":
+            remove_mission(args.id)
+        else:
+            mission_parser.print_help()
+    elif args.type == "addfolder":
         add_mission_from_folder(args.path, args.location, args.other)
     else:
         parser.print_help()
