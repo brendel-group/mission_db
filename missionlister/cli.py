@@ -13,6 +13,7 @@ django.setup()
 
 # Importing Models, adjust as needed
 from restapi.models import Mission  # noqa
+from restapi.serializer import MissionSerializer # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -44,6 +45,39 @@ def validate_date(date_str):
         logging.error("Date and time format should be YYYY-MM-DD.")
         return None
 
+def print_table(list_of_dict):
+    if not list_of_dict:
+        return
+    
+    keys = list(list_of_dict[0])
+
+    # get widths of columns
+
+    widths = {}
+
+    for key in keys:
+        list_of_widths = list(map(lambda d: len(str(d[key])),list_of_dict))
+        list_of_widths.append(len(key))
+        widths[key] = max(list_of_widths)
+
+    # print header
+
+    header = ""
+    for key in keys:
+        header += f"{key:<{widths[key]}} | "
+
+    header = header[:-3]
+    header += "\n"
+    line = "-"*len(header)
+    header += line
+    print(header)
+
+    for entry in list_of_dict:
+        line = ""
+        for key in keys:
+            line += f"{str(entry[key]):<{widths[key]}} | "
+        line = line[:-3]
+        print(line)
 
 # Add mission to DB
 def add_mission_from_folder(folder_path, location, other):
