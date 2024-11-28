@@ -80,15 +80,12 @@ def remove_mission(mission_id):
     except Mission.DoesNotExist:
         print(f"No mission found with ID {mission_id}.")
 
-
-
-def main():
-    # Arg parser
-    parser = argparse.ArgumentParser(description="Mission CLI")
-    subparser = parser.add_subparsers(dest="command")
+def mission_arg_parser(subparser):
+    mission_parser = subparser.add_parser("mission", help="Modify Missions")
+    mission_subparser = mission_parser.add_subparsers(dest="command")
 
     # Add command
-    add_parser = subparser.add_parser("add", help="Add mission")
+    add_parser = mission_subparser.add_parser("add", help="Add mission")
     add_parser.add_argument("--name", required=True, help="Mission name")
     add_parser.add_argument("--date", required=True, help="Mission date (YYYY-MM-DD)")
     add_parser.add_argument(
@@ -98,10 +95,11 @@ def main():
         "--other", required=False, help="Other mission details"
     )
 
-    # remove command
-    remove_parser = subparser.add_parser("remove", help="Remove mission")
+    # Remove command
+    remove_parser = mission_subparser.add_parser("remove", help="Remove mission")
     remove_parser.add_argument("--id", required=True, help="ID")
 
+def folder_arg_parser(subparser):
     folder_parser = subparser.add_parser("addfolder", help="adds details from folder")
     folder_parser.add_argument("--path", required=True, help="Filepath")
     folder_parser.add_argument(
@@ -110,6 +108,16 @@ def main():
     folder_parser.add_argument(
         "--other", required=False, help="other mission details"
     )
+
+
+def main():
+    # Arg parser
+    parser = argparse.ArgumentParser(description="Mission CLI")
+    subparser = parser.add_subparsers(dest="type")
+
+    mission_arg_parser(subparser)
+
+    folder_arg_parser(subparser)
 
     args = parser.parse_args()
 
