@@ -135,6 +135,9 @@ def mission_arg_parser(subparser):
     remove_parser = mission_subparser.add_parser("remove", help="Remove mission")
     remove_parser.add_argument("--id", required=True, help="ID")
 
+    # List command
+    _ = mission_subparser.add_parser("list", help="List all missions")
+
     return mission_parser
 
 def folder_arg_parser(subparser):
@@ -160,27 +163,33 @@ def main():
     args = parser.parse_args()
 
     # Execute command
-    if args.type == "mission":
-        if args.command == "add":
-            # Validate date
-            validated_date = validate_date(args.date)
-            if validated_date is None:
-                return
+    match args.type:
+        case "mission": 
+            match args.command:
+                case "add":
+                    # Validate date
+                    validated_date = validate_date(args.date)
+                    if validated_date is None:
+                        return
 
-            add_mission(
-                args.name,
-                validated_date,  # Pass the validated date
-                args.location,
-                args.other,
-            )
-        elif args.command == "remove":
-            remove_mission(args.id)
-        else:
-            mission_parser.print_help()
-    elif args.type == "addfolder":
-        add_mission_from_folder(args.path, args.location, args.other)
-    else:
-        parser.print_help()
+                    add_mission(
+                        args.name,
+                        validated_date,  # Pass the validated date
+                        args.location,
+                        args.other,
+                    )
+                case "remove":
+                    remove_mission(args.id)
+                case "list":
+                    missions = Mission.objects.all()
+                    serializer = MissionSerializer(missions, many=True)
+                    print_table(serializer.data)
+                case _:
+                    mission_parser.print_help()
+        case "addfolder":
+            add_mission_from_folder(args.path, args.location, args.other)
+        case _:
+            parser.print_help()
 
 
 if __name__ == "__main__":
