@@ -18,9 +18,15 @@ from restapi.serializer import MissionSerializer  # noqa
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-
-# Extract date and name from folder name
 def extract_info_from_folder(folder_name):
+    """
+    Extract date and name from folder name
+    ### Parameters
+    folder_name: basename of folder in format YYYY.MM.DD_missionname
+    ### Returns
+    date: datetime object of extracted date
+    name: extracted mission name
+    """
     try:
         date_str, name = folder_name.split("_", 1)
         date = datetime.strptime(date_str, "%Y.%m.%d")
@@ -32,13 +38,27 @@ def extract_info_from_folder(folder_name):
         return None, None
 
 
-# Check if mission exists
 def check_mission_exists(id):
+    """
+    Check if mission exists
+    ### Parameters
+    id: mission_id
+    ### Returns
+    true if mission exists\\
+    false it mission doesn't exist
+    """
     return Mission.objects.filter(id=id).exists()
 
 
-# Validate datetime format
 def validate_date(date_str):
+    """
+    Validate datetime format
+    ### Parameters
+    date_str: date string in the format YYYY-MM-DD
+    ### Returns
+    datetime object if format is valid\\
+    None if string is of invalid format
+    """
     try:
         return datetime.strptime(date_str, "%Y-%m-%d")
     except ValueError:
@@ -46,7 +66,23 @@ def validate_date(date_str):
         return None
 
 
-def print_table(list_of_dict):
+def print_table(list_of_dict: list[dict]):
+    """
+    Print the contents of a list of dictionaries as a table.\\
+    A dictionary and a json are essentially the same in python.\\
+    So this function can be called with the data of a ListSerializer
+    to print a table of DB entries.\\
+    The keys/labels are printed in the header.\\
+    It assumes that the dictionaries are flat an contain the same keys.\\
+    The width of the columns are automatically adjusted to the max width
+    of any value in that column.
+    ### Parameters
+    list_of_dict: A list containing flat dictionaries which all have the same keys
+    """
+    vertical_bar = "│" # U+2502
+    horizontal_bar = "─" # U+2500
+    cross_bar = "┼" # U+253C
+
     if not list_of_dict:
         return
 
@@ -64,27 +100,36 @@ def print_table(list_of_dict):
     # print header
 
     header = ""
+    vertical_line = ""
     for key in keys:
-        header += f"{key:<{widths[key]}} | "
+        header += f"{key:<{widths[key]}} {vertical_bar} "
+        vertical_line += horizontal_bar*(widths[key]+1) + cross_bar + horizontal_bar
 
+    # remove last 3 characters because there is no extra column
     header = header[:-3]
-    header += "\n"
-    line = "-" * len(header)
-    header += line
+    vertical_line = vertical_line[:-3]
+    
     print(header)
+    print(vertical_line)
 
     # print content
 
     for entry in list_of_dict:
         line = ""
         for key in keys:
-            line += f"{str(entry[key]):<{widths[key]}} | "
+            line += f"{str(entry[key]):<{widths[key]}} {vertical_bar} "
         line = line[:-3]
         print(line)
 
 
-# Add mission to DB
-def add_mission_from_folder(folder_path, location, other):
+def add_mission_from_folder(folder_path, location = None, other = None):
+    """
+    Add mission to DB with data from filesystem
+    ### Parameters
+    folder_path: path to a folder without trailing /\\
+    location: optional string containing information about the location\\
+    other: optional string containing other extra information
+    """
     folder_name = os.path.basename(folder_path)
     date, name = extract_info_from_folder(folder_name)
 
@@ -99,8 +144,15 @@ def add_mission_from_folder(folder_path, location, other):
         logging.warning("Skipping folder due to naming issues.")
 
 
-# Add mission to DB
-def add_mission(name, date, location, other):
+def add_mission(name, date, location=None, other=None):
+    """
+    Add mission to DB
+    ### Parameters
+    name: string containing the mission name\\
+    date: datetime object of the date\\
+    location: optional string containing information about the location\\
+    other: optional string containing other extra information 
+    """
     try:
         mission = Mission.objects.create(
             name=name, date=date, location=location, other=other
@@ -112,6 +164,11 @@ def add_mission(name, date, location, other):
 
 
 def remove_mission(mission_id):
+    """
+    Remove mission from DB
+    ### Parameters
+    mission_id: id of mission to remove
+    """
     try:
         # Attempt to find the mission by ID
         mission = Mission.objects.get(id=mission_id)
@@ -122,6 +179,13 @@ def remove_mission(mission_id):
 
 
 def mission_arg_parser(subparser):
+    """
+    Parser setup for mission subcommand
+    ### Parameters
+    subparser: subparser to which this subcommand belongs to
+    ### Returns
+    mission_parser: subparser here created
+    """
     mission_parser = subparser.add_parser("mission", help="Modify Missions")
     mission_subparser = mission_parser.add_subparsers(dest="command")
 
@@ -143,6 +207,11 @@ def mission_arg_parser(subparser):
 
 
 def folder_arg_parser(subparser):
+    """
+    Parser setup for addfolder subcommand
+    ### Parameters
+    subparser: subparser to which this subcommand belongs to
+    """
     folder_parser = subparser.add_parser("addfolder", help="adds details from folder")
     folder_parser.add_argument("--path", required=True, help="Filepath")
     folder_parser.add_argument("--location", required=False, help="location")
