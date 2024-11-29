@@ -18,6 +18,7 @@ from restapi.serializer import MissionSerializer  # noqa
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
+
 def extract_info_from_folder(folder_name):
     """
     Extract date and name from folder name
@@ -79,9 +80,9 @@ def print_table(list_of_dict: list[dict]):
     ### Parameters
     list_of_dict: A list containing flat dictionaries which all have the same keys
     """
-    vertical_bar = "│" # U+2502
-    horizontal_bar = "─" # U+2500
-    cross_bar = "┼" # U+253C
+    vertical_bar = "│"  # U+2502
+    horizontal_bar = "─"  # U+2500
+    cross_bar = "┼"  # U+253C
 
     if not list_of_dict:
         print("Empty list nothing to display")
@@ -104,12 +105,12 @@ def print_table(list_of_dict: list[dict]):
     vertical_line = ""
     for key in keys:
         header += f"{key:<{widths[key]}} {vertical_bar} "
-        vertical_line += horizontal_bar*(widths[key]+1) + cross_bar + horizontal_bar
+        vertical_line += horizontal_bar * (widths[key] + 1) + cross_bar + horizontal_bar
 
     # remove last 3 characters because there is no extra column
     header = header[:-3]
     vertical_line = vertical_line[:-3]
-    
+
     print(header)
     print(vertical_line)
 
@@ -123,7 +124,7 @@ def print_table(list_of_dict: list[dict]):
         print(line)
 
 
-def add_mission_from_folder(folder_path, location = None, other = None):
+def add_mission_from_folder(folder_path, location=None, other=None):
     """
     Add mission to DB with data from filesystem
     ### Parameters
