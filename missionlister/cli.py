@@ -84,6 +84,7 @@ def print_table(list_of_dict: list[dict]):
     cross_bar = "┼" # U+253C
 
     if not list_of_dict:
+        print("Empty list nothing to display")
         return
 
     keys = list(list_of_dict[0])
