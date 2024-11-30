@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Set up Django env
 os.environ.setdefault(
-    "DJANGO_SETTINGS_MODULE", "missionlister.settings"
+    "DJANGO_SETTINGS_MODULE", "backend.settings"
 )  # Adjust as needed
 django.setup()
 
