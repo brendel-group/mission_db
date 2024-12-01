@@ -5,8 +5,13 @@ from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from .models import Tag, Mission, Mission_tags
+from datetime import datetime
+import sys
+import logging
 
-# Create your tests here.
+sys.path.append("..")
+
+import cli
 
 
 class TagTestCase(TestCase):
@@ -50,6 +55,16 @@ class RestAPITagTestCase(APITestCase):
                 n += 1
             Tag.objects.create(name="test" + str(n))
             self.test_names.append("test" + str(n))
+
+        # raise logging level to ERROR
+        logger = logging.getLogger("django.request")
+        self.previous_logging_level = logger.getEffectiveLevel()
+        logger.setLevel(logging.ERROR)
+
+    def tearDown(self):
+        # reset logigng level
+        logger = logging.getLogger("django.request")
+        logger.setLevel(self.previous_logging_level)
 
     def test_get_tags(self):
         response = self.client.get(reverse("get_tags"), format="json")
@@ -274,6 +289,16 @@ class NotFoundErrors(APITestCase):
         self.mission = Mission.objects.create(name="TestMission", date=timezone.now())
         self.tag = Tag.objects.create(name="test tag")
 
+        # raise logging level to ERROR
+        logger = logging.getLogger("django.request")
+        self.previous_logging_level = logger.getEffectiveLevel()
+        logger.setLevel(logging.ERROR)
+
+    def tearDown(self):
+        # reset logigng level
+        logger = logging.getLogger("django.request")
+        logger.setLevel(self.previous_logging_level)
+
     def test_tag_detail_not_found(self):
         response = self.client.get(reverse("tag_detail", kwargs={"name": "notfound"}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -334,3 +359,13 @@ class NotFoundErrors(APITestCase):
         self.assertEqual(
             response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
         )
+
+
+class CLITests(TestCase):
+    def setUp(self):
+        pass
+
+    def test_extract_info_from_folder(self):
+        date, name = cli.extract_info_from_folder("2024.11.30_test")
+        self.assertEqual(date, datetime.strptime("2024.11.30", "%Y.%m.%d"))
+        self.assertEqual(name, "test")
