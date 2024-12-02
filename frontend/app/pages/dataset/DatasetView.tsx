@@ -1,5 +1,4 @@
 import { Text } from "@mantine/core";
-import { rem } from "@mantine/core";
 import AbstractPage from "../AbstractPage";
 
 // Interface describing expected properties of DatasetView
