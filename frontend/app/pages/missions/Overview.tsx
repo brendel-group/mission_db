@@ -10,6 +10,7 @@ import {
   rem,
   keys,
   Menu,
+  Skeleton,
 } from "@mantine/core";
 import {
   IconSelector,
@@ -64,7 +65,7 @@ function filterData(data: MissionData[], search: string) {
         return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
-    }),
+    })
   );
 }
 
@@ -74,7 +75,7 @@ function sortData(
     sortBy: keyof MissionData | null;
     reversed: boolean;
     search: string;
-  },
+  }
 ) {
   const { sortBy } = payload;
 
@@ -113,7 +114,7 @@ function sortData(
 
       return String(a[sortBy]).localeCompare(String(b[sortBy]));
     }),
-    payload.search,
+    payload.search
   );
 }
 
@@ -148,7 +149,8 @@ export function Overview() {
     fetchMissions();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Skeleton style={{ height: "30vh" }} />;
+
   if (error) return <p>Error: {error}</p>;
 
   const setSorting = (field: keyof MissionData) => {
@@ -166,14 +168,14 @@ export function Overview() {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
-      }),
+      })
     );
   };
 
   const rows = sortedData.map((row) => (
     <Table.Tr
       key={row.name}
-      onClick={() => navigate('/details?id=' + row.missionId)}
+      onClick={() => navigate("/details?id=" + row.missionId)}
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
