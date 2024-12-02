@@ -173,7 +173,7 @@ export function Overview() {
   const rows = sortedData.map((row) => (
     <Table.Tr
       key={row.name}
-      onClick={() => navigate('/detail?id=' + row.missionId)}
+      onClick={() => navigate('/details?id=' + row.missionId)}
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
