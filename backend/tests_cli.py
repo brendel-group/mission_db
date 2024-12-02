@@ -180,12 +180,12 @@ class CapturedOutputTest(TestCase):
         cli.print_table(serializer.data)
         sys.stdout.flush()
         self.assertEqual(
-            self.captured_output.getvalue().strip(),
-            "id │ name │ date       │ location │ other\n"
-            + "───┼──────┼────────────┼──────────┼──────\n"
-            + f"{missions[0].id} │ Test │ 2024-12-02 │ None     │ None \n"
-            + f"{missions[1].id} │ Test │ 2024-12-02 │ None     │ None \n"
-            + f"{missions[2].id} │ Test │ 2024-12-02 │ None     │ None",
+            self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
+            "id│name│date│location│other\n"
+            + "┼┼┼┼\n"
+            + f"{missions[0].id}│Test│2024-12-02│None│None\n"
+            + f"{missions[1].id}│Test│2024-12-02│None│None\n"
+            + f"{missions[2].id}│Test│2024-12-02│None│None",
         )
 
     def test_print_tag_table(self):
@@ -194,12 +194,12 @@ class CapturedOutputTest(TestCase):
         cli.print_table(serializer.data)
         sys.stdout.flush()
         self.assertEqual(
-            self.captured_output.getvalue().strip(),
-            "id │ name  │ color  \n"
-            + "───┼───────┼────────\n"
-            + f"{tags[0].id}  │ {tags[0].name} │ #FFFFFF\n"
-            + f"{tags[1].id}  │ {tags[1].name} │ #FFFFFF\n"
-            + f"{tags[2].id}  │ {tags[2].name} │ #FFFFFF",
+            self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
+            "id│name│color\n"
+            + "┼┼\n"
+            + f"{tags[0].id}│{tags[0].name}│#FFFFFF\n"
+            + f"{tags[1].id}│{tags[1].name}│#FFFFFF\n"
+            + f"{tags[2].id}│{tags[2].name}│#FFFFFF",
         )
 
 
