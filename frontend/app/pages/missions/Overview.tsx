@@ -19,11 +19,11 @@ import {
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
 import { MissionData } from "~/data";
-import RenderView from "../detail/DetailView";
 import { fetchAndTransformMissions } from "~/utilities/fetchapi";
 import { RenderTagsOverview } from "../../utilities/TagList";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPlus } from "@tabler/icons-react";
+import { useNavigate } from "@remix-run/react";
 
 interface ThProps {
   children: React.ReactNode;
@@ -118,12 +118,11 @@ function sortData(
 }
 
 export function Overview() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState<MissionData[]>([]);
   const [sortBy, setSortBy] = useState<keyof MissionData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-  const [modalOpened, setModalOpened] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<MissionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -171,15 +170,10 @@ export function Overview() {
     );
   };
 
-  const openModal = (row: MissionData) => {
-    setSelectedRow(row);
-    setModalOpened(true);
-  };
-
   const rows = sortedData.map((row) => (
     <Table.Tr
       key={row.name}
-      onClick={() => openModal(row)}
+      onClick={() => navigate('/details?id=' + row.missionId)}
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
@@ -294,13 +288,6 @@ export function Overview() {
           )}
         </Table.Tbody>
       </Table>
-
-      {/* Modal Component */}
-      <RenderView
-        modalOpened={modalOpened}
-        missionData={selectedRow}
-        onClose={() => setModalOpened(false)}
-      />
     </ScrollArea>
   );
 }
