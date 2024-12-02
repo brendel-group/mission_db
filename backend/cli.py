@@ -23,13 +23,13 @@ def extract_info_from_folder(folder_name):
     ### Parameters
     folder_name: basename of folder in format YYYY.MM.DD_missionname
     ### Returns
-    date: datetime object of extracted date
+    date: date object of extracted date
     name: extracted mission name
     """
     try:
         date_str, name = folder_name.split("_", 1)
-        date = datetime.strptime(date_str, "%Y.%m.%d")
-        return date, name
+        mission_date = datetime.strptime(date_str, "%Y.%m.%d").date()
+        return mission_date, name
     except ValueError:
         logging.error(
             f"Folder name '{folder_name}' does not match the expected format (YYYY.MM.DD_missionname)."
@@ -59,7 +59,7 @@ def validate_date(date_str):
     None if string is of invalid format
     """
     try:
-        return datetime.strptime(date_str, "%Y-%m-%d")
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         logging.error("Date and time format should be YYYY-MM-DD.")
         return None
@@ -131,10 +131,10 @@ def add_mission_from_folder(folder_path, location=None, other=None):
     other: optional string containing other extra information
     """
     folder_name = os.path.basename(folder_path)
-    date, name = extract_info_from_folder(folder_name)
+    mission_date, name = extract_info_from_folder(folder_name)
 
-    if date and name:
-        mission = Mission(name=name, date=date, location=location, other=other)
+    if mission_date and name:
+        mission = Mission(name=name, date=mission_date, location=location, other=other)
         try:
             mission.save()
             logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
@@ -144,18 +144,18 @@ def add_mission_from_folder(folder_path, location=None, other=None):
         logging.warning("Skipping folder due to naming issues.")
 
 
-def add_mission(name, date, location=None, other=None):
+def add_mission(name, mission_date, location=None, other=None):
     """
     Add mission to DB
     ### Parameters
     name: string containing the mission name\\
-    date: datetime object of the date\\
+    mission_date: date object of the date\\
     location: optional string containing information about the location\\
     other: optional string containing other extra information 
     """
     try:
         mission = Mission.objects.create(
-            name=name, date=date, location=location, other=other
+            name=name, date=mission_date, location=location, other=other
         )
         mission.save()
         logging.info(f"'{name}' added.")
