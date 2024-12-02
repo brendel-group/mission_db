@@ -1,7 +1,7 @@
 import { MetaFunction, useSearchParams } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { CreateAppShell } from "~/layout/AppShell";
-import DetailsView from "~/pages/detail/DetailsView";
+import DetailsView from "~/pages/details/DetailsView";
 import { fetchAndTransformMission } from "~/utilities/fetchapi";
 
 export const meta: MetaFunction = () => {
