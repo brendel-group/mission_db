@@ -33,29 +33,55 @@ class BasicCLITests(TestCase):
 
 
 class ErrorCatchingTests(TestCase):
-    def setUp(self):
-        # disable logging
-        self.logger = logging.getLogger()
-        self.logger.disabled = True
-
-    def tearDown(self):
-        # reenable logging
-        self.logger.disabled = False
-
     def test_validate_date(self):
-        self.assertIsNone(cli.validate_date("Wrong format"))
-        self.assertIsNone(cli.validate_date("2024-13-02"))
+        with self.assertLogs(level="WARNING") as log:
+            self.assertIsNone(cli.validate_date("Wrong format"))
+            self.assertIsNone(cli.validate_date("2024-13-02"))
+            self.assertEqual(
+                log.output,
+                [
+                    "ERROR:root:Date and time format should be YYYY-MM-DD.",
+                    "ERROR:root:Date and time format should be YYYY-MM-DD.",
+                ],
+            )
 
     def test_extract_info_from_folder(self):
-        mission_date, name = cli.extract_info_from_folder("2024.13.30_test")
-        self.assertIsNone(mission_date)
-        self.assertIsNone(name)
+        with self.assertLogs(level="WARNING") as log:
+            mission_date, name = cli.extract_info_from_folder("2024.13.30_test")
+            self.assertIsNone(mission_date)
+            self.assertIsNone(name)
+            self.assertEqual(
+                log.output,
+                [
+                    "ERROR:root:Folder name '2024.13.30_test' does not match the expected format (YYYY.MM.DD_missionname)."
+                ],
+            )
 
     def test_add_mission_from_folder(self):
-        cli.add_mission_from_folder("2024.13.02_test_add_mission")
-        self.assertFalse(
-            Mission.objects.filter(name="test_add_mission", date="2024-12-02").exists()
-        )
+        with self.assertLogs(level="WARNING") as log:
+            cli.add_mission_from_folder("2024.13.02_test_add_mission")
+            self.assertFalse(
+                Mission.objects.filter(
+                    name="test_add_mission", date="2024-12-02"
+                ).exists()
+            )
+            self.assertEqual(
+                log.output,
+                [
+                    "ERROR:root:Folder name '2024.13.02_test_add_mission' does not match the expected format (YYYY.MM.DD_missionname).",
+                    "WARNING:root:Skipping folder due to naming issues.",
+                ],
+            )
+
+    def test_add_mission_invalid_date(self):
+        with self.assertLogs(level="WARNING") as log:
+            cli.add_mission("TestInvalidDate", "2024-13-02")
+            self.assertEqual(
+                log.output,
+                [
+                    "ERROR:root:Error adding mission: ['“2024-13-02” value has the correct format (YYYY-MM-DD) but it is an invalid date.']"
+                ],
+            )
 
 
 class AddMissionTests(TestCase):
