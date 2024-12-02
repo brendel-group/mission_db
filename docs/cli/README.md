@@ -2,7 +2,7 @@
 ## usage
 
 ```bash
-cli.py --help
+./cli.py --help
 ```
 to display help information\
 `--help` can be called on every command and subcommand
