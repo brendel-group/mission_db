@@ -56,3 +56,13 @@ Example:
 ```
 ./cli.py addfolder --path "your/path/name_date" --location "location(optional)" --other "other(optional)"
 ```
+
+## Troubleshooting
+
+- ### `Error adding mission: duplicate key value violates unique constraint "restapi_mission_pkey"`
+  If you encounter this issue it is likely you have old missions in your database that where added before
+  the id field was changed to an `AutoField`, so postgresql didn't track the id's and can't assign new id's correctly.\
+  To remove everything from the database and reset the `..._id_seq` tables you can run
+  ```bash
+  ./manage.py flush
+  ```
