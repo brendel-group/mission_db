@@ -93,3 +93,19 @@ class AddMissionTests(TestCase):
                 other="other info",
             ).exists()
         )
+
+    def test_add_mission(self):
+        cli.add_mission("TestAddMission", "2024-12-02")
+        self.assertTrue(
+            Mission.objects.filter(name="TestAddMission", date="2024-12-02").exists()
+        )
+        cli.add_mission("TestAddMission", "2024-12-02")
+        self.assertEqual(
+            len(Mission.objects.filter(name="TestAddMission", date="2024-12-02")), 2
+        )
+        cli.add_mission("TestAddMission", "2024-12-02", other="other")
+        self.assertTrue(
+            Mission.objects.filter(
+                name="TestAddMission", date="2024-12-02", other="other"
+            ).exists()
+        )
