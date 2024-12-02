@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 import argparse
 import django
 import logging
@@ -218,7 +219,7 @@ def folder_arg_parser(subparser):
     folder_parser.add_argument("--other", required=False, help="other mission details")
 
 
-def main():
+def main(args):
     # Arg parser
     parser = argparse.ArgumentParser(description="Mission CLI")
     subparser = parser.add_subparsers(dest="type")
@@ -227,7 +228,7 @@ def main():
 
     folder_arg_parser(subparser)
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     # Execute command
     match args.type:
@@ -260,4 +261,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
