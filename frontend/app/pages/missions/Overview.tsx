@@ -64,7 +64,7 @@ function filterData(data: MissionData[], search: string) {
         return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
-    }),
+    })
   );
 }
 
@@ -74,7 +74,7 @@ function sortData(
     sortBy: keyof MissionData | null;
     reversed: boolean;
     search: string;
-  },
+  }
 ) {
   const { sortBy } = payload;
 
@@ -113,14 +113,15 @@ function sortData(
 
       return String(a[sortBy]).localeCompare(String(b[sortBy]));
     }),
-    payload.search,
+    payload.search
   );
 }
 
 export function Overview() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [sortedData, setSortedData] = useState<MissionData[]>([]);
+  const [fetchedData, setFetchedData] = useState<MissionData[]>([]);
+  const [renderedData, setRenderedData] = useState<MissionData[]>([]);
   const [sortBy, setSortBy] = useState<keyof MissionData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -133,7 +134,10 @@ export function Overview() {
         if (data.length <= 0) {
           throw new Error("Data is empty");
         }
-        setSortedData(data);
+
+        setFetchedData(data);
+        setRenderedData(data);
+        
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message); // Display Error information
@@ -151,29 +155,31 @@ export function Overview() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
+
+
   const setSorting = (field: keyof MissionData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(sortedData, { sortBy: field, reversed, search }));
+    setRenderedData(sortData(fetchedData, { sortBy: field, reversed, search }));
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
     setSearch(value);
-    setSortedData(
-      sortData(sortedData, {
+    setRenderedData(
+      sortData(fetchedData, {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
-      }),
+      })
     );
   };
 
-  const rows = sortedData.map((row) => (
+  const rows = renderedData.map((row) => (
     <Table.Tr
       key={row.name}
-      onClick={() => navigate('/details?id=' + row.missionId)}
+      onClick={() => navigate("/details?id=" + row.missionId)}
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
@@ -188,7 +194,7 @@ export function Overview() {
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
       <Table.Td
-        onClick={(e) => e.stopPropagation()} // stops opening openModal
+        onClick={(e) => e.stopPropagation()}
       >
         <Menu styles={{ dropdown: { border: "1px solid #ccc" } }}>
           <Menu.Target>
@@ -208,19 +214,19 @@ export function Overview() {
               onAddTag={(newTag) => {
                 // update tags in frontend. TODO: Implement API call to update tags in backend
                 row.tags.push(newTag);
-                setSortedData([...sortedData]);
+                setRenderedData([...renderedData]);
               }}
               onRemoveTag={(tagName) => {
                 // update tags in frontend. TODO: Implement API call to update tags in backend
                 row.tags = row.tags.filter((tag) => tag.name !== tagName);
-                setSortedData([...sortedData]);
+                setRenderedData([...renderedData]);
               }}
               onChangeTagColor={(tagName, newColor) => {
                 // update tags in frontend. TODO: Implement API call to update tags in backend
                 const tag = row.tags.find((tag) => tag.name === tagName);
                 if (tag) {
                   tag.color = newColor;
-                  setSortedData([...sortedData]);
+                  setRenderedData([...renderedData]);
                 }
               }}
             />
@@ -279,7 +285,7 @@ export function Overview() {
             rows
           ) : (
             <Table.Tr>
-              <Table.Td colSpan={Object.keys(sortedData[0]).length}>
+              <Table.Td colSpan={columns.length}>
                 <Text fw={500} ta="center">
                   Nothing found
                 </Text>
