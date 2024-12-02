@@ -1,13 +1,13 @@
 # REST-API
 
 ## where is the code located
-The request functions are located in the missionlister/restapi/views.py. The @api_view decorator describes, which request the function implements.
+The request functions are located in the backend/restapi/views.py. The @api_view decorator describes, which request the function implements.
 
-To test the API, one can use the django webserver. The missionlister/restapi/urls.py file defines the URL needed to visit, in order to test the function.
+To test the API, one can use the django webserver. The backend/restapi/urls.py file defines the URL needed to visit, in order to test the function.
 
 ## how to test using the webserver
 ### starting the webserver
-- cd into the missionlister dir
+- cd into the backend dir
 - run `python manage.py runserver`
 
 ### using the webserver

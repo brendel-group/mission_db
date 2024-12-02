@@ -76,6 +76,37 @@ export const deleteMission = async (id: number): Promise<void> => {
     }
 };
 
+//Debug functions because RestAPI and fetching is incomplete
+export const fetchAndTransformMission = async (
+    id: number
+  ): Promise<MissionData> => {
+    if (USE_RANDOM_DATA) {
+      return mission_table_data[id % mission_table_data.length];
+    } // Return only the RandomData
+  
+    try {
+      const mission: BackendMissionData = await getMission(id); // Fetch the mission using the REST API
+  
+      const exampleData: MissionData = mission_table_data[id % mission_table_data.length];
+  
+      const transformedMission: MissionData = {
+          missionId: mission.id,
+          name: mission.name,
+          location: mission.location,
+          totalDuration: exampleData?.totalDuration || "",
+          totalSize: exampleData?.totalSize || "",
+          robot: exampleData?.robot || "",
+          remarks: mission.other || "",
+          tags: exampleData?.tags || [],
+        };
+  
+      return transformedMission;
+    } catch (error) {
+      console.error("Failed to fetch and transform mission:", error);
+      throw error; // Re-throw the error to handle it upstream if needed
+    }
+  };
+
 export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
     if (USE_RANDOM_DATA) { return mission_table_data } // Return only the RandomData
     try {

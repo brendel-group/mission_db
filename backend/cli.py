@@ -6,9 +6,7 @@ import logging
 from datetime import datetime
 
 # Set up Django env
-os.environ.setdefault(
-    "DJANGO_SETTINGS_MODULE", "missionlister.settings"
-)  # Adjust as needed
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")  # Adjust as needed
 django.setup()
 
 # Importing Models, adjust as needed
