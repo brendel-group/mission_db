@@ -1,8 +1,11 @@
 from django.test import TestCase
 from datetime import date, datetime
 from restapi.models import Mission
+from restapi.serializer import MissionSerializer
 import cli
 import logging
+from io import StringIO
+import sys
 
 
 class BasicCLITests(TestCase):
@@ -134,4 +137,53 @@ class AddMissionTests(TestCase):
             Mission.objects.filter(
                 name="TestAddMission", date="2024-12-02", other="other"
             ).exists()
+        )
+
+
+class CapturedOutputTest(TestCase):
+    def setUp(self):
+        self.mission = Mission.objects.create(name="TestRemove", date=date.today())
+        self.original_stdout = sys.stdout
+        self.captured_output = StringIO()
+        sys.stdout = self.captured_output
+
+    def tearDown(self):
+        self.mission.delete()
+        sys.stdout = self.original_stdout
+
+    def test_remove_misison(self):
+        cli.remove_mission(self.mission.id)
+        sys.stdout.flush()
+        self.assertFalse(Mission.objects.filter(id=self.mission.id).exists())
+        self.assertEqual(
+            self.captured_output.getvalue().strip(),
+            f"Mission with ID {self.mission.id} has been removed.",
+        )
+
+    def test_remove_mission_failed(self):
+        id_no_mission = 1
+        while Mission.objects.filter(id=id_no_mission).exists():
+            id_no_mission += 1
+        cli.remove_mission(id_no_mission)
+        sys.stdout.flush()
+        self.assertTrue(Mission.objects.filter(id=self.mission.id).exists())
+        self.assertEqual(
+            self.captured_output.getvalue().strip(),
+            f"No mission found with ID {id_no_mission}.",
+        )
+
+    def test_print_table(self):
+        missions = [
+            Mission.objects.create(name="Test", date="2024-12-02") for i in range(3)
+        ]
+        serializer = MissionSerializer(missions, many=True)
+        cli.print_table(serializer.data)
+        sys.stdout.flush()
+        self.assertEqual(
+            self.captured_output.getvalue().strip(),
+            "id │ name │ date       │ location │ other\n"
+            + "───┼──────┼────────────┼──────────┼──────\n"
+            + f"{missions[0].id} │ Test │ 2024-12-02 │ None     │ None \n"
+            + f"{missions[1].id} │ Test │ 2024-12-02 │ None     │ None \n"
+            + f"{missions[2].id} │ Test │ 2024-12-02 │ None     │ None",
         )
