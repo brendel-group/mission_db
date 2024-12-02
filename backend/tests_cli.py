@@ -1,7 +1,7 @@
 from django.test import TestCase
 from datetime import date, datetime
-from restapi.models import Mission
-from restapi.serializer import MissionSerializer
+from restapi.models import Mission, Tag
+from restapi.serializer import MissionSerializer, TagSerializer
 import cli
 import logging
 from io import StringIO
@@ -172,7 +172,7 @@ class CapturedOutputTest(TestCase):
             f"No mission found with ID {id_no_mission}.",
         )
 
-    def test_print_table(self):
+    def test_print_mission_table(self):
         missions = [
             Mission.objects.create(name="Test", date="2024-12-02") for i in range(3)
         ]
@@ -186,4 +186,18 @@ class CapturedOutputTest(TestCase):
             + f"{missions[0].id} │ Test │ 2024-12-02 │ None     │ None \n"
             + f"{missions[1].id} │ Test │ 2024-12-02 │ None     │ None \n"
             + f"{missions[2].id} │ Test │ 2024-12-02 │ None     │ None",
+        )
+
+    def test_print_tag_table(self):
+        tags = [Tag.objects.create(name=f"Test{i}") for i in range(3)]
+        serializer = TagSerializer(tags, many=True)
+        cli.print_table(serializer.data)
+        sys.stdout.flush()
+        self.assertEqual(
+            self.captured_output.getvalue().strip(),
+            "id │ name  │ color  \n"
+            + "───┼───────┼────────\n"
+            + f"{tags[0].id}  │ {tags[0].name} │ #FFFFFF\n"
+            + f"{tags[1].id}  │ {tags[1].name} │ #FFFFFF\n"
+            + f"{tags[2].id}  │ {tags[2].name} │ #FFFFFF",
         )
