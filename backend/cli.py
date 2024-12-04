@@ -191,13 +191,23 @@ def add_tag(name, color=None):
         logging.error(f"Error adding Tag: {e}")
 
 
-def remove_tag(name):
+def remove_tag(id=None, name=None):
+    if not (id or name):
+        logging.error("No id or name given")
+        return
+
     try:
-        tag = Tag.objects.get(name=name)
+        if id:
+            tag = Tag.objects.get(id=id)
+        else:
+            tag = Tag.objects.get(name=name)
         tag.delete()
-        logging.info(f"Tag '{name}' has been removed.")
+        logging.info(f"Tag '{tag.name}' has been removed.")
     except Tag.DoesNotExist:
-        logging.error(f"No Tag found with name '{name}'.")
+        if id:
+            logging.error(f"No Tag found with id '{id}'.")
+        else:
+            logging.error(f"No Tag found with name '{name}'.")
 
 
 def list_tags():
@@ -238,7 +248,7 @@ def tag_command(tag_parser, args):
         case "add":
             add_tag(args.name, args.color)
         case "remove":
-            remove_tag(args.name)
+            remove_tag(args.id, args.name)
         case "list":
             list_tags()
         case "change":
@@ -298,7 +308,8 @@ def tag_arg_parser(subparser):
 
     # Remove command
     remove_parser = tag_subparser.add_parser("remove", help="Remove Tag")
-    remove_parser.add_argument("--name", required=True, help="name of Tag to remove")
+    remove_parser.add_argument("--id", required=False, help="id of Tag to remove")
+    remove_parser.add_argument("--name", required=False, help="name of Tag to remove")
 
     # remove_parser.add_argument("--id", required=True, help="ID")
 
