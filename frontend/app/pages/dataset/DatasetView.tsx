@@ -1,5 +1,5 @@
-import { Container, Text } from "@mantine/core";
-import { rem } from "@mantine/core";
+import { Text } from "@mantine/core";
+import AbstractPage from "../AbstractPage";
 
 // Interface describing expected properties of DatasetView
 interface DatasetViewProps {
@@ -10,19 +10,7 @@ interface DatasetViewProps {
 
 export function DatasetView({ file, duration, size }: DatasetViewProps) {
   return (
-    <Container
-      my="md"
-      style={{
-        maxWidth: "100%", // Aligns it to the left
-        padding: "0 1rem", // Adds padding to the container
-      }}
-    >
-      <Text
-        size={rem(30)}
-        style={{ marginBottom: "1rem" }}
-      >
-        Dataset View
-      </Text>
+    <AbstractPage headline="Dataset View">
       {file !== null ? (
         <div>
           <Text size="lg">File: {file}</Text>
@@ -30,8 +18,8 @@ export function DatasetView({ file, duration, size }: DatasetViewProps) {
           <Text size="lg">Size: {size} MB</Text>
         </div>
       ) : (
-        <Text>No details available</Text>
+        <Text>No data available</Text>
       )}
-    </Container>
+    </AbstractPage>
   );
 }

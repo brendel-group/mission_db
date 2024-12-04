@@ -1,7 +1,6 @@
 import { MetaFunction, useSearchParams } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { CreateAppShell } from "~/layout/AppShell";
 import { DatasetView } from "~/pages/dataset/DatasetView";
-import { fetchAndTransformMission } from "~/utilities/fetchapi";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Dataset" }];
@@ -15,11 +14,17 @@ function Dataset() {
 
   if (!fileName || !duration || !size) return <h1>Invalid URL</h1>;
 
-  return <DatasetView file={fileName} duration={duration} size={size}></DatasetView>;
+  return (
+    <DatasetView file={fileName} duration={duration} size={size}></DatasetView>
+  );
 }
 
 const App = () => {
-  return <Dataset />;
+  return (
+    <CreateAppShell>
+      <Dataset />
+    </CreateAppShell>
+  );
 };
 
 export default App;

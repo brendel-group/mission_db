@@ -1,7 +1,8 @@
 import { Skeleton } from "@mantine/core";
 import { MetaFunction, useSearchParams } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import DetailView from "~/pages/detail/DetailView";
+import { CreateAppShell } from "~/layout/AppShell";
+import DetailsView from "~/pages/details/DetailsView";
 import { fetchAndTransformMission } from "~/utilities/fetchapi";
 
 export const meta: MetaFunction = () => {
@@ -45,11 +46,15 @@ function Detail() {
   if (error) return <p>Error: {error}</p>;
   if (!missionData) return <p>No data available</p>;
 
-  return <DetailView missionData={missionData}></DetailView>;
+  return <DetailsView missionData={missionData}></DetailsView>;
 }
 
 const App = () => {
-  return <Detail />;
+  return (
+    <CreateAppShell>
+      <Detail />
+    </CreateAppShell>
+  );
 };
 
 export default App;
