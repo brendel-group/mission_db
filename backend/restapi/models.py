@@ -23,6 +23,9 @@ class Tag(models.Model):
     name = models.CharField(max_length=42, unique=True)
     color = ColorField(format="hex")
 
+    def __str__(self):
+        return f"id={self.id}, name='{self.name}', color={self.color}"
+
 
 class Mission_tags(models.Model):
     """The relationship table to connect Misson and Tag"""
