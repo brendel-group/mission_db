@@ -179,6 +179,12 @@ def remove_mission(mission_id):
 
 
 def add_tag(name, color=None):
+    """Add a tag to the database
+
+    Args:
+        name: Tag name
+        color (optional): Tag color
+    """
     if color:
         tag = Tag(name=name, color=color)
     else:
@@ -192,6 +198,13 @@ def add_tag(name, color=None):
 
 
 def remove_tag(id=None, name=None):
+    """Remove a tag either by id or name. If both are given the id will be used and the name is ignored
+    logs an error if neither are given
+
+    Args:
+        id (optional): id of tag to remove
+        name (optional): name of tag to remove
+    """
     if not (id or name):
         logging.error("No id or name given")
         return
@@ -211,12 +224,25 @@ def remove_tag(id=None, name=None):
 
 
 def list_tags():
+    """
+    list all Tags in a table
+    """
     tags = Tag.objects.all()
     serializer = TagSerializer(tags, many=True)
     print_table(serializer.data)
 
 
 def change_tag(id=None, name=None, color=None):
+    """
+    Change a Tag either by id or name. \\
+    If the id is given then always the Tag with that id will be changed.\\
+    If only the name is given the Tag will be identified by the name.
+
+    Args:
+        id (optional): the id of the Tag
+        name (optional): the name or the new name of the Tag
+        color (optional): the new color of the Tag
+    """
     if not (id or name):
         logging.error("At least one of --id or --name must be provided")
         return
