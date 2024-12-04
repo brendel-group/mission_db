@@ -82,7 +82,7 @@ class ErrorCatchingTests(TestCase):
             self.assertEqual(
                 log.output,
                 [
-                    "ERROR:root:Error adding mission: ['“2024-13-02” value has the correct format (YYYY-MM-DD) but it is an invalid date.']"
+                    "ERROR:root:Error adding mission: {'date': ['“2024-13-02” value has the correct format (YYYY-MM-DD) but it is an invalid date.']}"
                 ],
             )
 
