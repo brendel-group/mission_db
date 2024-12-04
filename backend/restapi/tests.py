@@ -5,8 +5,7 @@ from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from .models import Tag, Mission, Mission_tags
-
-# Create your tests here.
+import logging
 
 
 class TagTestCase(TestCase):
@@ -50,6 +49,16 @@ class RestAPITagTestCase(APITestCase):
                 n += 1
             Tag.objects.create(name="test" + str(n))
             self.test_names.append("test" + str(n))
+
+        # raise logging level to ERROR
+        logger = logging.getLogger("django.request")
+        self.previous_logging_level = logger.getEffectiveLevel()
+        logger.setLevel(logging.ERROR)
+
+    def tearDown(self):
+        # reset logigng level
+        logger = logging.getLogger("django.request")
+        logger.setLevel(self.previous_logging_level)
 
     def test_get_tags(self):
         response = self.client.get(reverse("get_tags"), format="json")
@@ -273,6 +282,16 @@ class NotFoundErrors(APITestCase):
     def setUp(self):
         self.mission = Mission.objects.create(name="TestMission", date=timezone.now())
         self.tag = Tag.objects.create(name="test tag")
+
+        # raise logging level to ERROR
+        logger = logging.getLogger("django.request")
+        self.previous_logging_level = logger.getEffectiveLevel()
+        logger.setLevel(logging.ERROR)
+
+    def tearDown(self):
+        # reset logigng level
+        logger = logging.getLogger("django.request")
+        logger.setLevel(self.previous_logging_level)
 
     def test_tag_detail_not_found(self):
         response = self.client.get(reverse("tag_detail", kwargs={"name": "notfound"}))

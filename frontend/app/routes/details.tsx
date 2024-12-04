@@ -1,3 +1,4 @@
+import { Skeleton } from "@mantine/core";
 import { MetaFunction, useSearchParams } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { CreateAppShell } from "~/layout/AppShell";
@@ -41,7 +42,7 @@ function Detail() {
     fetchMission();
   }, [id]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
   if (!missionData) return <p>No data available</p>;
 
