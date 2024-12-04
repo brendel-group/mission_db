@@ -303,3 +303,113 @@ class MainFunctionTests(TestCase):
                 log.output,
                 ["INFO:root:Mission 'test' from folder '2024.12.02_test' added."],
             )
+
+    def test_add_tag_command(self):
+        args = ["tag", "add", "--name", "CLI_Tag", "--color", "#123123"]
+        with self.assertLogs(level="INFO") as log:
+            cli.main(args)
+            self.assertTrue(
+                Tag.objects.filter(name="CLI_Tag", color="#123123").exists()
+            )
+            self.assertEqual(log.output, ["INFO:root:'CLI_Tag' Tag added."])
+
+    def test_remove_tag_command(self):
+        tag = Tag.objects.create(name="RemoveMe", color="#ABCDEF")
+        args = ["tag", "remove", "--id", str(tag.id)]
+        with self.assertLogs(level="INFO") as log:
+            cli.main(args)
+            self.assertFalse(Tag.objects.filter(id=tag.id).exists())
+            self.assertEqual(log.output, ["INFO:root:Tag 'RemoveMe' has been removed."])
+
+    def test_list_tags_command(self):
+        Tag.objects.create(name="ListTag1", color="#CCCCCC")
+        Tag.objects.create(name="ListTag2", color="#333333")
+        args = ["tag", "list"]
+        cli.main(args)
+        sys.stdout.flush()
+        self.assertIn("ListTag1", self.captured_output.getvalue())
+        self.assertIn("ListTag2", self.captured_output.getvalue())
+
+    def test_change_tag_command(self):
+        tag = Tag.objects.create(name="ChangeThis", color="#AAAAAA")
+        args = [
+            "tag",
+            "change",
+            "--id",
+            str(tag.id),
+            "--name",
+            "Changed",
+            "--color",
+            "#FFFFFF",
+        ]
+        with self.assertLogs(level="INFO") as log:
+            cli.main(args)
+            updated_tag = Tag.objects.get(id=tag.id)
+            self.assertEqual(updated_tag.name, "Changed")
+            self.assertEqual(updated_tag.color, "#FFFFFF")
+            self.assertEqual(log.output, [f"INFO:root:Tag changed to '{updated_tag}'"])
+
+
+class TagFunctionLogTests(TestCase):
+    def test_add_tag_error_on_duplicate(self):
+        Tag.objects.create(name="UniqueTag", color="#123456")
+        with self.assertLogs(level="ERROR") as log:
+            # Adding a tag with the same name should trigger a validation error
+            cli.add_tag("UniqueTag", "#654321")
+            self.assertIn("ERROR:root:Error adding Tag:", log.output[0])
+
+    def test_remove_tag_not_found_logging(self):
+        with self.assertLogs(level="ERROR") as log:
+            cli.remove_tag(name="NonExistentTag")
+            self.assertEqual(
+                log.output, ["ERROR:root:No Tag found with name 'NonExistentTag'."]
+            )
+
+    def test_change_tag_no_change_logging(self):
+        tag = Tag.objects.create(name="NoChange", color="#333333")
+        with self.assertLogs(level="INFO") as log:
+            cli.change_tag(id=tag.id)  # No change provided
+            self.assertEqual(log.output, ["INFO:root:Nothing to change"])
+
+
+class TagBasicTests(TestCase):
+    def setUp(self):
+        self.logger = logging.getLogger()
+        self.logger.disabled = True
+
+        self.original_stdout = sys.stdout
+        self.captured_output = StringIO()
+        sys.stdout = self.captured_output
+
+        # Setting up environment, creating common tags
+        self.tag = Tag.objects.create(name="TestTag", color="#FFFFFF")
+
+    def tearDown(self):
+        self.logger.disabled = False
+
+        sys.stdout.flush()
+        sys.stdout = self.original_stdout
+        Tag.objects.all().delete()  # Clean up after tests
+
+    def test_add_tag(self):
+        cli.add_tag("NewTagCLI", "#123123")
+        self.assertTrue(Tag.objects.filter(name="NewTagCLI", color="#123123").exists())
+
+    def test_remove_tag_by_name(self):
+        cli.remove_tag(name="TestTag")
+        self.assertFalse(Tag.objects.filter(name="TestTag").exists())
+
+    def test_remove_tag_by_id(self):
+        cli.remove_tag(id=self.tag.id)
+        self.assertFalse(Tag.objects.filter(id=self.tag.id).exists())
+
+    def test_list_tags(self):
+        cli.list_tags()
+        sys.stdout.flush()
+        self.assertIn("TestTag", self.captured_output.getvalue())
+
+    def test_change_tag_command(self):
+        cli.change_tag(id=self.tag.id, name="UpdatedTag", color="#000000")
+        updated_tag = Tag.objects.get(id=self.tag.id)
+        self.assertEqual(updated_tag.name, "UpdatedTag")
+        self.assertEqual(updated_tag.color, "#000000")
