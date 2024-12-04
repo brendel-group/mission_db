@@ -99,7 +99,6 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               shadow="md"
               styles={{
                 dropdown: {
-                  border: "1px solid #ccc",
                   padding: 4,
                 },
               }}

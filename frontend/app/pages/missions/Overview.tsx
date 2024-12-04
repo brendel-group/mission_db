@@ -65,7 +65,7 @@ function filterData(data: MissionData[], search: string) {
         return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
-    })
+    }),
   );
 }
 
@@ -75,7 +75,7 @@ function sortData(
     sortBy: keyof MissionData | null;
     reversed: boolean;
     search: string;
-  }
+  },
 ) {
   const { sortBy } = payload;
 
@@ -114,7 +114,7 @@ function sortData(
 
       return String(a[sortBy]).localeCompare(String(b[sortBy]));
     }),
-    payload.search
+    payload.search,
   );
 }
 
@@ -138,7 +138,6 @@ export function Overview() {
 
         setFetchedData(data);
         setRenderedData(data);
-        
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message); // Display Error information
@@ -157,8 +156,6 @@ export function Overview() {
 
   if (error) return <p>Error: {error}</p>;
 
-
-
   const setSorting = (field: keyof MissionData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
@@ -174,7 +171,7 @@ export function Overview() {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
-      })
+      }),
     );
   };
 
@@ -195,10 +192,8 @@ export function Overview() {
       <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
-      <Table.Td
-        onClick={(e) => e.stopPropagation()}
-      >
-        <Menu styles={{ dropdown: { border: "1px solid #ccc" } }}>
+      <Table.Td onClick={(e) => e.stopPropagation()}>
+        <Menu>
           <Menu.Target>
             <div>
               <RenderTagsOverview tags={row.tags} />
