@@ -206,6 +206,33 @@ def list_tags():
     print_table(serializer.data)
 
 
+def change_tag(id=None, name=None, color=None):
+    if not (id or name):
+        logging.error("At least one of --id or --name must be provided")
+        return
+    if not (name or color):
+        logging.info("Nothing to change")
+        return
+    try:
+        if id:
+            tag = Tag.objects.get(id=id)
+        elif name:
+            tag = Tag.objects.get(name=name)
+        else:
+            logging.error("At least one of --id or --name must be provided")
+            return
+
+        if name:
+            tag.name = name
+        if color:
+            tag.color = color
+        tag.full_clean()
+        tag.save()
+        logging.info(f"Tag changed to '{tag}'")
+    except Exception as e:
+        logging.error(f"Error changing Tag: {e}")
+
+
 def tag_command(tag_parser, args):
     match args.command:
         case "add":
@@ -214,6 +241,8 @@ def tag_command(tag_parser, args):
             remove_tag(args.name)
         case "list":
             list_tags()
+        case "change":
+            change_tag(args.id, args.name, args.color)
         case _:
             tag_parser.print_help()
 
@@ -275,6 +304,12 @@ def tag_arg_parser(subparser):
 
     # List command
     _ = tag_subparser.add_parser("list", help="List all Tags")
+
+    # change command
+    change_parser = tag_subparser.add_parser("change", help="Change Tag by name or id")
+    change_parser.add_argument("--id", required=False, help="Tag id")
+    change_parser.add_argument("--name", required=False, help="Tag name")
+    change_parser.add_argument("--color", required=False, help="Tag color")
 
     return tag_parser
 
