@@ -10,6 +10,7 @@ import {
   rem,
   keys,
   Menu,
+  Skeleton,
 } from "@mantine/core";
 import {
   IconSelector,
@@ -152,7 +153,8 @@ export function Overview() {
     fetchMissions();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Skeleton style={{ height: "30vh" }} />;
+
   if (error) return <p>Error: {error}</p>;
 
 
