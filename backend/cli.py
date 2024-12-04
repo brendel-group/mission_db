@@ -179,6 +179,18 @@ def remove_mission(mission_id):
         print(f"No mission found with ID {mission_id}.")
 
 
+def add_tag(name, color=None):
+    pass
+
+
+def remove_tag(name):
+    pass
+
+
+def list_tags():
+    pass
+
+
 def mission_arg_parser(subparser):
     """
     Parser setup for mission subcommand
@@ -219,6 +231,27 @@ def folder_arg_parser(subparser):
     folder_parser.add_argument("--other", required=False, help="other mission details")
 
 
+def tag_arg_parser(subparser):
+    tag_parser = subparser.add_parser("tag", help="Modify Tags")
+    tag_subparser = tag_parser.add_subparsers(dest="command")
+
+    # Add command
+    add_parser = tag_subparser.add_parser("add", help="Add mission")
+    add_parser.add_argument("--name", required=True, help="Tag name")
+    add_parser.add_argument("--color", required=False, help="Tag color")
+
+    # Remove command
+    remove_parser = tag_subparser.add_parser("remove", help="Remove Tag")
+    remove_parser.add_argument("--name", required=True, help="name of Tag to remove")
+
+    # remove_parser.add_argument("--id", required=True, help="ID")
+
+    # List command
+    _ = tag_subparser.add_parser("list", help="List all Tags")
+
+    return tag_parser
+
+
 def main(args):
     # Arg parser
     parser = argparse.ArgumentParser(description="Mission CLI")
@@ -227,6 +260,8 @@ def main(args):
     mission_parser = mission_arg_parser(subparser)
 
     folder_arg_parser(subparser)
+
+    tag_parser = tag_arg_parser(subparser)  # noqa
 
     args = parser.parse_args(args)
 
