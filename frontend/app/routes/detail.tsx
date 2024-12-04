@@ -8,7 +8,7 @@ export const meta: MetaFunction = () => {
   return [{ title: "Details" }];
 };
 
-function Details() {
+function Detail() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
 
@@ -18,10 +18,14 @@ function Details() {
   const [error, setError] = useState<string | null>(null);
   const [missionData, setMissionData] = useState<any | null>(null);
 
+  const numberId = Number(id);
+
+  if (isNaN(numberId)) return <h1>Invalid URL</h1>;
+
   useEffect(() => {
     const fetchMission = async () => {
       try {
-        const data = await fetchAndTransformMission(Number(id));
+        const data = await fetchAndTransformMission(numberId);
         setMissionData(data);
       } catch (e: any) {
         if (e instanceof Error) {
@@ -45,7 +49,7 @@ function Details() {
 }
 
 const App = () => {
-  return <Details />;
+  return <Detail />;
 };
 
 export default App;

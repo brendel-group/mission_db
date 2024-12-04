@@ -138,7 +138,6 @@ export function Overview() {
 
         setFetchedData(data);
         setRenderedData(data);
-        
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message); // Display Error information
@@ -156,8 +155,6 @@ export function Overview() {
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
 
   if (error) return <p>Error: {error}</p>;
-
-
 
   const setSorting = (field: keyof MissionData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -181,7 +178,7 @@ export function Overview() {
   const rows = renderedData.map((row) => (
     <Table.Tr
       key={row.name}
-      onClick={() => navigate("/details?id=" + row.missionId)}
+      onClick={() => navigate("/detail?id=" + row.missionId)}
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
@@ -195,9 +192,7 @@ export function Overview() {
       <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
-      <Table.Td
-        onClick={(e) => e.stopPropagation()}
-      >
+      <Table.Td onClick={(e) => e.stopPropagation()}>
         <Menu styles={{ dropdown: { border: "1px solid #ccc" } }}>
           <Menu.Target>
             <div>
