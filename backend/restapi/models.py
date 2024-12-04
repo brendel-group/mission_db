@@ -21,7 +21,7 @@ class Tag(models.Model):
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=42, unique=True)
-    color = ColorField()
+    color = ColorField(format="hex")
 
 
 class Mission_tags(models.Model):

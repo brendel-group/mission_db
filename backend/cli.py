@@ -11,8 +11,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")  # Adjust as
 django.setup()
 
 # Importing Models, adjust as needed
-from restapi.models import Mission  # noqa
-from restapi.serializer import MissionSerializer  # noqa
+from restapi.models import Mission, Tag  # noqa
+from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -155,9 +155,8 @@ def add_mission(name, mission_date, location=None, other=None):
     other: optional string containing other extra information 
     """
     try:
-        mission = Mission.objects.create(
-            name=name, date=mission_date, location=location, other=other
-        )
+        mission = Mission(name=name, date=mission_date, location=location, other=other)
+        mission.full_clean()  # validation
         mission.save()
         logging.info(f"'{name}' added.")
     except Exception as e:
@@ -180,15 +179,43 @@ def remove_mission(mission_id):
 
 
 def add_tag(name, color=None):
-    pass
+    if color:
+        tag = Tag(name=name, color=color)
+    else:
+        tag = Tag(name=name)
+    try:
+        tag.full_clean()  # validation
+        tag.save()
+        logging.info(f"'{name}' Tag added.")
+    except Exception as e:
+        logging.error(f"Error adding Tag: {e}")
 
 
 def remove_tag(name):
-    pass
+    try:
+        tag = Tag.objects.get(name=name)
+        tag.delete()
+        logging.info(f"Tag '{name}' has been removed.")
+    except Tag.DoesNotExist:
+        logging.error(f"No Tag found with name '{name}'.")
 
 
 def list_tags():
-    pass
+    tags = Tag.objects.all()
+    serializer = TagSerializer(tags, many=True)
+    print_table(serializer.data)
+
+
+def tag_command(tag_parser, args):
+    match args.command:
+        case "add":
+            add_tag(args.name, args.color)
+        case "remove":
+            remove_tag(args.name)
+        case "list":
+            list_tags()
+        case _:
+            tag_parser.print_help()
 
 
 def mission_arg_parser(subparser):
@@ -261,7 +288,7 @@ def main(args):
 
     folder_arg_parser(subparser)
 
-    tag_parser = tag_arg_parser(subparser)  # noqa
+    tag_parser = tag_arg_parser(subparser)
 
     args = parser.parse_args(args)
 
@@ -291,6 +318,8 @@ def main(args):
                     mission_parser.print_help()
         case "addfolder":
             add_mission_from_folder(args.path, args.location, args.other)
+        case "tag":
+            tag_command(tag_parser, args)
         case _:
             parser.print_help()
 
