@@ -10,6 +10,7 @@ from .views import (
     TagByMissionAPI,
     add_tag_to_mission,
     delete_mission_tag,
+    FileByMissionAPI,
 )
 
 urlpatterns = [
@@ -29,6 +30,9 @@ urlpatterns = [
         MissionByTagAPI.as_view(),
         name="get_missions_by_tag",
     ),
+    path("missions/<int:mission_id>/files/",
+        FileByMissionAPI.as_view(),
+        name="get_files_by_mission_id"),
     path("mission-tags/create/", add_tag_to_mission, name="add_tag_to_mission"),
     path(
         "mission-tags/delete/<int:mission_id>/<str:tag_name>",
