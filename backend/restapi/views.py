@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 from .models import Tag, Mission, Mission_tags, File, Mission_files
-from .serializer import TagSerializer, MissionSerializer, MissionTagSerializer
+from .serializer import TagSerializer, MissionSerializer, MissionTagSerializer, FileSerializer, MissionFileSerializer
 
 
 @api_view(["GET"])
@@ -44,6 +44,18 @@ def mission_detail(request, pk):
     elif request.method == "DELETE":
         mission.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class MissionFilesView(generics.ListAPIView):
+    serializer_class = FileSerializer
+    name = "Get Files by Mission"
+
+    def get_queryset(self):
+        try:
+            mission = Mission.objects.get(id=self.kwargs["mission_id"])
+        except Mission.DoesNotExist:
+            raise NotFound(f"Mission with ID " + mission + " not found")
+        file_ids = Mission_files.objects.filter(mission=mission).values_list("file_id", flat=True)
+        return File.objects.filter(id__in=file_ids)
 
 
 @api_view(["GET"])
