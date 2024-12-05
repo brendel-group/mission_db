@@ -79,8 +79,8 @@ Arguments:
 - `--id` remove tag by id
 - `--name` remove tag by name
 
-either `--id` or `--name` must be given. If both are given the id will be used and the 
-name is ignored. Doesn't aks for verification.
+Either `--id` or `--name` must be given. If both are given the id will be used and the name is ignored. \
+Doesn't ask for verification.
 
 Example
 ```bash
@@ -89,13 +89,14 @@ Example
 
 ### `cli.py tag list`
 list all tags
+
 Example:
 ```bash
 ./cli.py tag list
 ```
 
 ### `cli.py tag change`
-make changes to a tag.
+make changes to a tag
 
 Arguments:
 - `--id` select tag by id
@@ -103,7 +104,8 @@ Arguments:
 - `--color` new color of the tag
 
 Either `--id` or `--name` must be given. If both are given the id will be used to select the tag
-and the name will be the new name of the tag.
+and the name will be the new name of the tag.\
+All arguments are optional, so you can change the name without changing the color and vice versa.
 
 Example:
 ```bash
