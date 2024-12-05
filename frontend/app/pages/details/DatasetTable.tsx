@@ -1,24 +1,16 @@
 import { Table } from "@mantine/core";
 import { useState } from "react";
 import { DetailViewData } from "~/data";
-import { DatasetView } from "../dataset/DatasetView";
+import { useNavigate } from "@remix-run/react";
 
 export function ShowDatasets({ data }: { data: DetailViewData }) {
-  const [opened, setOpened] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-
-  const handleRowClick = (file: string, index: number) => {
-    setSelectedFile(file);
-    setSelectedIndex(index);
-    setOpened(true);
-  };
+  const navigate = useNavigate();
 
   // Creates rows of table
   const rows = data.files.map((file, index) => (
     <Table.Tr
       key={file}
-      onClick={() => handleRowClick(file, index)}
+      onClick={() => navigate('/dataset?fileName=' + file + "&duration=" + data.durations[index] + "&size=" + data.sizes[index])}
       // Change color on mouse hover
       style={{
         cursor: "pointer",
@@ -47,14 +39,6 @@ export function ShowDatasets({ data }: { data: DetailViewData }) {
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
-
-      <DatasetView
-        opened={opened}
-        onClose={() => setOpened(false)}
-        file={selectedFile}
-        duration={selectedIndex !== null ? data.durations[selectedIndex] : null}
-        size={selectedIndex !== null ? data.sizes[selectedIndex] : null}
-      />
     </>
   );
 }
