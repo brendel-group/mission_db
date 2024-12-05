@@ -65,7 +65,7 @@ function filterData(data: MissionData[], search: string) {
         return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
-    })
+    }),
   );
 }
 
@@ -75,7 +75,7 @@ function sortData(
     sortBy: keyof MissionData | null;
     reversed: boolean;
     search: string;
-  }
+  },
 ) {
   const { sortBy } = payload;
 
@@ -114,7 +114,7 @@ function sortData(
 
       return String(a[sortBy]).localeCompare(String(b[sortBy]));
     }),
-    payload.search
+    payload.search,
   );
 }
 
@@ -171,7 +171,7 @@ export function Overview() {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
-      })
+      }),
     );
   };
 
@@ -193,7 +193,7 @@ export function Overview() {
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
       <Table.Td onClick={(e) => e.stopPropagation()}>
-        <Menu styles={{ dropdown: { border: "1px solid #ccc" } }}>
+        <Menu>
           <Menu.Target>
             <div>
               <RenderTagsOverview tags={row.tags} />
