@@ -12,10 +12,12 @@ class MissionSerializer(serializers.ModelSerializer):
         model = Mission
         fields = "__all__"
 
+
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
         fields = "__all__"
+
 
 class MissionFileSerializer(serializers.ModelSerializer):
     mission_id = serializers.IntegerField(source="mission.id", initial=None)

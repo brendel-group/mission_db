@@ -335,6 +335,7 @@ class NotFoundErrors(APITestCase):
             response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
         )
 
+
 class MissionFilesTestCase(APITestCase):
     def setUp(self):
         # Create a mission
@@ -344,23 +345,29 @@ class MissionFilesTestCase(APITestCase):
             location="TestLocation",
             other="TestOther",
         )
-        
+
         # Create files
         self.file1 = File.objects.create(name="File1", path="path/to/file1")
         self.file2 = File.objects.create(name="File2", path="path/to/file2")
-        
+
         # Associate files with the mission
         Mission_files.objects.create(mission=self.mission, file=self.file1)
         Mission_files.objects.create(mission=self.mission, file=self.file2)
 
     def test_get_files_by_mission(self):
-        response = self.client.get(reverse("mission_files", kwargs={"mission_id": self.mission.id}))
+        response = self.client.get(
+            reverse("mission_files", kwargs={"mission_id": self.mission.id})
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)  # Expecting 2 files associated with the mission
+        self.assertEqual(
+            len(response.data), 2
+        )  # Expecting 2 files associated with the mission
         self.assertEqual(response.data[0]["name"], self.file1.name)
         self.assertEqual(response.data[1]["name"], self.file2.name)
 
     def test_get_files_by_nonexistent_mission(self):
-        response = self.client.get(reverse("mission_files", kwargs={"mission_id": 999}))  # Nonexistent ID
+        response = self.client.get(
+            reverse("mission_files", kwargs={"mission_id": 999})
+        )  # Nonexistent ID
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"detail": "Mission not found"})
