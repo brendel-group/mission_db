@@ -18,20 +18,17 @@ class Mission(models.Model):
 
 class File(models.Model):
     """The files table"""
-
     id = models.AutoField(primary_key=True)
-    file_path = models.CharField(max_length=65536)  # absolute path to the file
-    robot = models.CharField(max_length=65536, null=True, blank=True)  # can be optional
-    duration = models.BigIntegerField()  # unit: nanoseconds
-    size = models.BigIntegerField()  # unit: bytes
-
+    file_path = models.CharField(max_length=65536) # absolute path to the file
+    robot = models.CharField(max_length=65536, null=True, blank=True) # can be optional
+    duration = models.BigIntegerField() # unit: nanoseconds
+    size = models.BigIntegerField() # unit: bytes
 
 class Mission_files(models.Model):
     """The relationship table to connect Misson and File"""
-
     mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
     file = models.ForeignKey(File, on_delete=models.CASCADE)
-    type = models.CharField(max_length=65536)  # either 'train' or 'test'
+    type = models.CharField(max_length=65536) # either 'train' or 'test'
 
 
 class Tag(models.Model):
