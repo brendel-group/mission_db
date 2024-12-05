@@ -63,9 +63,9 @@ def create_tag(request):
     """
     Create new tag
     ### Parameters
-    request: POST Request containing tag name in json format
+    request: POST Request containing tag name and optionally a hex color in json format
     ### Returns
-    Response with data of created tag object containing id and name\
+    Response with data of created tag object containing id, name and color\
     Or HTTP_400_BAD_REQUEST Response
     """
     serializer = TagSerializer(data=request.data)
@@ -154,12 +154,13 @@ class TagByMissionAPI(generics.ListAPIView):
 def add_tag_to_mission(request):
     """
     Assign/add a tag to a misison
+    Will create a new tag when no tag with that name was found
     ### Parameters
     request: POST Request containing mission_id and tag_name
     ### Returns
     json with given mission_id and tag_name
     ### Response codes
-    HTTP_201_CREATED\\
+    HTTP_201_CREATED when a new tag was created\\
     HTTP_200_OK\\
     HTTP_400_BAD_REQUEST\\
     HTTP_404_NOT_FOUND

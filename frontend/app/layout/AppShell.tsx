@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { AppShell, Burger, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconRobot } from "@tabler/icons-react";
 import { Navbar } from "~/layout/NavBar/NavBar";
 
 interface BasicAppShellProps {
@@ -21,7 +20,7 @@ export function CreateAppShell({ children }: BasicAppShellProps) {
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <img
-            src="/polybotLogo.ico"
+            src="/favicon.ico"
             alt="Custom Icon"
             style={{ width: 30, height: 30 }}
           />

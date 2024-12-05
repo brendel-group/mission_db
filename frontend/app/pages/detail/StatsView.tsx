@@ -2,22 +2,22 @@ import { Text } from "@mantine/core";
 import { MissionData } from "~/data";
 
 interface ShowStatsViewProps {
-  selectedRow: MissionData | null;
+  missionData: MissionData | null;
 }
 
 export const ShowStatsView: React.FC<ShowStatsViewProps> = ({
-  selectedRow,
+  missionData,
 }) => {
-  if (!selectedRow) return null;
+  if (!missionData) return null;
 
   return (
     <div>
       <Text size="xl" mb="sm">
         Stats
       </Text>
-      <Text>Total Duration: {selectedRow.total_duration}</Text>
-      <Text>Total Size: {selectedRow.total_size} GB</Text>
-      <Text>Remarks: {selectedRow.remarks}</Text>
+      <Text>Total Duration: {missionData.totalDuration}</Text>
+      <Text>Total Size: {missionData.totalSize} GB</Text>
+      <Text>Remarks: {missionData.remarks}</Text>
     </div>
   );
 };

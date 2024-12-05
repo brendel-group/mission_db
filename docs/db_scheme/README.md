@@ -20,9 +20,10 @@ It has the columns `mission_id`, `file_id` and `type`.\
 `misson_id` and `file_id` are foreign keys and contain the primary keys of the entries in the other tables.\
 `type` is used to indicate wether the file is used as train or test data and should be a string.
 
-The third table is the `tags` table. It has the columns `id` and `name`.\
-`name` is a string and should be unique.\
-`id` is the primary key and is an integer with auto increment.
+The third table is the `tags` table. It has the columns `id`, `name` and `color`.\
+`name` is a string and is unique.\
+`id` is the primary key and is an integer with auto increment.\
+`color` is a Colorfield that stores the hex value of the colors. 
 
 Again we need a relationship table to connect the tags and the missions. This is the `mission_tags` table.
 It's only columns are `mission_id` and `tag_id` which are the foreign keys of the tables `missions` and `tags`.

@@ -1,14 +1,12 @@
 // Variable to switch between backend data and RandomData
-var useRandomData = true;
-// BASE_URL of the Rest API
-const BASE_URL = 'http://127.0.0.1:8000/restapi';
 
 import { MissionData, BackendMissionData } from "~/data";
 import { mission_table_data } from "../RandomData"
+import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from "~/config";
 
 // Function to fetch all missions
 export const getMissions = async (): Promise<BackendMissionData[]> => {
-    const response = await fetch(`${BASE_URL}/missions/`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/missions/`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -23,7 +21,7 @@ export const getMissions = async (): Promise<BackendMissionData[]> => {
 
 // Function to create a new mission
 export const createMission = async (mission: Omit<BackendMissionData, 'id'>): Promise<MissionData> => {
-    const response = await fetch(`${BASE_URL}/missions/create`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/missions/create`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -39,7 +37,7 @@ export const createMission = async (mission: Omit<BackendMissionData, 'id'>): Pr
 
 // Function to fetch a single mission by ID
 export const getMission = async (id: number): Promise<BackendMissionData> => {
-    const response = await fetch(`${BASE_URL}/missions/${id}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/missions/${id}`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -54,7 +52,7 @@ export const getMission = async (id: number): Promise<BackendMissionData> => {
 
 // Function to update an existing mission
 export const updateMission = async (mission: BackendMissionData): Promise<BackendMissionData> => {
-    const response = await fetch(`${BASE_URL}/missions/${mission.id}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/missions/${mission.id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -70,7 +68,7 @@ export const updateMission = async (mission: BackendMissionData): Promise<Backen
 
 // Function to delete a mission by ID
 export const deleteMission = async (id: number): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/missions/${id}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/missions/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -78,32 +76,63 @@ export const deleteMission = async (id: number): Promise<void> => {
     }
 };
 
-export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
-    if (useRandomData) { return mission_table_data } // Return only the RandomData
-    try {
-      const missions: BackendMissionData[] = await getMissions(); // Fetch the missions using the REST API
-    
-      // Map BackendMissionData missions to MissionData
-      let renderedMissions: MissionData[] = [];
-      for (let i = 0; i < missions.length; i++) {
-        const exampleData = mission_table_data.at(i % 5);
-        renderedMissions.push(
-            {
-            mission_id: missions[i].id,
-            name: missions[i].name,
-            location: missions[i].location,
-            total_duration: exampleData?.total_duration || "",
-            total_size: exampleData?.total_size || "",
-            robot: exampleData?.robot || "",
-            remarks: missions[i].other || "",
-            tags: exampleData?.tags || []
-            }
-        )
-      }
+//Debug functions because RestAPI and fetching is incomplete
+export const fetchAndTransformMission = async (
+    id: number
+  ): Promise<MissionData> => {
+    if (USE_RANDOM_DATA) {
+      return mission_table_data[id % mission_table_data.length];
+    } // Return only the RandomData
   
-      return renderedMissions;
+    try {
+      const mission: BackendMissionData = await getMission(id); // Fetch the mission using the REST API
+  
+      const exampleData: MissionData = mission_table_data[id % mission_table_data.length];
+  
+      const transformedMission: MissionData = {
+          missionId: mission.id,
+          name: mission.name,
+          location: mission.location,
+          totalDuration: exampleData?.totalDuration || "",
+          totalSize: exampleData?.totalSize || "",
+          robot: exampleData?.robot || "",
+          remarks: mission.other || "",
+          tags: exampleData?.tags || [],
+        };
+  
+      return transformedMission;
     } catch (error) {
-      console.error('Failed to fetch and transform missions:', error);
+      console.error("Failed to fetch and transform mission:", error);
       throw error; // Re-throw the error to handle it upstream if needed
     }
   };
+
+export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
+    if (USE_RANDOM_DATA) { return mission_table_data } // Return only the RandomData
+    try {
+        const missions: BackendMissionData[] = await getMissions(); // Fetch the missions using the REST API
+
+        // Map BackendMissionData missions to MissionData
+        let renderedMissions: MissionData[] = [];
+        for (let i = 0; i < missions.length; i++) {
+            const exampleData = mission_table_data.at(i % 5);
+            renderedMissions.push(
+                {
+                    missionId: missions[i].id,
+                    name: missions[i].name,
+                    location: missions[i].location,
+                    totalDuration: exampleData?.totalDuration || "",
+                    totalSize: exampleData?.totalSize || "",
+                    robot: exampleData?.robot || "",
+                    remarks: missions[i].other || "",
+                    tags: exampleData?.tags || []
+                }
+            )
+        }
+
+        return renderedMissions;
+    } catch (error) {
+        console.error('Failed to fetch and transform missions:', error);
+        throw error; // Re-throw the error to handle it upstream if needed
+    }
+};

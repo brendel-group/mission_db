@@ -5,12 +5,12 @@ export interface Tag {
 }
 
 export interface MissionData {
-  mission_id: number;
+  missionId: number;
 
   name: string;
   location: string;
-  total_duration: string;
-  total_size: string;
+  totalDuration: string;
+  totalSize: string;
   robot: string;
   remarks: string;
 

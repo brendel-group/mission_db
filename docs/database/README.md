@@ -15,7 +15,7 @@
     - now go to pgadmin4 and add the server with the usere data from the step before
 
 ## defining server details
-We're using postreSQL, for which we need to specify our database name/ip/password/etc in the missionlister/missionlister/settings.py file.
+We're using postreSQL, for which we need to specify our database name/ip/password/etc in the backend/backend/settings.py file.
 For obvious reasons, it wouldn't be useful to put ip and password in a GitHub repo, therefore we're using the django-environ package.
 
 In order to specify your database details, you need to create a .env file in the same directory as our settings.py file.
@@ -36,7 +36,7 @@ and modify with your actual details.
 - host should be localhost
 
 ## initialize database
-cd into the missionlister directory and run the following commands:
+cd into the backend directory and run the following commands:
 ```python
 python manage.py makemigrations
 ```

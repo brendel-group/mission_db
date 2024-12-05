@@ -18,11 +18,12 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
-import { mission_table_data } from "../../RandomData";
 import { MissionData } from "~/data";
-import RenderView from "../details/DetailsView";
 import { fetchAndTransformMissions } from "~/utilities/fetchapi";
 import { RenderTagsOverview } from "../../utilities/TagList";
+import { TagPicker } from "~/utilities/TagPicker";
+import { IconPlus } from "@tabler/icons-react";
+import { useNavigate } from "@remix-run/react";
 
 interface ThProps {
   children: React.ReactNode;
@@ -83,7 +84,7 @@ function sortData(
 
   return filterData(
     [...data].sort((a, b) => {
-      if (sortBy === "total_size") {
+      if (sortBy === "totalSize") {
         // Duration needs a numeric sort
         const durationA = parseFloat(a[sortBy]);
         const durationB = parseFloat(b[sortBy]);
@@ -117,12 +118,11 @@ function sortData(
 }
 
 export function Overview() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState<MissionData[]>([]);
   const [sortBy, setSortBy] = useState<keyof MissionData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-  const [modalOpened, setModalOpened] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<MissionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -170,15 +170,10 @@ export function Overview() {
     );
   };
 
-  const openModal = (row: MissionData) => {
-    setSelectedRow(row);
-    setModalOpened(true);
-  };
-
   const rows = sortedData.map((row) => (
     <Table.Tr
       key={row.name}
-      onClick={() => openModal(row)}
+      onClick={() => navigate('/details?id=' + row.missionId)}
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
@@ -188,23 +183,47 @@ export function Overview() {
     >
       <Table.Td>{row.name}</Table.Td>
       <Table.Td>{row.location}</Table.Td>
-      <Table.Td>{row.total_duration}</Table.Td>
-      <Table.Td>{row.total_size}</Table.Td>
+      <Table.Td>{row.totalDuration}</Table.Td>
+      <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
       <Table.Td
         onClick={(e) => e.stopPropagation()} // stops opening openModal
       >
-        <Menu>
+        <Menu styles={{ dropdown: { border: "1px solid #ccc" } }}>
           <Menu.Target>
             <div>
               <RenderTagsOverview tags={row.tags} />
+              {row.tags.length === 0 && (
+                <Center>
+                  <IconPlus size={16} stroke={1.5} color="gray" />
+                </Center>
+              )}
             </div>
           </Menu.Target>
           {/*Actions for the Tag Picker*/}
-          <Menu.Dropdown>
-            {/*TODO: Implement tag picker*/}
-            <h3>Tag Picker</h3>
+          <Menu.Dropdown style={{ padding: "10px" }}>
+            <TagPicker
+              tags={row.tags}
+              onAddTag={(newTag) => {
+                // update tags in frontend. TODO: Implement API call to update tags in backend
+                row.tags.push(newTag);
+                setSortedData([...sortedData]);
+              }}
+              onRemoveTag={(tagName) => {
+                // update tags in frontend. TODO: Implement API call to update tags in backend
+                row.tags = row.tags.filter((tag) => tag.name !== tagName);
+                setSortedData([...sortedData]);
+              }}
+              onChangeTagColor={(tagName, newColor) => {
+                // update tags in frontend. TODO: Implement API call to update tags in backend
+                const tag = row.tags.find((tag) => tag.name === tagName);
+                if (tag) {
+                  tag.color = newColor;
+                  setSortedData([...sortedData]);
+                }
+              }}
+            />
           </Menu.Dropdown>
         </Menu>
       </Table.Td>
@@ -214,8 +233,8 @@ export function Overview() {
   const columns: { key: keyof MissionData; label: string }[] = [
     { key: "name", label: "Name" },
     { key: "location", label: "Location" },
-    { key: "total_duration", label: "Duration" },
-    { key: "total_size", label: "Size (MB)" },
+    { key: "totalDuration", label: "Duration" },
+    { key: "totalSize", label: "Size (MB)" },
     { key: "robot", label: "Robot" },
     { key: "remarks", label: "Remarks" },
     { key: "tags", label: "Tags" },
@@ -269,13 +288,6 @@ export function Overview() {
           )}
         </Table.Tbody>
       </Table>
-
-      {/* Modal Component */}
-      <RenderView
-        modalOpened={modalOpened}
-        selectedRow={selectedRow}
-        onClose={() => setModalOpened(false)}
-      />
     </ScrollArea>
   );
 }
