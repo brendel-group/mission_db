@@ -57,6 +57,58 @@ Example:
 ./cli.py addfolder --path "your/path/name_date" --location "location(optional)" --other "other(optional)"
 ```
 
+### `cli.py tag`
+command to make changes to tags
+
+### `cli.py tag add`
+adds a new tag to the database
+
+Arguments:
+- `--name` tag name
+- `--color` (optional) tag color in hex format defaults to the default value of the ColorField
+
+Example:
+```bash
+./cli.py tag add --name "Tag" --color "#FF0000"
+```
+
+### `cli.py tag remove`
+remove a tag from the database
+
+Arguments:
+- `--id` remove tag by id
+- `--name` remove tag by name
+
+either `--id` or `--name` must be given. If both are given the id will be used and the 
+name is ignored. Doesn't aks for verification.
+
+Example
+```bash
+./cli.py tag remove --name "Tag"
+```
+
+### `cli.py tag list`
+list all tags
+Example:
+```bash
+./cli.py tag list
+```
+
+### `cli.py tag change`
+make changes to a tag.
+
+Arguments:
+- `--id` select tag by id
+- `--name` select tag by name or change name
+- `--color` new color of the tag
+
+Either `--id` or `--name` must be given. If both are given the id will be used to select the tag
+and the name will be the new name of the tag.
+
+Example:
+```bash
+./cli.py tag change --id 1 --name "NewName" --color "#00FF00"
+```
 ## Troubleshooting
 
 - ### `Error adding mission: duplicate key value violates unique constraint "restapi_mission_pkey"`
