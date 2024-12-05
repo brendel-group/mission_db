@@ -45,11 +45,17 @@ def mission_detail(request, pk):
         mission.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class MissionFilesView(generics.ListAPIView):
+class FileByMissionAPI(generics.ListAPIView):
     serializer_class = FileSerializer
-    name = "Get Files by Mission"
-
+    name = "Get Files by Mission ID"
     def get_queryset(self):
+        """
+        List Files of a Mission
+        ### Returns
+        List of Files
+        ### Raises
+        NotFound if no Mission with given id exists
+        """
         try:
             mission = Mission.objects.get(id=self.kwargs["mission_id"])
         except Mission.DoesNotExist:
@@ -63,7 +69,7 @@ def get_tags(request):
     """
     List all tags in database
     ### Returns
-    List of tags in json format as Response
+    List of tags in json format as ResponseFileByMissionAPI,
     """
     tags = Tag.objects.all()
     serializer = TagSerializer(tags, many=True)
