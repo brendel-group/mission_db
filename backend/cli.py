@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# PYTHON_ARGCOMPLETE_OK
 import os
 import sys
+import argcomplete
 import argparse
 import django
 import logging
@@ -572,6 +574,8 @@ def main(args):
     folder_arg_parser(subparser)
 
     tag_parser, tag_mission_parser = tag_arg_parser(subparser)
+
+    argcomplete.autocomplete(parser)
 
     args = parser.parse_args(args)
 
