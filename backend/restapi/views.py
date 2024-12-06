@@ -66,7 +66,7 @@ class FileByMissionAPI(generics.ListAPIView):
         try:
             mission = Mission.objects.get(id=self.kwargs["mission_id"])
         except Mission.DoesNotExist:
-            raise NotFound("Mission with ID " + mission + " not found")
+            raise NotFound(f"Mission with ID {self.kwargs["mission_id"]} not found")
         file_ids = Mission_files.objects.filter(mission=mission).values_list(
             "file_id", flat=True
         )
