@@ -269,8 +269,62 @@ def change_tag(id=None, name=None, color=None):
         logging.error(f"Error changing Tag: {e}")
 
 
-def tag_command(tag_parser, args):
-    match args.command:
+def list_tags_by_mission(id):
+    # TODO
+    pass
+
+
+def list_missions_by_tag(id=None, name=None):
+    # TODO
+    pass
+
+
+def add_tag_to_mission(id, tag_id=None, tag_name=None):
+    # TODO
+    pass
+
+
+def remove_tag_from_mission(id, tag_id=None, ta_name=None):
+    # TODO
+    pass
+
+
+def mission_command(mission_parser, mission_tag_parser, args):
+    match args.mission:
+        case "add":
+            # Validate date
+            validated_date = validate_date(args.date)
+            if validated_date is None:
+                return
+
+            add_mission(
+                args.name,
+                validated_date,  # Pass the validated date
+                args.location,
+                args.other,
+            )
+        case "remove":
+            remove_mission(args.id)
+        case "list":
+            missions = Mission.objects.all()
+            serializer = MissionSerializer(missions, many=True)
+            print_table(serializer.data)
+        case "tag":
+            match args.mission_tag:
+                case "list":
+                    list_tags_by_mission(args.id)
+                case "add":
+                    add_tag_to_mission(args.id, args.tag_id, args.tag_name)
+                case "remove":
+                    remove_tag_from_mission(args.id, args.tag_id, args.tag_name)
+                case _:
+                    mission_tag_parser.print_help()
+        case _:
+            mission_parser.print_help()
+
+
+def tag_command(tag_parser, tag_mission_parser, args):
+    match args.tag:
         case "add":
             add_tag(args.name, args.color)
         case "remove":
@@ -279,6 +333,12 @@ def tag_command(tag_parser, args):
             list_tags()
         case "change":
             change_tag(args.id, args.name, args.color)
+        case "mission":
+            match args.tag_mission:
+                case "list":
+                    list_missions_by_tag(args.id, args.name)
+                case _:
+                    tag_mission_parser.print_help()
         case _:
             tag_parser.print_help()
 
@@ -292,7 +352,7 @@ def mission_arg_parser(subparser):
     mission_parser: subparser here created
     """
     mission_parser = subparser.add_parser("mission", help="Modify Missions")
-    mission_subparser = mission_parser.add_subparsers(dest="command")
+    mission_subparser = mission_parser.add_subparsers(dest="mission")
 
     # Add command
     add_parser = mission_subparser.add_parser("add", help="Add mission")
@@ -351,7 +411,7 @@ def folder_arg_parser(subparser):
 
 def tag_arg_parser(subparser):
     tag_parser = subparser.add_parser("tag", help="Modify Tags")
-    tag_subparser = tag_parser.add_subparsers(dest="command")
+    tag_subparser = tag_parser.add_subparsers(dest="tag")
 
     # Add command
     add_parser = tag_subparser.add_parser("add", help="Add mission")
@@ -378,7 +438,7 @@ def tag_arg_parser(subparser):
     mission_parser = tag_subparser.add_parser(
         "mission", help="Change tags of one mission"
     )
-    mission_subparser = mission_parser.add_subparsers(dest="mission_tag")
+    mission_subparser = mission_parser.add_subparsers(dest="tag_mission")
 
     # mission list
     list_mission_parser = mission_subparser.add_parser(
@@ -395,7 +455,7 @@ def tag_arg_parser(subparser):
 def main(args):
     # Arg parser
     parser = argparse.ArgumentParser(description="Mission CLI")
-    subparser = parser.add_subparsers(dest="type")
+    subparser = parser.add_subparsers(dest="command")
 
     mission_parser, mission_tag_parser = mission_arg_parser(subparser)
 
@@ -406,33 +466,13 @@ def main(args):
     args = parser.parse_args(args)
 
     # Execute command
-    match args.type:
+    match args.command:
         case "mission":
-            match args.command:
-                case "add":
-                    # Validate date
-                    validated_date = validate_date(args.date)
-                    if validated_date is None:
-                        return
-
-                    add_mission(
-                        args.name,
-                        validated_date,  # Pass the validated date
-                        args.location,
-                        args.other,
-                    )
-                case "remove":
-                    remove_mission(args.id)
-                case "list":
-                    missions = Mission.objects.all()
-                    serializer = MissionSerializer(missions, many=True)
-                    print_table(serializer.data)
-                case _:
-                    mission_parser.print_help()
+            mission_command(mission_parser, mission_tag_parser, args)
         case "addfolder":
             add_mission_from_folder(args.path, args.location, args.other)
         case "tag":
-            tag_command(tag_parser, args)
+            tag_command(tag_parser, tag_mission_parser, args)
         case _:
             parser.print_help()
 
