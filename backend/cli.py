@@ -11,7 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")  # Adjust as
 django.setup()
 
 # Importing Models, adjust as needed
-from restapi.models import Mission, Tag  # noqa
+from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 
 # Set up logging
@@ -270,23 +270,120 @@ def change_tag(id=None, name=None, color=None):
 
 
 def list_tags_by_mission(id):
-    # TODO
-    pass
+    tags = Tag.objects.filter(mission_tags__mission_id=id)
+    serializer = TagSerializer(tags, many=True)
+    print_table(serializer.data)
 
 
 def list_missions_by_tag(id=None, name=None):
-    # TODO
-    pass
+    # Input check
+    if id and name:
+        try:
+            tag = Tag.objects.get(id=id)
+        except Tag.DoesNotExist:
+            logging.error(f"No Tag with id {id} found")
+            return
+        if tag.name != name:
+            logging.error("Tag id and name given but dont match.")
+            return
+
+    if not (id or name):
+        logging.error("At least one of --id or --name must be provided")
+        return
+
+    # Actual processing
+    if id:
+        missions = Mission.objects.filter(mission_tags__tag_id=id)
+    else:
+        missions = Mission.objects.filter(mission_tags__tag__name=name)
+    serializer = MissionSerializer(missions, many=True)
+    print_table(serializer.data)
 
 
 def add_tag_to_mission(id, tag_id=None, tag_name=None):
-    # TODO
-    pass
+    # Input check
+    if tag_id and tag_name:
+        try:
+            tag = Tag.objects.get(id=tag_id)
+        except Tag.DoesNotExist:
+            logging.error(f"No Tag with id {tag_id} found")
+            return
+        if tag.name != tag_name:
+            logging.error("Tag id and name given but dont match.")
+            return
+
+    if not (tag_id or tag_name):
+        logging.error("At least one of --tag-id or --tag-name must be provided")
+        return
+
+    # Actual processing
+    try:
+        mission = Mission.objects.get(id=id)
+        if tag_id:
+            tag = Tag.objects.get(id=tag_id)
+        else:
+            tag, created = Tag.objects.get_or_create(name=tag_name)
+        mission_tag = Mission_tags(mission=mission, tag=tag)
+        mission_tag.full_clean()
+        mission_tag.save()
+
+        # Output
+        if created:
+            logging.info(f"Tag '{tag.name}' created and tagged Mission with id {id}")
+        else:
+            logging.info(f"Tagged Mission with id {id} with '{tag.name}'")
+
+    # Error handling
+    except Mission.DoesNotExist:
+        logging.error(f"No Mission with id {id} found")
+    except Exception as e:
+        logging.error(e)
 
 
-def remove_tag_from_mission(id, tag_id=None, ta_name=None):
-    # TODO
-    pass
+def remove_tag_from_mission(id, tag_id=None, tag_name=None):
+    # Input check
+    if not (tag_id or tag_name):
+        logging.error("At least one of --tag-id or --tag-name must be provided")
+        return
+
+    try:
+        if tag_id and tag_name:
+            tag = Tag.objects.get(id=tag_id)
+            if tag.name != tag_name:
+                logging.error("Tag id and name given but dont match.")
+                return
+
+        # Actual processing
+        # using filter over get, because if for some reason the same Tag got added multiple times to the same Mission
+        # filter will handle it properly, while get throws an error
+        if tag_id:
+            mission_tag = Mission_tags.objects.filter(mission_id=id, tag_id=tag_id)
+        else:
+            mission_tag = Mission_tags.objects.filter(mission_id=id, tag__name=tag_name)
+        if not mission_tag.exists():
+            raise Mission_tags.DoesNotExist
+        mission_tag.delete()
+
+        # Output
+        tag = Tag.objects.filter(id=tag_id) | Tag.objects.filter(name=tag_name)
+        tag = tag.first()
+        logging.info(f"Removed Tag '{tag.name}' from Mission with id {id}")
+
+    # Error handling
+    except Mission.DoesNotExist:
+        logging.error(f"No Mission with id {id} found")
+    except Mission_tags.DoesNotExist:
+        if tag_id:
+            logging.error(f"No Tag with id {tag_id} found at Mission with id {id}")
+        else:
+            logging.error(
+                f"No Tag with name '{tag_name}' found at Mission with id {id}"
+            )
+    except Tag.DoesNotExist:
+        if tag_id:
+            logging.error(f"No Tag with id {tag_id} found")
+        else:
+            logging.error(f"No Tag with name '{tag_name}' found")
 
 
 def mission_command(mission_parser, mission_tag_parser, args):
