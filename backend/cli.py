@@ -227,7 +227,7 @@ def list_tags():
     """
     list all Tags in a table
     """
-    tags = Tag.objects.all()
+    tags = Tag.objects.all().order_by("id")
     serializer = TagSerializer(tags, many=True)
     print_table(serializer.data)
 
@@ -270,7 +270,7 @@ def change_tag(id=None, name=None, color=None):
 
 
 def list_tags_by_mission(id):
-    tags = Tag.objects.filter(mission_tags__mission_id=id)
+    tags = Tag.objects.filter(mission_tags__mission_id=id).order_by("id")
     serializer = TagSerializer(tags, many=True)
     print_table(serializer.data)
 
@@ -293,9 +293,9 @@ def list_missions_by_tag(id=None, name=None):
 
     # Actual processing
     if id:
-        missions = Mission.objects.filter(mission_tags__tag_id=id)
+        missions = Mission.objects.filter(mission_tags__tag_id=id).order_by("id")
     else:
-        missions = Mission.objects.filter(mission_tags__tag__name=name)
+        missions = Mission.objects.filter(mission_tags__tag__name=name).order_by("id")
     serializer = MissionSerializer(missions, many=True)
     print_table(serializer.data)
 
@@ -321,6 +321,7 @@ def add_tag_to_mission(id, tag_id=None, tag_name=None):
         mission = Mission.objects.get(id=id)
         if tag_id:
             tag = Tag.objects.get(id=tag_id)
+            created = False
         else:
             tag, created = Tag.objects.get_or_create(name=tag_name)
         mission_tag = Mission_tags(mission=mission, tag=tag)
@@ -403,7 +404,7 @@ def mission_command(mission_parser, mission_tag_parser, args):
         case "remove":
             remove_mission(args.id)
         case "list":
-            missions = Mission.objects.all()
+            missions = Mission.objects.all().order_by("id")
             serializer = MissionSerializer(missions, many=True)
             print_table(serializer.data)
         case "tag":
