@@ -11,6 +11,9 @@ class Mission(models.Model):
     location = models.CharField(max_length=65536, null=True, blank=True)
     other = models.CharField(max_length=65536, null=True, blank=True)
 
+    class Meta:
+        unique_together = ["name", "date", "location", "other"]
+
     # this function defines, what the value of print(mission) would be
     def __str__(self):
         return self.id
@@ -32,6 +35,9 @@ class Mission_tags(models.Model):
 
     mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ["mission", "tag"]
 
 
 """
