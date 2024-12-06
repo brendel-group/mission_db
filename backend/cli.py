@@ -308,7 +308,33 @@ def mission_arg_parser(subparser):
     # List command
     _ = mission_subparser.add_parser("list", help="List all missions")
 
-    return mission_parser
+    # tag subcommand
+    tag_parser = mission_subparser.add_parser("tag", help="Change tags of one mission")
+    tag_subparser = tag_parser.add_subparsers(dest="mission_tag")
+
+    # tag list
+    list_tag_parser = tag_subparser.add_parser("list", help="List tags of one mission")
+    list_tag_parser.add_argument("--id", required=True, help="Select mission by id")
+
+    # tag add
+    tag_add_parser = tag_subparser.add_parser("add", help="Add tag to mission")
+    tag_add_parser.add_argument("--id", required=True, help="Select mission by id")
+    tag_add_parser.add_argument(
+        "--tag-name", required=False, help="Add or create tag by name"
+    )
+    tag_add_parser.add_argument("--tag-id", required=False, help="Add tag by id")
+
+    # tag remove
+    tag_remove_parser = tag_subparser.add_parser(
+        "remove", help="Remove tag from mission"
+    )
+    tag_remove_parser.add_argument("--id", required=True, help="Select mission by id")
+    tag_remove_parser.add_argument(
+        "--tag-name", required=False, help="Remove tag by name"
+    )
+    tag_remove_parser.add_argument("--tag-id", required=False, help="Remove tag by id")
+
+    return mission_parser, tag_parser
 
 
 def folder_arg_parser(subparser):
@@ -348,7 +374,22 @@ def tag_arg_parser(subparser):
     change_parser.add_argument("--name", required=False, help="Tag name")
     change_parser.add_argument("--color", required=False, help="Tag color")
 
-    return tag_parser
+    # mission subcommand
+    mission_parser = tag_subparser.add_parser(
+        "mission", help="Change tags of one mission"
+    )
+    mission_subparser = mission_parser.add_subparsers(dest="mission_tag")
+
+    # mission list
+    list_mission_parser = mission_subparser.add_parser(
+        "list", help="List missions with selected tag"
+    )
+    list_mission_parser.add_argument("--id", required=False, help="Select tag by id")
+    list_mission_parser.add_argument(
+        "--name", required=False, help="Select tag by name"
+    )
+
+    return tag_parser, mission_parser
 
 
 def main(args):
@@ -356,11 +397,11 @@ def main(args):
     parser = argparse.ArgumentParser(description="Mission CLI")
     subparser = parser.add_subparsers(dest="type")
 
-    mission_parser = mission_arg_parser(subparser)
+    mission_parser, mission_tag_parser = mission_arg_parser(subparser)
 
     folder_arg_parser(subparser)
 
-    tag_parser = tag_arg_parser(subparser)
+    tag_parser, tag_mission_parser = tag_arg_parser(subparser)
 
     args = parser.parse_args(args)
 
