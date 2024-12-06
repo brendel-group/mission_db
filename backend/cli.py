@@ -214,8 +214,20 @@ def remove_tag(id=None, name=None):
             tag = Tag.objects.get(id=id)
         else:
             tag = Tag.objects.get(name=name)
-        tag.delete()
-        logging.info(f"Tag '{tag.name}' has been removed.")
+
+        missions_with_tag = Mission.objects.filter(mission_tags__tag=tag)
+        if missions_with_tag.exists():
+            response = input(
+                f"The Tag is used in {len(missions_with_tag)} Mission(s).\nDo you really want to remove it? [Y/n] "
+            ).lower()
+            if response == "y":
+                tag.delete()
+                logging.info(f"Tag '{tag.name}' has been removed.")
+            else:
+                logging.info("Tag not removed")
+        else:
+            tag.delete()
+            logging.info(f"Tag '{tag.name}' has been removed.")
     except Tag.DoesNotExist:
         if id:
             logging.error(f"No Tag found with id '{id}'.")
