@@ -284,12 +284,27 @@ def change_tag(id=None, name=None, color=None):
 
 
 def list_tags_by_mission(id):
+    """
+    List all Tags that belong to the same Mission
+
+    Args:
+        id: mission id
+    """
     tags = Tag.objects.filter(mission_tags__mission_id=id).order_by("id")
     serializer = TagSerializer(tags, many=True)
     print_table(serializer.data)
 
 
 def list_missions_by_tag(id=None, name=None):
+    """
+    List all Missions that have the same Tag
+    Either id or name must be given. If both are given it is checked, that they belong
+    to the same Tag.
+
+    Args:
+        id (optional): Tag id
+        name (optional): Tag name
+    """
     # Input check
     if id and name:
         try:
@@ -315,6 +330,15 @@ def list_missions_by_tag(id=None, name=None):
 
 
 def add_tag_to_mission(id, tag_id=None, tag_name=None):
+    """
+    Either tag_id or tag_name must be given. If both are given it is checked, that they belong
+    to the same Tag.
+
+    Args:
+        id: Mission id
+        tag_id (optional): Tag id
+        tag_name (optional): Tag name
+    """
     # Input check
     if tag_id and tag_name:
         try:
@@ -356,6 +380,15 @@ def add_tag_to_mission(id, tag_id=None, tag_name=None):
 
 
 def remove_tag_from_mission(id, tag_id=None, tag_name=None):
+    """
+    Either tag_id or tag_name must be given. If both are given it is checked, that they belong
+    to the same Tag.
+
+    Args:
+        id: Mission id
+        tag_id (optional): Tag id
+        tag_name (_type_, optional): Tag name
+    """
     # Input check
     if not (tag_id or tag_name):
         logging.error("At least one of --tag-id or --tag-name must be provided")
