@@ -37,7 +37,8 @@ Example:
 ```
 
 ### `cli.py mission list`
-List all missions in a table
+List all missions in a table\
+Sorted ascending by id
 
 Example:
 ```bash
@@ -47,7 +48,8 @@ Example:
 command to make changes to tags of one mission
 
 ### `cli.py mission tag list`
-List all Tags of one Mission in a table
+List all Tags of one Mission in a table\
+Sorted ascending by id
 
 Arguments:
 - `--id` Mission id
@@ -116,14 +118,14 @@ Example:
 ```
 
 ### `cli.py tag remove`
-remove a tag from the database
+remove a tag from the database\
+Asks for verification if there are any Missions with this Tag and prints the number of Missions it is used in.
 
 Arguments:
 - `--id` remove tag by id
 - `--name` remove tag by name
 
 Either `--id` or `--name` must be given. If both are given the id will be used and the name is ignored. \
-Doesn't ask for verification.
 
 Example
 ```bash
@@ -131,7 +133,8 @@ Example
 ```
 
 ### `cli.py tag list`
-list all tags
+list all tags\
+Sorted ascending by id
 
 Example:
 ```bash
@@ -157,7 +160,8 @@ Example:
 
 ### `cli.py tag mission list`
 List all missions with the same tag.\
-The Tag can be selected by id or name.
+The Tag can be selected by id or name.\
+Sorted ascending by id
 
 Arguments:
 - `--id` (optional) Tag id
