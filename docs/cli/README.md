@@ -43,6 +43,49 @@ Example:
 ```bash
 ./cli.py mission list
 ```
+### `cli.py mission tag`
+command to make changes to tags of one mission
+
+### `cli.py mission tag list`
+List all Tags of one Mission in a table
+
+Arguments:
+- `--id` Mission id
+
+Example:
+```bash
+./cli.py mission tag list --id 1
+```
+
+### `cli.py mission tag add`
+Add Tag to Mission.\
+A Tag can be added using the id or the name.\
+If the name is used and there is no Tag with that name a new Tag is created.
+
+Arguments:
+- `--id` Mission id
+- `--tag-id` (optional) Tag id
+- `--tag-name` (optional) Tag name
+
+Example:
+```bash
+./cli.py mission tag add --id 1 --name "TestTag"
+```
+
+### `cli.py mission tag remove`
+Remove Tag from Mission.\
+A Tag can be removed using the id or the name, but at least one of them must be used.
+
+Arguments:
+- `--id` Mission id
+- `--tag-id` (optional) Tag id
+- `--tag-name` (optional) Tag name
+
+Example:
+```bash
+./cli.py mission tag remove --id 1 --name "TestTag"
+```
+
 
 ### `cli.py addfolder`
 adds a mission using the filepath
@@ -111,6 +154,20 @@ Example:
 ```bash
 ./cli.py tag change --id 1 --name "NewName" --color "#00FF00"
 ```
+
+### `cli.py tag mission list`
+List all missions with the same tag.\
+The Tag can be selected by id or name.
+
+Arguments:
+- `--id` (optional) Tag id
+- `--name` (optional) Tag name
+
+Example:
+```bash
+./cli.py tag mission list --id 1
+```
+
 ## Troubleshooting
 
 - ### `Error adding mission: duplicate key value violates unique constraint "restapi_mission_pkey"`
