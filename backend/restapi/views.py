@@ -3,12 +3,11 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
-from .models import Tag, Mission, Mission_tags, File, Mission_files
+from .models import Tag, Mission, Mission_tags, Mission_files
 from .serializer import (
     TagSerializer,
     MissionSerializer,
     MissionTagSerializer,
-    FileSerializer,
     FileWithTypeSerializer,
 )
 
@@ -50,6 +49,7 @@ def mission_detail(request, pk):
     elif request.method == "DELETE":
         mission.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(["GET"])
 def get_files_by_mission_id(request, mission_id):
