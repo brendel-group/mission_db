@@ -238,14 +238,25 @@ export function Overview() {
                 setRenderedData([...renderedData]);
               }}
               onChangeTagColor={(tagName, newColor) => {
-                // update tags in backend
+                // update tag color in backend
                 changeTagColor(tagName, newColor);
+
                 // update tags in frontend
-                const tag = row.tags.find((tag) => tag.name === tagName);
-                if (tag) {
-                  tag.color = newColor;
-                  setRenderedData([...renderedData]);
-                }
+                const updatedRenderedData = renderedData.map((missionRow) => {
+                  // Find the tag in each row and update its color if found
+                  const updatedTags = missionRow.tags.map((tag) => {
+                    if (tag.name === tagName) {
+                      return { ...tag, color: newColor }; // update the color of the matching tag
+                    }
+                    return tag;
+                  });
+
+                  // Return the updated row with the updated tags
+                  return { ...missionRow, tags: updatedTags };
+                });
+
+                // Set the updated state with the updated array
+                setRenderedData(updatedRenderedData);
               }}
             />
           </Menu.Dropdown>
