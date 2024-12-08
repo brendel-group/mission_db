@@ -81,5 +81,9 @@ To test the API, one can use the django webserver. The backend/restapi/urls.py f
   - The relation is stored in a separate table in the database.
   - If the tag or the mission gets deleted the relation of mission and tag will also be deleted.
 
+- GET request to list files by mission ID
+  - Using a [GET Request](http://localhost:8000/restapi/missions/int:mission_id/files) the files of a mission can be listed.
+  - The URL is of the format `restapi/missions/<int:mission_id>files/`
+  - The result will be a list of files associated with the specific mission.
 
 If you want to confirm your actions further, you can always check the current state of the database. The steps to achieve this are described in docs/database.
