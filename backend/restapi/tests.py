@@ -353,6 +353,7 @@ class NotFoundErrors(APITestCase):
         self.assertEqual(
             response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
         )
+
     def test_get_files_by_nonexistent_mission(self):
         response = self.client.get(
             reverse("get_files", kwargs={"mission_id": 999})
@@ -396,8 +397,7 @@ class MissionFilesTestCase(APITestCase):
             reverse("get_files", kwargs={"mission_id": self.mission.id})
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2) 
+        self.assertEqual(len(response.data), 2)
         # Expecting 2 files associated with the mission
         self.assertEqual(response.data[0]["file"]["id"], self.file1.id)
         self.assertEqual(response.data[1]["file"]["id"], self.file2.id)
-    

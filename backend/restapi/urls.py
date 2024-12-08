@@ -10,8 +10,7 @@ from .views import (
     TagByMissionAPI,
     add_tag_to_mission,
     delete_mission_tag,
-    FileByMissionAPI,
-    get_files_by_mission_id
+    get_files_by_mission_id,
 )
 
 urlpatterns = [

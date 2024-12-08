@@ -73,8 +73,9 @@ class FileByMissionAPI(generics.ListAPIView):
         )
         return File.objects.filter(id__in=file_ids)
 
+
 @api_view(["GET"])
-def get_files_by_mission_id(request,mission_id):
+def get_files_by_mission_id(request, mission_id):
     """
     List all files with type of a mission by ID
     ### Returns
@@ -85,8 +86,8 @@ def get_files_by_mission_id(request,mission_id):
         mission = Mission.objects.get(id=mission_id)
     except Mission.DoesNotExist:
         raise NotFound(f"Mission with ID {mission_id} not found")
-    mission_files = Mission_files.objects.filter(mission__id=mission_id)
-    serializer = FileWithTypeSerializer(mission_files,many=True)
+    mission_files = Mission_files.objects.filter(mission__id=mission.id)
+    serializer = FileWithTypeSerializer(mission_files, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
