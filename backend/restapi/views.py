@@ -9,6 +9,7 @@ from .serializer import (
     MissionSerializer,
     MissionTagSerializer,
     FileSerializer,
+    FileWithTypeSerializer,
 )
 
 
@@ -72,6 +73,11 @@ class FileByMissionAPI(generics.ListAPIView):
         )
         return File.objects.filter(id__in=file_ids)
 
+@api_view(["GET"])
+def get_files_by_mission_id(request,mission_id):
+    mission_files = Mission_files.objects.filter(mission__id=mission_id)
+    serializer = FileWithTypeSerializer(mission_files,many=True)
+    return Response(serializer.data)
 
 @api_view(["GET"])
 def get_tags(request):
