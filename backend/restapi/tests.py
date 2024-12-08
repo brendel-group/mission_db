@@ -4,7 +4,7 @@ from rest_framework import status
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.utils import timezone
-from .models import Tag, Mission, Mission_tags
+from .models import Tag, Mission, Mission_tags, File, Mission_files
 import logging
 
 
@@ -353,3 +353,51 @@ class NotFoundErrors(APITestCase):
         self.assertEqual(
             response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
         )
+
+    def test_get_files_by_nonexistent_mission(self):
+        response = self.client.get(
+            reverse("get_files", kwargs={"mission_id": 999})
+        )  # Nonexistent ID
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {"detail": "Mission with ID 999 not found"})
+
+
+class MissionFilesTestCase(APITestCase):
+    def setUp(self):
+        # Create a mission
+        self.mission = Mission.objects.create(
+            name="TestMission",
+            date=timezone.now(),
+            location="TestLocation",
+            other="TestOther",
+        )
+
+        # Create files
+        self.file1 = File.objects.create(
+            id=0,
+            file_path="path/to/file1",
+            robot="TestRobot1",
+            duration=12000,
+            size=1024,
+        )
+        self.file2 = File.objects.create(
+            id=1,
+            file_path="path/to/file2",
+            robot="TestRobot2",
+            duration=24000,
+            size=2048,
+        )
+
+        # Associate files with the mission
+        Mission_files.objects.create(mission=self.mission, file=self.file1)
+        Mission_files.objects.create(mission=self.mission, file=self.file2)
+
+    def test_get_files_by_mission(self):
+        response = self.client.get(
+            reverse("get_files", kwargs={"mission_id": self.mission.id})
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        # Expecting 2 files associated with the mission
+        self.assertEqual(response.data[0]["file"]["id"], self.file1.id)
+        self.assertEqual(response.data[1]["file"]["id"], self.file2.id)

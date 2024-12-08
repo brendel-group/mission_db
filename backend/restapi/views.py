@@ -3,8 +3,13 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
-from .models import Tag, Mission, Mission_tags
-from .serializer import TagSerializer, MissionSerializer, MissionTagSerializer
+from .models import Tag, Mission, Mission_tags, Mission_files
+from .serializer import (
+    TagSerializer,
+    MissionSerializer,
+    MissionTagSerializer,
+    FileWithTypeSerializer,
+)
 
 
 @api_view(["GET"])
@@ -47,11 +52,28 @@ def mission_detail(request, pk):
 
 
 @api_view(["GET"])
+def get_files_by_mission_id(request, mission_id):
+    """
+    List all files with type of a mission by ID
+    ### Returns
+    Response with list of files with type in json format\
+    Or NotFound exception
+    """
+    try:
+        mission = Mission.objects.get(id=mission_id)
+    except Mission.DoesNotExist:
+        raise NotFound(f"Mission with ID {mission_id} not found")
+    mission_files = Mission_files.objects.filter(mission__id=mission.id)
+    serializer = FileWithTypeSerializer(mission_files, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
 def get_tags(request):
     """
     List all tags in database
     ### Returns
-    List of tags in json format as Response
+    List of tags in json format as ResponseFileByMissionAPI,
     """
     tags = Tag.objects.all()
     serializer = TagSerializer(tags, many=True)
