@@ -13,14 +13,14 @@ import { Tag } from "~/data";
 
 interface TagPickerProps {
   tags: Tag[];
-  onAddTag: (newTag: Tag) => void;
+  onAddNewTag: (tagName: string, tagColor: string) => void;
   onRemoveTag: (tagName: string) => void;
   onChangeTagColor: (tagName: string, newColor: string) => void;
 }
 
 export const TagPicker: React.FC<TagPickerProps> = ({
   tags,
-  onAddTag,
+  onAddNewTag,
   onRemoveTag,
   onChangeTagColor,
 }) => {
@@ -43,7 +43,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       if (tags.find((tag) => tag.name === newTagName)) {
         return;
       }
-      onAddTag({ name: newTagName, color: selectedColor });
+      onAddNewTag(newTagName, selectedColor);
     }
   };
 
