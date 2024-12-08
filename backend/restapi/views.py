@@ -51,29 +51,6 @@ def mission_detail(request, pk):
         mission.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class FileByMissionAPI(generics.ListAPIView):
-    serializer_class = FileSerializer
-    name = "Get Files by Mission ID"
-
-    def get_queryset(self):
-        """
-        List files of a mission
-        ### Returns
-        List of files
-        ### Raises
-        NotFound if no Mission with given id exists
-        """
-        try:
-            mission = Mission.objects.get(id=self.kwargs["mission_id"])
-        except Mission.DoesNotExist:
-            raise NotFound(f"Mission with ID {self.kwargs["mission_id"]} not found")
-        file_ids = Mission_files.objects.filter(mission=mission).values_list(
-            "file_id", flat=True
-        )
-        return File.objects.filter(id__in=file_ids)
-
-
 @api_view(["GET"])
 def get_files_by_mission_id(request, mission_id):
     """
