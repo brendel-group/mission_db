@@ -58,9 +58,9 @@ class FileByMissionAPI(generics.ListAPIView):
 
     def get_queryset(self):
         """
-        List Files of a Mission
+        List files of a mission
         ### Returns
-        List of Files
+        List of files
         ### Raises
         NotFound if no Mission with given id exists
         """
@@ -75,9 +75,18 @@ class FileByMissionAPI(generics.ListAPIView):
 
 @api_view(["GET"])
 def get_files_by_mission_id(request,mission_id):
+    """
+    List all files with type of a mission by ID
+    ### Returns
+    Response with list of files with type in json format\
+    Or HTTP_400_BAD_REQUEST Response
+    """
     mission_files = Mission_files.objects.filter(mission__id=mission_id)
     serializer = FileWithTypeSerializer(mission_files,many=True)
-    return Response(serializer.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
 def get_tags(request):
