@@ -1,0 +1,12 @@
+argcomplete
+django
+django-colorfield
+django-cors-headers
+django-environ
+djangorestframework
+gunicorn
+pre-commit
+psycopg2-binary
+pyreadline3; platform_system == 'Windows'
+ruff
+whitenoise
