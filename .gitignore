@@ -17,3 +17,5 @@ db.sqlite3
 .venv
 
 **/.ruff_cache/
+
+.cli.py-hist

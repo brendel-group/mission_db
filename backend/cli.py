@@ -6,6 +6,9 @@ import argcomplete
 import argparse
 import django
 import logging
+import shlex
+import code
+import readline
 from datetime import datetime
 
 # Set up Django env
@@ -18,6 +21,10 @@ from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
+
+# set up repl
+REPL_HISTFILE = os.path.expanduser(".cli.py-hist")
+REPL_HISTFILE_SIZE = 1000
 
 
 def extract_info_from_folder(folder_name):
@@ -434,6 +441,41 @@ def remove_tag_from_mission(id, tag_id=None, tag_name=None):
             logging.error(f"No Tag with name '{tag_name}' found")
 
 
+class Interactive(code.InteractiveConsole):
+    def runsource(self, source, filename="<input>", symbol="single"):
+        args = shlex.split(source)
+        if "exit" in args:
+            raise SystemExit
+        try:
+            main(args)
+        except SystemExit:
+            pass
+
+
+def interactive(parser):
+    if readline and os.path.exists(REPL_HISTFILE):
+        readline.read_history_file(REPL_HISTFILE)
+
+    console = Interactive()
+    console.interact(banner="", exitmsg="")
+
+    if readline:
+        readline.set_history_length(REPL_HISTFILE_SIZE)
+        readline.write_history_file(REPL_HISTFILE)
+
+
+#    args=["--help"]
+#    while "exit" not in args:
+#        try:
+#            main(args)
+#        except SystemExit:
+#            pass
+#        args = input('$: ')
+#        if not args:
+#            args = "--help"
+#        args = shlex.split(args)
+
+
 def mission_command(mission_parser, mission_tag_parser, args):
     match args.mission:
         case "add":
@@ -621,7 +663,7 @@ def main(args):
         case "tag":
             tag_command(tag_parser, tag_mission_parser, args)
         case _:
-            parser.print_help()
+            interactive(parser)
 
 
 if __name__ == "__main__":
