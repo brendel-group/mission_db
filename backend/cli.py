@@ -446,6 +446,14 @@ class Interactive(code.InteractiveConsole):
         args = shlex.split(source)
         if "exit" in args:
             raise SystemExit
+        if args == ["help"]:
+            print(
+                "options:\n"
+                + "  -h, --help\tshow available commands\n"
+                + "  exit\t\texit the command prompt\n"
+                + "  help\t\tshow this help message"
+            )
+            return
         try:
             main(args)
         except SystemExit:
@@ -462,18 +470,6 @@ def interactive(parser):
     if readline:
         readline.set_history_length(REPL_HISTFILE_SIZE)
         readline.write_history_file(REPL_HISTFILE)
-
-
-#    args=["--help"]
-#    while "exit" not in args:
-#        try:
-#            main(args)
-#        except SystemExit:
-#            pass
-#        args = input('$: ')
-#        if not args:
-#            args = "--help"
-#        args = shlex.split(args)
 
 
 def mission_command(mission_parser, mission_tag_parser, args):
