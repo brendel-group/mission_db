@@ -22,17 +22,13 @@ In order to specify your database details, you need to create a .env file in the
 In that file please paste the following:
 ```python
 SECRET_KEY= key
-DATABASE_NAME=name
-DATABASE_USER=user
-DATABASE_PASSWORD=password
-DATABASE_HOST=host
-DATABASE_PORT=5432
+DATABASE_URL=postgres://user:password@host:5432/name
 ```
 and modify with your actual details.
 - The secret key can be found in settings.py as a comment
 - name should be postgres
 - user is you user name (in our linux example from above it is "bob")
-- passwort is you password (in our linux example from above it is "admin")
+- passwort is your password (in our linux example from above it is "admin")
 - host should be localhost
 
 ## initialize database

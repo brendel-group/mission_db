@@ -1,10 +1,1 @@
-pre-commit
-django
-django-environ
-psycopg2-binary
-djangorestframework
-django-cors-headers
-django-colorfield
-argcomplete
-pyreadline3; platform_system == 'Windows'
-ruff
+backend/requirements.txt
