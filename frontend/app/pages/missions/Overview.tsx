@@ -20,7 +20,15 @@ import {
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
 import { MissionData } from "~/data";
-import { fetchAndTransformMissions } from "~/utilities/fetchapi";
+import {
+  fetchAndTransformMissions,
+  addTagToMission,
+  changeTagColor,
+  removeTagFromMission,
+  createTag,
+  getMissionsByTag,
+  deleteTag,
+} from "~/utilities/fetchapi";
 import { RenderTagsOverview } from "../../utilities/TagList";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPlus } from "@tabler/icons-react";
@@ -150,6 +158,7 @@ export function Overview() {
     };
 
     fetchMissions();
+    console.log(JSON.stringify(fetchedData));
   }, []);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
@@ -208,23 +217,46 @@ export function Overview() {
           <Menu.Dropdown style={{ padding: "10px" }}>
             <TagPicker
               tags={row.tags}
-              onAddTag={(newTag) => {
-                // update tags in frontend. TODO: Implement API call to update tags in backend
-                row.tags.push(newTag);
+              onAddNewTag={(tagName, tagColor) => {
+                //update tags in backend
+                createTag(tagName, tagColor);
+                addTagToMission(row.missionId, tagName);
+                // update tags in frontend
+                row.tags.push({ tagId: 0, name: tagName, color: tagColor });
                 setRenderedData([...renderedData]);
               }}
-              onRemoveTag={(tagName) => {
-                // update tags in frontend. TODO: Implement API call to update tags in backend
+              onRemoveTag={async (tagName) => {
+                // update tags in backend
+                await removeTagFromMission(row.missionId, tagName);
+                const missionsWithTag = await getMissionsByTag(tagName);
+                if (missionsWithTag.length === 0) {
+                  // delete tag from database if no missions are using it
+                  deleteTag(tagName);
+                }
+                // update tags in frontend
                 row.tags = row.tags.filter((tag) => tag.name !== tagName);
                 setRenderedData([...renderedData]);
               }}
               onChangeTagColor={(tagName, newColor) => {
-                // update tags in frontend. TODO: Implement API call to update tags in backend
-                const tag = row.tags.find((tag) => tag.name === tagName);
-                if (tag) {
-                  tag.color = newColor;
-                  setRenderedData([...renderedData]);
-                }
+                // update tag color in backend
+                changeTagColor(tagName, newColor);
+
+                // update tags in frontend
+                const updatedRenderedData = renderedData.map((missionRow) => {
+                  // Find the tag in each row and update its color if found
+                  const updatedTags = missionRow.tags.map((tag) => {
+                    if (tag.name === tagName) {
+                      return { ...tag, color: newColor }; // update the color of the matching tag
+                    }
+                    return tag;
+                  });
+
+                  // Return the updated row with the updated tags
+                  return { ...missionRow, tags: updatedTags };
+                });
+
+                // Set the updated state with the updated array
+                setRenderedData(updatedRenderedData);
               }}
             />
           </Menu.Dropdown>
