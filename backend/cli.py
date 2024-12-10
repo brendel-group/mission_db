@@ -8,8 +8,12 @@ import django
 import logging
 import shlex
 import code
-import readline
 from datetime import datetime
+
+try:
+    import readline
+except ImportError:
+    readline = None
 
 # Set up Django env
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")  # Adjust as needed
@@ -461,11 +465,12 @@ class Interactive(code.InteractiveConsole):
 
 
 def interactive(parser):
-    if readline and os.path.exists(REPL_HISTFILE):
-        readline.read_history_file(REPL_HISTFILE)
-    readline.set_completer_delims("")
-    readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
-    readline.parse_and_bind("tab: complete")
+    if readline:
+        if os.path.exists(REPL_HISTFILE):
+            readline.read_history_file(REPL_HISTFILE)
+        readline.set_completer_delims("")
+        readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
+        readline.parse_and_bind("tab: complete")
 
     console = Interactive()
     console.interact(banner="", exitmsg="")
