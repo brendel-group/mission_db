@@ -463,6 +463,9 @@ class Interactive(code.InteractiveConsole):
 def interactive(parser):
     if readline and os.path.exists(REPL_HISTFILE):
         readline.read_history_file(REPL_HISTFILE)
+    readline.set_completer_delims("")
+    readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
+    readline.parse_and_bind("tab: complete")
 
     console = Interactive()
     console.interact(banner="", exitmsg="")
