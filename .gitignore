@@ -18,4 +18,4 @@ db.sqlite3
 
 **/.ruff_cache/
 
-.cli.py-hist
+.polybot_mission_db_cli.py_hist

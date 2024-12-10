@@ -27,8 +27,19 @@ from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 logging.basicConfig(level=logging.INFO)
 
 # set up repl
-REPL_HISTFILE = os.path.expanduser(".cli.py-hist")
+REPL_HISTFILE = os.path.expanduser("~/.polybot_mission_db_cli.py_hist")
 REPL_HISTFILE_SIZE = 1000
+
+# handle wrong home directory
+HOME = os.path.expanduser("~")
+if not HOME or HOME == "/" or not os.path.exists(HOME):
+    # try env variable USERPROFILE
+    HOME = os.environ.get("USERPROFILE")
+    if HOME and os.path.exists(HOME):
+        REPL_HISTFILE = os.path.join(HOME, ".polybot_mission_db_cli.py_hist")
+    else:
+        # fall back to current working directory
+        REPL_HISTFILE = os.path.join(os.path.curdir, ".polybot_mission_db_cli.py_hist")
 
 
 def extract_info_from_folder(folder_name):
@@ -446,6 +457,10 @@ def remove_tag_from_mission(id, tag_id=None, tag_name=None):
 
 
 class Interactive(code.InteractiveConsole):
+    def __init__(self, help):
+        super().__init__(locals=None, filename="<console>")
+        self.help = help
+
     def runsource(self, source, filename="<input>", symbol="single"):
         args = shlex.split(source)
         if not args:
@@ -454,10 +469,11 @@ class Interactive(code.InteractiveConsole):
             raise SystemExit
         if args == ["help"]:
             print(
-                "options:\n"
-                + "  -h, --help\tshow available commands\n"
-                + "  exit\t\texit the command prompt\n"
-                + "  help\t\tshow this help message"
+                self.help
+                + "\n"
+                + "only interactive:\n"
+                + "  exit\t\t\texit the command prompt\n"
+                + "  help\t\t\tshow this help message"
             )
             return
         try:
@@ -466,7 +482,7 @@ class Interactive(code.InteractiveConsole):
             pass
 
 
-def interactive(parser):
+def interactive(parser: argparse.ArgumentParser):
     if readline:
         if not os.path.exists(REPL_HISTFILE):
             open(REPL_HISTFILE, "a").close()
@@ -476,9 +492,12 @@ def interactive(parser):
         readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
         readline.parse_and_bind("tab: complete")
 
-    console = Interactive()
+    console = Interactive(parser.format_help())
     try:
-        console.interact(banner="", exitmsg="")
+        console.interact(
+            banner="cli.py interactive mode\n  type 'help' for help or 'exit' to exit",
+            exitmsg="",
+        )
     except SystemExit:
         pass
 
