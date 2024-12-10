@@ -17,6 +17,7 @@ Two commands are available in interactive mode that are not available as normal 
 
 Example usage:
 ```bash
+./cli.py
 cli.py interactive mode
   type 'help' for help or 'exit' to exit
 >>> mission add --name "Example for interactive shell" --date "2024-12-10" 
