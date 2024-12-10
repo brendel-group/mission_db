@@ -448,6 +448,8 @@ def remove_tag_from_mission(id, tag_id=None, tag_name=None):
 class Interactive(code.InteractiveConsole):
     def runsource(self, source, filename="<input>", symbol="single"):
         args = shlex.split(source)
+        if not args:
+            args = ["help"]
         if "exit" in args:
             raise SystemExit
         if args == ["help"]:
@@ -466,14 +468,19 @@ class Interactive(code.InteractiveConsole):
 
 def interactive(parser):
     if readline:
-        if os.path.exists(REPL_HISTFILE):
-            readline.read_history_file(REPL_HISTFILE)
+        if not os.path.exists(REPL_HISTFILE):
+            open(REPL_HISTFILE, "a").close()
+
+        readline.read_history_file(REPL_HISTFILE)
         readline.set_completer_delims("")
         readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
         readline.parse_and_bind("tab: complete")
 
     console = Interactive()
-    console.interact(banner="", exitmsg="")
+    try:
+        console.interact(banner="", exitmsg="")
+    except SystemExit:
+        pass
 
     if readline:
         readline.set_history_length(REPL_HISTFILE_SIZE)
