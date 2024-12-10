@@ -1,10 +1,26 @@
-import { MetaFunction, useSearchParams } from "@remix-run/react";
+import { LoaderFunctionArgs } from "@remix-run/node";
+import {
+  data,
+  MetaFunction,
+  redirect,
+  useSearchParams,
+} from "@remix-run/react";
 import { CreateAppShell } from "~/layout/AppShell";
 import { DatasetView } from "~/pages/dataset/DatasetView";
+import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Dataset" }];
 };
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  let session = await sessionStorage.getSession(request.headers.get("cookie"));
+  let user = session.get("user");
+
+  if (!user) throw redirect("/login");
+
+  return data(null);
+}
 
 function Dataset() {
   const [searchParams] = useSearchParams();
