@@ -464,7 +464,7 @@ class Interactive(code.InteractiveConsole):
     def runsource(self, source, filename="<input>", symbol="single"):
         args = shlex.split(source)
         if not args:
-            args = ["help"]
+            return
         if "exit" in args:
             raise SystemExit
         if args == ["help"]:
