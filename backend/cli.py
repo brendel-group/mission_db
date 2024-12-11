@@ -141,7 +141,7 @@ def add_mission_from_folder(folder_path, location=None, other=None):
     mission_date, name = extract_info_from_folder(folder_name)
 
     if mission_date and name:
-        if check_mission(name, mission_date) == False:
+        if not check_mission(name, mission_date):
             mission = Mission(name=name, date=mission_date, location=location, other=other)
             try:
                 mission.save()
