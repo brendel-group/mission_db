@@ -179,7 +179,7 @@ export const addTagToMission = async (missionId: number, tagName: string): Promi
 
 // Remove a tag from a mission
 export const removeTagFromMission = async (missionId: number, tagName: string): Promise<void> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/delete/${missionId}/${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/delete/${missionId}/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -192,7 +192,7 @@ export const removeTagFromMission = async (missionId: number, tagName: string): 
 
 // Change the color of a tag
 export const changeTagColor = async (tagName: string, newColor: string): Promise<Tag> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -241,7 +241,7 @@ export const createTag = async (tagName: string, color?: string): Promise<Tag> =
 
 // Delete a tag by its name
 export const deleteTag = async (tagName: string): Promise<void> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -279,7 +279,7 @@ export const getTagsByMission = async (missionId: number): Promise<Tag[]> => {
 
 // Get all missions for a tag
 export const getMissionsByTag = async (tagName: string): Promise<{ id: number; name: string; location: string }[]> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/tags/missions/${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/tags/missions/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
