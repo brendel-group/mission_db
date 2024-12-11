@@ -27,7 +27,6 @@ id │ name                          │ date       │ location │ other
 ───┼───────────────────────────────┼────────────┼──────────┼──────
 1  │ Example for interactive shell │ 2024-12-10 │ None     │ None 
 >>> exit
-
 ```
 
 ## Argument mode:
