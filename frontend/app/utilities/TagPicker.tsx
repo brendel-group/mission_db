@@ -26,6 +26,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("#390099");
+  const [error, setError] = useState<string | null>(null);
   const swatches = [
     "#390099",
     "#2c7da0",
@@ -41,15 +42,30 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     if (newTagName) {
       // check if tag already exists
       if (tags.find((tag) => tag.name === newTagName)) {
+        setError("This tag already exists");
+        setNewTagName("");
+        return;
+      }
+      // check if tag name is too long (max 42 characters)
+      if (newTagName.length > 42) {
+        setError("This tag name is too long");
+        setNewTagName("");
         return;
       }
       onAddNewTag(newTagName, selectedColor);
       setNewTagName("");
+      setError(null);
     }
   };
 
   return (
     <Stack gap={4}>
+      {/*error message*/}
+      {error && (
+        <Badge color="red" variant="filled">
+          {error}
+        </Badge>
+      )}
       {/*input for new tag name*/}
       <TextInput
         value={newTagName}
