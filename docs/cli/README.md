@@ -1,6 +1,39 @@
 # Command-line Interface
-## usage
 
+## Interactive mode:
+Executing `cli.py` without any arguments will start an interactive shell mode.\
+Every argument is available as a command in the shell.\
+It supports tab completion and history.
+The history is stored in the file `.polybot_mission_db_cli.py_hist` in the home directory or if the home directory is not found it is stored in the current working directory!
+
+To use tab completion start typing a command and hit tab to complete it or show available completions.\
+Example: `mis` will be completed to `mission`.
+
+To use the history you can navigate with the arrow up and down keys through your last typed commands and execute them when hitting enter.
+
+Two commands are available in interactive mode that are not available as normal arguments: `exit` and `help`\
+`exit` terminantes the shell.\
+`help` shows the normal `--help` and adds the commands `exit` and `help` to it.
+
+Example usage:
+```bash
+./cli.py
+cli.py interactive mode
+  type 'help' for help or 'exit' to exit
+>>> mission add --name "Example for interactive shell" --date "2024-12-10" 
+INFO:root:'Example for interactive shell' added.
+>>> mission list
+id │ name                          │ date       │ location │ other
+───┼───────────────────────────────┼────────────┼──────────┼──────
+1  │ Example for interactive shell │ 2024-12-10 │ None     │ None 
+>>> exit
+```
+
+## Argument mode:
+
+Instead of using the interactive mode you can directly call the CLI with the arguments.
+
+Use
 ```bash
 ./cli.py --help
 ```
