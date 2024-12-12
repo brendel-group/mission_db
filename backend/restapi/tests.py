@@ -6,6 +6,7 @@ from django.db.utils import IntegrityError
 from django.utils import timezone
 from .models import Tag, Mission, Mission_tags, File, Mission_files
 import logging
+import urllib.parse
 
 
 class TagTestCase(TestCase):
@@ -401,3 +402,35 @@ class MissionFilesTestCase(APITestCase):
         # Expecting 2 files associated with the mission
         self.assertEqual(response.data[0]["file"]["id"], self.file1.id)
         self.assertEqual(response.data[1]["file"]["id"], self.file2.id)
+
+
+class SpecialTagNameTest(APITestCase):
+    def setUp(self):
+        self.tag = Tag(name="create/")
+        self.tag.full_clean()
+        self.tag.save()
+        self.encoded_name = urllib.parse.quote_plus(
+            self.tag.name
+        )  # tests don't use the webserver so no double encoding needed
+
+    def test_create_other_tag(self):
+        response = self.client.post(reverse("create_tag"), {"name": "test"})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Tag.objects.filter(name="test").exists())
+
+    def test_change_tag(self):
+        response = self.client.put(
+            reverse("tag_detail", kwargs={"name": self.encoded_name}),
+            {"name": "create/", "color": "#ff0000"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.tag.refresh_from_db()
+        self.assertEqual(self.tag.color, "#ff0000")
+
+    def test_delete_tag(self):
+        response = self.client.delete(
+            reverse("tag_detail", kwargs={"name": self.encoded_name})
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Tag.objects.filter(name="create/").exists())
