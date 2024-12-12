@@ -49,11 +49,12 @@ def check_mission_exists(id):
     """
     return Mission.objects.filter(id=id).exists()
 
+
 def check_mission(name, date):
     """
     Checks if Mission with the same name and date exists
     """
-    return Mission.objects.filter(name=name, date=date).exists() 
+    return Mission.objects.filter(name=name, date=date).exists()
 
 
 def validate_date(date_str):
@@ -142,7 +143,9 @@ def add_mission_from_folder(folder_path, location=None, other=None):
 
     if mission_date and name:
         if not check_mission(name, mission_date):
-            mission = Mission(name=name, date=mission_date, location=location, other=other)
+            mission = Mission(
+                name=name, date=mission_date, location=location, other=other
+            )
             try:
                 mission.save()
                 logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
@@ -152,6 +155,7 @@ def add_mission_from_folder(folder_path, location=None, other=None):
             logging.warning("skipping because this mission has already been added")
     else:
         logging.warning("Skipping folder due to naming issues.")
+
 
 def sync_folder(folder_path, location=None, other=None):
     """
@@ -340,8 +344,11 @@ def folder_arg_parser(subparser):
     folder_parser.add_argument("--location", required=False, help="location")
     folder_parser.add_argument("--other", required=False, help="other mission details")
 
+
 def sync_arg_parser(subparser):
-    sync_parser = subparser.add_parser("syncfolder", help="adds allmissions from folder")
+    sync_parser = subparser.add_parser(
+        "syncfolder", help="adds allmissions from folder"
+    )
     sync_parser.add_argument("--path", required=True, help="Filepath")
     sync_parser.add_argument("--location", required=False, help="location")
     sync_parser.add_argument("--other", required=False, help="other mission details")
