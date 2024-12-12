@@ -1,6 +1,6 @@
 import { Grid } from "@mantine/core";
 import React from "react";
-import { RenderTagsDetailView } from "../../utilities/TagList";
+import { RenderTags } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { ShowStatsView } from "./StatsView";
 import { MissionData } from "~/data";
@@ -34,7 +34,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({
             {/* Tags */}
             <Grid.Col span={12}>
               {selectedRow && (
-                <RenderTagsDetailView
+                <RenderTags
                   tags_={selectedRow.tags}
                   missionId={selectedRow.missionId}
                 />
