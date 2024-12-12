@@ -44,6 +44,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         return;
       }
       onAddNewTag(newTagName, selectedColor);
+      setNewTagName("");
     }
   };
 
