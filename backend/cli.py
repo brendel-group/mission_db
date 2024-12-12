@@ -6,6 +6,7 @@ import argcomplete
 import argparse
 import django
 import logging
+import yaml
 from datetime import datetime
 
 # Set up Django env
@@ -13,7 +14,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")  # Adjust as
 django.setup()
 
 # Importing Models, adjust as needed
-from restapi.models import Mission, Tag, Mission_tags  # noqa
+from restapi.models import Mission, Tag, Mission_tags, File  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 
 # Set up logging
@@ -38,7 +39,25 @@ def extract_info_from_folder(folder_name):
             f"Folder name '{folder_name}' does not match the expected format (YYYY.MM.DD_missionname)."
         )
         return None, None
+    
+def extract_Data_from_File(path):
+    metadata = load_yaml_metadata(path)
+    size = get_filsize(path)
+    duration = get_mcap_duration_from_yaml(metadata)
+    return size, duration
+    
+def load_yaml_metadata(yaml_filepath):
+    """Load YAML metadata."""
+    with open(yaml_filepath, "r") as file:
+        return yaml.safe_load(file)
 
+def get_mcap_duration_from_yaml(metadata):
+    """Extract duration in seconds from YAML."""
+    nanoseconds = metadata.get("rosbag2_bagfile_information", {}).get("duration", {}).get("nanoseconds", 0)
+    return nanoseconds / 1e9
+
+def get_filsize(path):
+    return os.path.getsize(path)
 
 def check_mission_exists(id):
     """
@@ -146,6 +165,32 @@ def add_mission_from_folder(folder_path, location=None, other=None):
     else:
         logging.warning("Skipping folder due to naming issues.")
 
+def add_details(mission_path, robot):
+    for folder in os.listdir(mission_path):
+        folder_path = os.path.join(mission_path, folder)
+        if os.path.isdir(folder_path):
+            for item in os.listdir(folder_path):
+                item_path = os.path.join(folder_path, item)
+                if os.path.isdir(item_path):
+                    for file in os.listdir(item_path):
+                        if file.endswith(".yaml"):
+                            addDetails(os.path.join(item_path, file), robot)
+                            print("details found")
+                        else:
+                            logging.warning("no metadata found")
+                
+
+
+def addDetails(path, robot):
+    size, duration = extract_Data_from_File(path)
+    if size and duration:
+        file = File(file_path=path, robot=robot, duration=duration, size=size)
+        try:
+            file.save()
+        except Exception as e:
+            logging.error(f"Error Adding Details: {e}")
+    else:
+        logging.warning("Skipping sue to issues with the metadata")
 
 def add_mission(name, mission_date, location=None, other=None):
     """
@@ -553,6 +598,14 @@ def folder_arg_parser(subparser):
     folder_parser.add_argument("--location", required=False, help="location")
     folder_parser.add_argument("--other", required=False, help="other mission details")
 
+def details_parser(subparser):
+    """
+    Parser Setup for addDetails Command
+    """
+    details_parser = subparser.add_parser("adddetails", help="adds Details")
+    details_parser.add_argument("--path", required=True, help="Filepath")
+    details_parser.add_argument("--robot", required=False, help="Robot")
+
 
 def tag_arg_parser(subparser):
     tag_parser = subparser.add_parser("tag", help="Modify Tags")
@@ -606,6 +659,8 @@ def main(args):
 
     folder_arg_parser(subparser)
 
+    details_parser(subparser)
+
     tag_parser, tag_mission_parser = tag_arg_parser(subparser)
 
     argcomplete.autocomplete(parser)
@@ -620,6 +675,8 @@ def main(args):
             add_mission_from_folder(args.path, args.location, args.other)
         case "tag":
             tag_command(tag_parser, tag_mission_parser, args)
+        case "adddetails":
+            add_details(args.path, args.robot)
         case _:
             parser.print_help()
 
