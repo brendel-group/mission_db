@@ -12,7 +12,7 @@ import {
 } from "./fetchapi";
 import { useState } from "react";
 
-export function RenderTagsDetailView({
+export function RenderTags({
   tags_,
   missionId,
 }: {
@@ -84,23 +84,6 @@ export function RenderTagsDetailView({
           </Menu.Dropdown>
         </Menu>
       }
-    </Group>
-  );
-}
-
-export function RenderTagsOverview({ tags }: { tags: Tag[] }) {
-  return (
-    <Group gap="xs">
-      {tags.map((item) => (
-        <Badge
-          key={item.name}
-          color={item.color}
-          variant="light"
-          style={{ textTransform: "none" }}
-        >
-          {item.name}
-        </Badge>
-      ))}
     </Group>
   );
 }
