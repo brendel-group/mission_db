@@ -60,21 +60,23 @@ export const TagPicker: React.FC<TagPickerProps> = ({
 
   return (
     <Stack gap={4}>
-      {/*error message*/}
-      {error && (
-        <Badge color="red" variant="filled">
-          {error}
-        </Badge>
-      )}
-      {/*input for new tag name*/}
-      <TextInput
-        value={newTagName}
-        onChange={(e) => setNewTagName(e.target.value)}
-        placeholder="add a new tag"
-        onKeyDown={(e) => {
-          e.key === "Enter" && handleAddTag();
-        }}
-      />
+      <Group gap="xs" style={{ display: "flex" }}>
+        {/*input for new tag name*/}
+        <TextInput
+          value={newTagName}
+          onChange={(e) => setNewTagName(e.target.value)}
+          placeholder="add a new tag"
+          error={error}
+          onKeyDown={(e) => {
+            e.key === "Enter" && handleAddTag();
+          }}
+          style={{ flex: 0.89 }}
+        />
+        {/*button to add tag*/}
+        <Button onClick={handleAddTag} color="#dcdfe1" style={{ flex: 0.11 }}>
+          <IconPlus size={16} color="grey" />
+        </Button>
+      </Group>
       {/*custom color picker*/}
       <div style={{ display: "flex", gap: "8px" }}>
         {swatches.map((swatch) => (
@@ -93,11 +95,6 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           />
         ))}
       </div>
-
-      {/*button to add tag*/}
-      <Button onClick={handleAddTag} fullWidth>
-        <IconPlus size={16} />
-      </Button>
 
       {/*list of tags*/}
       {tags.map((tag) => (
