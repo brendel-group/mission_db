@@ -483,16 +483,8 @@ class Interactive(code.InteractiveConsole):
 
 
 def interactive(parser: argparse.ArgumentParser):
-    not_created = False
     if readline:
-        if not os.path.exists(REPL_HISTFILE):
-            try:
-                open(REPL_HISTFILE, "a").close()
-            except PermissionError as p:
-                print(p, "\nCould not create history file")
-                not_created = True
-
-        if not not_created:
+        if os.path.exists(REPL_HISTFILE):
             try:
                 readline.read_history_file(REPL_HISTFILE)
             except PermissionError as p:
@@ -511,7 +503,7 @@ def interactive(parser: argparse.ArgumentParser):
     except SystemExit:
         pass
 
-    if readline and not not_created:
+    if readline:
         readline.set_history_length(REPL_HISTFILE_SIZE)
         try:
             readline.write_history_file(REPL_HISTFILE)
