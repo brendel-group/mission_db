@@ -11,6 +11,7 @@ import {
   keys,
   Menu,
   Skeleton,
+  Badge,
 } from "@mantine/core";
 import {
   IconSelector,
@@ -29,9 +30,8 @@ import {
   getMissionsByTag,
   deleteTag,
 } from "~/utilities/fetchapi";
-import { RenderTagsOverview } from "../../utilities/TagList";
 import { TagPicker } from "~/utilities/TagPicker";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
 
 interface ThProps {
@@ -201,66 +201,84 @@ export function Overview() {
       <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
-      <Table.Td onClick={(e) => e.stopPropagation()}>
-        <Menu>
-          <Menu.Target>
-            <div>
-              <RenderTagsOverview tags={row.tags} />
-              {row.tags.length === 0 && (
-                <Center>
-                  <IconPlus size={16} stroke={1.5} color="gray" />
-                </Center>
-              )}
-            </div>
-          </Menu.Target>
-          {/*Actions for the Tag Picker*/}
-          <Menu.Dropdown style={{ padding: "10px" }}>
-            <TagPicker
-              tags={row.tags}
-              onAddNewTag={(tagName, tagColor) => {
-                //update tags in backend
-                createTag(tagName, tagColor);
-                addTagToMission(row.missionId, tagName);
-                // update tags in frontend
-                row.tags.push({ tagId: 0, name: tagName, color: tagColor });
-                setRenderedData([...renderedData]);
-              }}
-              onRemoveTag={async (tagName) => {
-                // update tags in backend
-                await removeTagFromMission(row.missionId, tagName);
-                const missionsWithTag = await getMissionsByTag(tagName);
-                if (missionsWithTag.length === 0) {
-                  // delete tag from database if no missions are using it
-                  deleteTag(tagName);
-                }
-                // update tags in frontend
-                row.tags = row.tags.filter((tag) => tag.name !== tagName);
-                setRenderedData([...renderedData]);
-              }}
-              onChangeTagColor={(tagName, newColor) => {
-                // update tag color in backend
-                changeTagColor(tagName, newColor);
+      <Table.Td
+        onClick={(e) => e.stopPropagation()}
+        style={{ cursor: "default" }}
+      >
+        <Group gap="xs">
+          {/* render tags */}
+          {row.tags.map((item) => (
+            <Badge
+              key={item.name}
+              color={item.color}
+              variant="light"
+              style={{ textTransform: "none", cursor: "pointer" }}
+              onClick={() => console.log(item.name + " clicked")}
+            >
+              {item.name}
+            </Badge>
+          ))}
+          <Menu>
+            {/*edit button*/}
+            <Menu.Target>
+              <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
+                <IconPencil
+                  size={16}
+                  style={{ transform: "translateY(2px)" }}
+                />
+              </Badge>
+            </Menu.Target>
+            {/*Actions for the Tag Picker*/}
+            <Menu.Dropdown
+              style={{ padding: "10px", marginLeft: "-25px", marginTop: "2px" }}
+            >
+              <TagPicker
+                tags={row.tags}
+                onAddNewTag={(tagName, tagColor) => {
+                  //update tags in backend
+                  createTag(tagName, tagColor);
+                  addTagToMission(row.missionId, tagName);
+                  // update tags in frontend
+                  row.tags.push({ tagId: 0, name: tagName, color: tagColor });
+                  setRenderedData([...renderedData]);
+                }}
+                onRemoveTag={async (tagName) => {
+                  // update tags in backend
+                  await removeTagFromMission(row.missionId, tagName);
+                  const missionsWithTag = await getMissionsByTag(tagName);
+                  if (missionsWithTag.length === 0) {
+                    // delete tag from database if no missions are using it
+                    deleteTag(tagName);
+                  }
+                  // update tags in frontend
+                  row.tags = row.tags.filter((tag) => tag.name !== tagName);
+                  setRenderedData([...renderedData]);
+                }}
+                onChangeTagColor={(tagName, newColor) => {
+                  // update tag color in backend
+                  changeTagColor(tagName, newColor);
 
-                // update tags in frontend
-                const updatedRenderedData = renderedData.map((missionRow) => {
-                  // Find the tag in each row and update its color if found
-                  const updatedTags = missionRow.tags.map((tag) => {
-                    if (tag.name === tagName) {
-                      return { ...tag, color: newColor }; // update the color of the matching tag
-                    }
-                    return tag;
+                  // update tags in frontend
+                  const updatedRenderedData = renderedData.map((missionRow) => {
+                    // Find the tag in each row and update its color if found
+                    const updatedTags = missionRow.tags.map((tag) => {
+                      if (tag.name === tagName) {
+                        return { ...tag, color: newColor }; // update the color of the matching tag
+                      }
+                      return tag;
+                    });
+
+                    // Return the updated row with the updated tags
+                    return { ...missionRow, tags: updatedTags };
                   });
 
-                  // Return the updated row with the updated tags
-                  return { ...missionRow, tags: updatedTags };
-                });
-
-                // Set the updated state with the updated array
-                setRenderedData(updatedRenderedData);
-              }}
-            />
-          </Menu.Dropdown>
-        </Menu>
+                  // Set the updated state with the updated array
+                  setRenderedData(updatedRenderedData);
+                }}
+              />
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
       </Table.Td>
     </Table.Tr>
   ));
