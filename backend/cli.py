@@ -242,7 +242,7 @@ def remove_tag(id=None, name=None):
         missions_with_tag = Mission.objects.filter(mission_tags__tag=tag)
         if missions_with_tag.exists():
             response = input(
-                f"The Tag is used in {len(missions_with_tag)} Mission(s).\nDo you really want to remove it? [Y/n] "
+                f"The Tag is used in {len(missions_with_tag)} Mission(s).\nDo you really want to remove it? [y/N] "
             ).lower()
             if response == "y":
                 tag.delete()
