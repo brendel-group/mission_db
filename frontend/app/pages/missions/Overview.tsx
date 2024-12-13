@@ -63,18 +63,30 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
   );
 }
 
-function filterData(data: MissionData[], search: string) {
+function filterData(
+  data: MissionData[],
+  search: string,
+  searchedTags: string[] = [],
+) {
   const query = search.toLowerCase().trim();
-  return data.filter((item) =>
-    keys(data[0]).some((key) => {
+  return data.filter((item) => {
+    const matchesSearch = keys(data[0]).some((key) => {
       const value = item[key];
       if (Array.isArray(value)) {
-        // Search every element in the array if value is an array (needed for tags)
         return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
-    }),
-  );
+    });
+
+    const matchesTags =
+      searchedTags.length === 0 ||
+      (item.tags &&
+        searchedTags.every((tag) =>
+          item.tags.some((itemTag) => itemTag.name === tag),
+        ));
+
+    return matchesSearch && matchesTags;
+  });
 }
 
 function sortData(
@@ -83,12 +95,13 @@ function sortData(
     sortBy: keyof MissionData | null;
     reversed: boolean;
     search: string;
+    searchedTags: string[];
   },
 ) {
   const { sortBy } = payload;
 
   if (!sortBy) {
-    return filterData(data, payload.search);
+    return filterData(data, payload.search, payload.searchedTags);
   }
 
   return filterData(
@@ -135,6 +148,7 @@ export function Overview() {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchedTags, setSearchedTags] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -169,7 +183,9 @@ export function Overview() {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setRenderedData(sortData(fetchedData, { sortBy: field, reversed, search }));
+    setRenderedData(
+      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags }),
+    );
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,6 +196,7 @@ export function Overview() {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
+        searchedTags,
       }),
     );
   };
@@ -211,9 +228,31 @@ export function Overview() {
             <Badge
               key={item.name}
               color={item.color}
-              variant="light"
-              style={{ textTransform: "none", cursor: "pointer" }}
-              onClick={() => console.log(item.name + " clicked")}
+              variant={"light"}
+              style={{
+                textTransform: "none",
+                cursor: "pointer",
+                border: searchedTags.includes(item.name) ? "2px solid" : "none",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSearchedTags(
+                  (current) =>
+                    current.includes(item.name)
+                      ? current.filter((tag) => tag !== item.name) // remove Tag
+                      : [...current, item.name], // add Tag
+                );
+                setRenderedData(
+                  sortData(fetchedData, {
+                    sortBy,
+                    reversed: reverseSortDirection,
+                    search,
+                    searchedTags: searchedTags.includes(item.name)
+                      ? searchedTags.filter((tag) => tag !== item.name)
+                      : [...searchedTags, item.name],
+                  }),
+                );
+              }}
             >
               {item.name}
             </Badge>
