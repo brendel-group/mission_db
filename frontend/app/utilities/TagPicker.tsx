@@ -73,7 +73,11 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           style={{ flex: 0.89 }}
         />
         {/*button to add tag*/}
-        <Button onClick={handleAddTag} color="#dcdfe1" style={{ flex: 0.11 }}>
+        <Button
+          onClick={handleAddTag}
+          color="#dcdfe1"
+          style={{ flex: 0.11, alignSelf: "flex-start" }}
+        >
           <IconPlus size={16} color="grey" />
         </Button>
       </Group>
