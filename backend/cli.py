@@ -483,11 +483,22 @@ class Interactive(code.InteractiveConsole):
 
 
 def interactive(parser: argparse.ArgumentParser):
+    no_permission = False
     if readline:
         if not os.path.exists(REPL_HISTFILE):
-            open(REPL_HISTFILE, "a").close()
+            try:
+                open(REPL_HISTFILE, "a").close()
+            except PermissionError as p:
+                print(p, "\nCould not create history file")
+                no_permission = True
 
-        readline.read_history_file(REPL_HISTFILE)
+        if not no_permission:
+            try:
+                readline.read_history_file(REPL_HISTFILE)
+            except PermissionError as p:
+                print(p, REPL_HISTFILE, "\nCould not read history file")
+                no_permission = True
+
         readline.set_completer_delims("")
         readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
         readline.parse_and_bind("tab: complete")
@@ -501,9 +512,16 @@ def interactive(parser: argparse.ArgumentParser):
     except SystemExit:
         pass
 
-    if readline:
+    if readline and not no_permission:
         readline.set_history_length(REPL_HISTFILE_SIZE)
-        readline.write_history_file(REPL_HISTFILE)
+        try:
+            readline.write_history_file(REPL_HISTFILE)
+        except PermissionError as p:
+            print(
+                p,
+                REPL_HISTFILE,
+                "\nCould not write history to file",
+            )
 
 
 def mission_command(mission_parser, mission_tag_parser, args):
