@@ -98,45 +98,38 @@ function sortData(
     searchedTags: string[];
   },
 ) {
-  const { sortBy } = payload;
+  const { sortBy, reversed, search, searchedTags } = payload;
 
+  // first filter the data
+  const filteredData = filterData(data, search, searchedTags);
+
+  // if no sortBy is specified, return the filtered data
   if (!sortBy) {
-    return filterData(data, payload.search, payload.searchedTags);
+    return reversed ? filteredData.reverse() : filteredData;
   }
 
-  return filterData(
-    [...data].sort((a, b) => {
-      if (sortBy === "totalSize") {
-        // Duration needs a numeric sort
-        const durationA = parseFloat(a[sortBy]);
-        const durationB = parseFloat(b[sortBy]);
+  // otherwise sort the data
+  const sortedData = [...filteredData].sort((a, b) => {
+    // numeric sorting
+    if (sortBy === "totalSize") {
+      const durationA = parseFloat(a[sortBy]);
+      const durationB = parseFloat(b[sortBy]);
+      return durationA - durationB;
+    }
 
-        if (payload.reversed) {
-          return durationB - durationA;
-        }
+    // sort an array of tags by the first tag name
+    if (sortBy === "tags") {
+      const tagA = a.tags?.[0]?.name ?? "";
+      const tagB = b.tags?.[0]?.name ?? "";
+      return tagA.localeCompare(tagB);
+    }
 
-        return durationA - durationB;
-      }
+    // default sorting
+    return String(a[sortBy]).localeCompare(String(b[sortBy]));
+  });
 
-      // sorting for tags based on the first tag of the tags list
-      if (sortBy === "tags") {
-        const tagA = a.tags && a.tags.length > 0 ? a.tags[0]?.name ?? "" : "";
-        const tagB = b.tags && b.tags.length > 0 ? b.tags[0]?.name ?? "" : "";
-
-        return payload.reversed
-          ? tagB.localeCompare(tagA)
-          : tagA.localeCompare(tagB);
-      }
-
-      // Other fields can be sorted alphabetically
-      if (payload.reversed) {
-        return String(b[sortBy]).localeCompare(String(a[sortBy]));
-      }
-
-      return String(a[sortBy]).localeCompare(String(b[sortBy]));
-    }),
-    payload.search,
-  );
+  // return the sorted data in the correct order
+  return reversed ? sortedData.reverse() : sortedData;
 }
 
 export function Overview() {
@@ -236,20 +229,16 @@ export function Overview() {
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                setSearchedTags(
-                  (current) =>
-                    current.includes(item.name)
-                      ? current.filter((tag) => tag !== item.name) // remove Tag
-                      : [...current, item.name], // add Tag
-                );
+                const updatedTags = searchedTags.includes(item.name)
+                  ? searchedTags.filter((tag) => tag !== item.name) // remove tag from search
+                  : [...searchedTags, item.name]; // add tag to search
+                setSearchedTags(updatedTags);
                 setRenderedData(
                   sortData(fetchedData, {
                     sortBy,
                     reversed: reverseSortDirection,
                     search,
-                    searchedTags: searchedTags.includes(item.name)
-                      ? searchedTags.filter((tag) => tag !== item.name)
-                      : [...searchedTags, item.name],
+                    searchedTags: updatedTags,
                   }),
                 );
               }}
