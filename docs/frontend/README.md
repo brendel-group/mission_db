@@ -23,7 +23,13 @@
      npm start
      ```
 
-## Frontend Configuration
-   In the frontend configuration ```frontend/app/config.tsx``` you can set the base url for backend fetching, it is also possible to disable fetching from backend.
+## Login
+   Currently, there is no backend connection for the login system, so, use the default user instead:
+   ```
+   Username: admin
+   Password: admin
+   ```
 
+## Frontend Configuration
+   In the frontend configuration ```frontend/app/config.tsx``` you can set the base url for backend fetching, it is also possible to disable fetching from backend. ```MAX_SESSION_AGES``` determines how long a login session is valid. Setting it to ```undefined``` enables sessions without a time limit. 
 

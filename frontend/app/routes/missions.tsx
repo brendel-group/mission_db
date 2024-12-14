@@ -5,11 +5,11 @@ import {
   type MetaFunction,
 } from "@remix-run/node";
 import { CreateAppShell } from "~/layout/AppShell";
-import SettingsPage from "~/pages/SettingsPage";
+import MissionsPage from "~/pages/missions/MissionsPage";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
-  return [{ title: "Settings" }];
+  return [{ title: "Missions" }];
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -25,7 +25,7 @@ export default function Index() {
   return (
     <CreateAppShell>
       <div>
-        <SettingsPage />
+        <MissionsPage />
       </div>
     </CreateAppShell>
   );

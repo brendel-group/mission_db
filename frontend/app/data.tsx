@@ -34,3 +34,10 @@ export interface BackendMissionData {
   date: string;
   other: string;
 }
+
+//User interface
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+}
