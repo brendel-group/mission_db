@@ -86,8 +86,11 @@ export const fetchAndTransformMission = async (
   
     try {
       const mission: BackendMissionData = await getMission(id); // Fetch the mission using the REST API
+      const tags: Tag[] = await getTagsByMission(id); //Fetch the tags for the mission
+      tags.sort((a, b) => a.name.localeCompare(b.name));
   
       const exampleData: MissionData = mission_table_data[id % mission_table_data.length];
+
   
       const transformedMission: MissionData = {
           missionId: mission.id,
@@ -97,7 +100,7 @@ export const fetchAndTransformMission = async (
           totalSize: exampleData?.totalSize || "",
           robot: exampleData?.robot || "",
           remarks: mission.other || "",
-          tags: exampleData?.tags || [],
+          tags: tags || [],
         };
   
       return transformedMission;
@@ -116,6 +119,7 @@ export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
         let renderedMissions: MissionData[] = [];
         for (let i = 0; i < missions.length; i++) {
             const tags: Tag[] = await getTagsByMission(missions[i].id);
+            tags.sort((a, b) => a.name.localeCompare(b.name));
             const exampleData = mission_table_data.at(i % 5);
             renderedMissions.push(
                 {

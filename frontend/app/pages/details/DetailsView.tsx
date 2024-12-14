@@ -33,7 +33,12 @@ const DetailsView: React.FC<DetailsViewProps> = ({
           <Grid gutter="md">
             {/* Tags */}
             <Grid.Col span={12}>
-              {selectedRow && <RenderTagsDetailView tags={selectedRow.tags} />}
+              {selectedRow && (
+                <RenderTagsDetailView
+                  tags_={selectedRow.tags}
+                  missionId={selectedRow.missionId}
+                />
+              )}
             </Grid.Col>
             {/* Table */}
             <Grid.Col span={12}>
