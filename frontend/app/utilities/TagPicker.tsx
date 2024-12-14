@@ -60,12 +60,12 @@ export const TagPicker: React.FC<TagPickerProps> = ({
 
   return (
     <Stack gap={4}>
-      <Group gap="xs" style={{ display: "flex" }}>
+      <Group gap="xs" style={{ display: "flex", marginBottom: "2px" }}>
         {/*input for new tag name*/}
         <TextInput
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
-          placeholder="add a new tag"
+          placeholder="Add a new tag"
           error={error}
           onKeyDown={(e) => {
             e.key === "Enter" && handleAddTag();
@@ -75,10 +75,10 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         {/*button to add tag*/}
         <Button
           onClick={handleAddTag}
-          color="#dcdfe1"
           style={{ flex: 0.11, alignSelf: "flex-start" }}
+          disabled={!newTagName}
         >
-          <IconPlus size={16} color="grey" />
+          <IconPlus size={16} />
         </Button>
       </Group>
       {/*custom color picker*/}
