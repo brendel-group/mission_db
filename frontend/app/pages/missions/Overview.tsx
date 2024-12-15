@@ -302,6 +302,7 @@ export function Overview() {
 
                   // Set the updated state with the updated array
                   setRenderedData(updatedRenderedData);
+                  setFetchedData(updatedRenderedData);
                 }}
               />
             </Menu.Dropdown>
