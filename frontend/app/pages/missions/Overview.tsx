@@ -262,10 +262,10 @@ export function Overview() {
             >
               <TagPicker
                 tags={row.tags}
-                onAddNewTag={async (tagName, tagColor) => {
+                onAddNewTag={(tagName, tagColor) => {
                   //update tags in backend
-                  await createTag(tagName, tagColor);
-                  await addTagToMission(row.missionId, tagName);
+                  createTag(tagName, tagColor);
+                  addTagToMission(row.missionId, tagName);
                   // update tags in frontend
                   row.tags.push({ name: tagName, color: tagColor });
                   setRenderedData([...renderedData]);
