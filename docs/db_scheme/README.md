@@ -5,8 +5,8 @@ The above diagram is an ER Diagram. Information on how to read those diagrams ca
 The first table is the `missions` table. It has the columns `id`, `name`, `date`, `location` and `other`.\
 The `id` field is underlined which means it's the primary key and is an integer with auto increment.\
 `name` is a string.\
-`date` should be a timestamp or DateTimeField.\
-`location` and `other` are strings.
+`date` is a DateField.\
+`location` and `other` are strings and are optional.
 
 The second table is the `files` table. It has the columns `id`, `file_path`, `robot`, `duration` and `size`.\
 `id` is the primary key and is an integer with auto increment.\
@@ -23,7 +23,7 @@ It has the columns `mission_id`, `file_id` and `type`.\
 The third table is the `tags` table. It has the columns `id`, `name` and `color`.\
 `name` is a string and is unique.\
 `id` is the primary key and is an integer with auto increment.\
-`color` is a Colorfield that stores the hex value of the colors. 
+`color` is a Colorfield that stores the hex value of the colors and defaults to `#FFFFFF`. 
 
 Again we need a relationship table to connect the tags and the missions. This is the `mission_tags` table.
 It's only columns are `mission_id` and `tag_id` which are the foreign keys of the tables `missions` and `tags`.
