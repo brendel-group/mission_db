@@ -262,12 +262,12 @@ export function Overview() {
             >
               <TagPicker
                 tags={row.tags}
-                onAddNewTag={(tagName, tagColor) => {
+                onAddNewTag={async (tagName, tagColor) => {
                   //update tags in backend
-                  createTag(tagName, tagColor);
-                  addTagToMission(row.missionId, tagName);
+                  await createTag(tagName, tagColor);
+                  await addTagToMission(row.missionId, tagName);
                   // update tags in frontend
-                  row.tags.push({ tagId: 0, name: tagName, color: tagColor });
+                  row.tags.push({ name: tagName, color: tagColor });
                   setRenderedData([...renderedData]);
                 }}
                 onRemoveTag={async (tagName) => {

@@ -39,7 +39,7 @@ export function RenderTagsDetailView({
               createTag(tagName, tagColor);
               addTagToMission(missionId, tagName);
               // update tags in frontend
-              setTags([...tags, { tagId: 0, name: tagName, color: tagColor }]);
+              setTags([...tags, { name: tagName, color: tagColor }]);
             }}
             onRemoveTag={async (tagName) => {
               // update tags in backend

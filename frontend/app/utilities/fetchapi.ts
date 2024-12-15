@@ -213,7 +213,6 @@ export const changeTagColor = async (tagName: string, newColor: string): Promise
     }
     const data = await response.json();
     return {
-        tagId: data.id,
         name: data.name,
         color: data.color,
     };
@@ -237,7 +236,6 @@ export const createTag = async (tagName: string, color?: string): Promise<Tag> =
     }
     const data = await response.json();
     return {
-        tagId: data.id,
         name: data.name,
         color: data.color,
     };
