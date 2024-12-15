@@ -242,7 +242,7 @@ def remove_tag(id=None, name=None):
         missions_with_tag = Mission.objects.filter(mission_tags__tag=tag)
         if missions_with_tag.exists():
             response = input(
-                f"The Tag is used in {len(missions_with_tag)} Mission(s).\nDo you really want to remove it? [Y/n] "
+                f"The Tag is used in {len(missions_with_tag)} Mission(s).\nDo you really want to remove it? [y/N] "
             ).lower()
             if response == "y":
                 tag.delete()
@@ -484,10 +484,12 @@ class Interactive(code.InteractiveConsole):
 
 def interactive(parser: argparse.ArgumentParser):
     if readline:
-        if not os.path.exists(REPL_HISTFILE):
-            open(REPL_HISTFILE, "a").close()
+        if os.path.exists(REPL_HISTFILE):
+            try:
+                readline.read_history_file(REPL_HISTFILE)
+            except PermissionError as p:
+                print(p, REPL_HISTFILE, "\nCould not read history file")
 
-        readline.read_history_file(REPL_HISTFILE)
         readline.set_completer_delims("")
         readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
         readline.parse_and_bind("tab: complete")
@@ -503,7 +505,14 @@ def interactive(parser: argparse.ArgumentParser):
 
     if readline:
         readline.set_history_length(REPL_HISTFILE_SIZE)
-        readline.write_history_file(REPL_HISTFILE)
+        try:
+            readline.write_history_file(REPL_HISTFILE)
+        except PermissionError as p:
+            print(
+                p,
+                REPL_HISTFILE,
+                "\nCould not write history to file",
+            )
 
 
 def mission_command(mission_parser, mission_tag_parser, args):
