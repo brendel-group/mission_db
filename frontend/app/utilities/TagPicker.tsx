@@ -13,19 +13,20 @@ import { Tag } from "~/data";
 
 interface TagPickerProps {
   tags: Tag[];
-  onAddTag: (newTag: Tag) => void;
+  onAddNewTag: (tagName: string, tagColor: string) => void;
   onRemoveTag: (tagName: string) => void;
   onChangeTagColor: (tagName: string, newColor: string) => void;
 }
 
 export const TagPicker: React.FC<TagPickerProps> = ({
   tags,
-  onAddTag,
+  onAddNewTag,
   onRemoveTag,
   onChangeTagColor,
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("#390099");
+  const [error, setError] = useState<string | null>(null);
   const swatches = [
     "#390099",
     "#2c7da0",
@@ -41,23 +42,45 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     if (newTagName) {
       // check if tag already exists
       if (tags.find((tag) => tag.name === newTagName)) {
+        setError("This tag already exists");
+        setNewTagName("");
         return;
       }
-      onAddTag({ name: newTagName, color: selectedColor });
+      // check if tag name is too long (max 42 characters)
+      if (newTagName.length > 42) {
+        setError("This tag name is too long");
+        setNewTagName("");
+        return;
+      }
+      onAddNewTag(newTagName, selectedColor);
+      setNewTagName("");
+      setError(null);
     }
   };
 
   return (
     <Stack gap={4}>
-      {/*input for new tag name*/}
-      <TextInput
-        value={newTagName}
-        onChange={(e) => setNewTagName(e.target.value)}
-        placeholder="add a new tag"
-        onKeyDown={(e) => {
-          e.key === "Enter" && handleAddTag();
-        }}
-      />
+      <Group gap="xs" style={{ display: "flex", marginBottom: "2px" }}>
+        {/*input for new tag name*/}
+        <TextInput
+          value={newTagName}
+          onChange={(e) => setNewTagName(e.target.value)}
+          placeholder="Add a new tag"
+          error={error}
+          onKeyDown={(e) => {
+            e.key === "Enter" && handleAddTag();
+          }}
+          style={{ flex: 0.89 }}
+        />
+        {/*button to add tag*/}
+        <Button
+          onClick={handleAddTag}
+          style={{ flex: 0.11, alignSelf: "flex-start" }}
+          disabled={!newTagName}
+        >
+          <IconPlus size={16} />
+        </Button>
+      </Group>
       {/*custom color picker*/}
       <div style={{ display: "flex", gap: "8px" }}>
         {swatches.map((swatch) => (
@@ -76,11 +99,6 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           />
         ))}
       </div>
-
-      {/*button to add tag*/}
-      <Button onClick={handleAddTag} fullWidth>
-        <IconPlus size={16} />
-      </Button>
 
       {/*list of tags*/}
       {tags.map((tag) => (
