@@ -52,9 +52,17 @@ Arguments:
 - `--location` (optional) the location where the mission took place
 - `--other` (optional) additional information
 
+### `cli.py syncfolder`
+adds all missions from a folder not currently in the database
+
+Arguments:
+- `--path` path to mission folder containing the missionfolders 
+- `--location` (optional) the location where the mission took place
+- `--other` (optional) additional information
+
 Example:
 ```
-./cli.py addfolder --path "your/path/name_date" --location "location(optional)" --other "other(optional)"
+./cli.py syncfolder --path "your/path/name" --location "location(optional)" --other "other(optional)"
 ```
 
 ### `cli.py tag`
