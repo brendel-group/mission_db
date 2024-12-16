@@ -161,10 +161,13 @@ def sync_folder(folder_path, location=None, other=None):
     """
     Adds all Missions from a folder wich are not yet in the DB
     """
-    for item in os.listdir(folder_path):
-        item_path = os.path.join(folder_path, item)
-        if os.path.isdir(item_path):
-            add_mission_from_folder(item_path, location, other)
+    if os.path.isdir(folder_path):
+        for item in os.listdir(folder_path):
+            item_path = os.path.join(folder_path, item)
+            if os.path.isdir(item_path):
+                add_mission_from_folder(item_path, location, other)
+    else:
+        logging.error("invalid path")
 
 
 def add_mission(name, mission_date, location=None, other=None):
@@ -347,7 +350,7 @@ def folder_arg_parser(subparser):
 
 def sync_arg_parser(subparser):
     sync_parser = subparser.add_parser(
-        "syncfolder", help="adds allmissions from folder"
+        "syncfolder", help="adds all missions from folder"
     )
     sync_parser.add_argument("--path", required=True, help="Filepath")
     sync_parser.add_argument("--location", required=False, help="location")

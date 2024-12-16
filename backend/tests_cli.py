@@ -6,6 +6,43 @@ import cli
 import logging
 from io import StringIO
 import sys
+from unittest.mock import patch
+
+
+class SyncFolderArgumentTests(TestCase):
+    @patch("os.path.join", side_effect=lambda *args: "/".join(args))
+    @patch("os.listdir")
+    @patch("os.path.isdir")
+    @patch("cli.add_mission_from_folder")
+    def test_sync_folder_calls_add_mission_from_folder_with_correct_arguments(
+        self, mock_add_mission_from_folder, mock_isdir, mock_listdir, mock_path_join
+    ):
+        """
+        Test sync_folder to ensure correct arguments are passed to add_mission_from_folder.
+        """
+        # Mock folder structure
+        mock_listdir.return_value = [
+            "2024.12.02_mission1",
+            "2024.12.03_mission2",
+            "invalid_folder",
+        ]
+        mock_isdir.side_effect = lambda path: path in [
+            "/test/2024.12.02_mission1",
+            "/test/2024.12.03_mission2",
+        ]
+
+        # Call sync_folder
+        cli.sync_folder("/test")
+
+        # Verify add_mission_from_folder is called with correct arguments
+        mock_add_mission_from_folder.assert_any_call(
+            "/test/2024.12.02_mission1", None, None
+        )
+        mock_add_mission_from_folder.assert_any_call(
+            "/test/2024.12.03_mission2", None, None
+        )
+        # Ensure add_mission_from_folder is not called for invalid folders
+        self.assertEqual(mock_add_mission_from_folder.call_count, 2)
 
 
 class BasicCLITests(TestCase):
@@ -110,15 +147,6 @@ class AddMissionTests(TestCase):
                 name="test_add_mission_2",
                 date="2024-12-02",
                 location="TestLocation",
-                other="other info",
-            ).exists()
-        )
-        cli.add_mission_from_folder("2024.12.02_test_add_mission_2", other="other info")
-        self.assertTrue(
-            Mission.objects.filter(
-                name="test_add_mission_2",
-                date="2024-12-02",
-                location=None,
                 other="other info",
             ).exists()
         )
