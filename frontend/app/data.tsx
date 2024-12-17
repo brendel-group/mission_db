@@ -1,11 +1,9 @@
-//This represents a single mission in the missions table
 export interface Tag {
-  tagId: number;
-
   name: string;
   color: string;
 }
 
+// This represents a single mission in the missions table
 export interface MissionData {
   missionId: number;
 

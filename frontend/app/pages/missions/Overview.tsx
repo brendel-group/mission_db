@@ -11,6 +11,7 @@ import {
   keys,
   Menu,
   Skeleton,
+  Badge,
 } from "@mantine/core";
 import {
   IconSelector,
@@ -29,9 +30,8 @@ import {
   getMissionsByTag,
   deleteTag,
 } from "~/utilities/fetchapi";
-import { RenderTagsOverview } from "../../utilities/TagList";
 import { TagPicker } from "~/utilities/TagPicker";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
 
 interface ThProps {
@@ -63,18 +63,30 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
   );
 }
 
-function filterData(data: MissionData[], search: string) {
+function filterData(
+  data: MissionData[],
+  search: string,
+  searchedTags: string[] = [],
+) {
   const query = search.toLowerCase().trim();
-  return data.filter((item) =>
-    keys(data[0]).some((key) => {
+  return data.filter((item) => {
+    const matchesSearch = keys(data[0]).some((key) => {
       const value = item[key];
       if (Array.isArray(value)) {
-        // Search every element in the array if value is an array (needed for tags)
         return value.some((tag) => tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
-    }),
-  );
+    });
+
+    const matchesTags =
+      searchedTags.length === 0 ||
+      (item.tags &&
+        searchedTags.every((tag) =>
+          item.tags.some((itemTag) => itemTag.name === tag),
+        ));
+
+    return matchesSearch && matchesTags;
+  });
 }
 
 function sortData(
@@ -83,47 +95,41 @@ function sortData(
     sortBy: keyof MissionData | null;
     reversed: boolean;
     search: string;
+    searchedTags: string[];
   },
 ) {
-  const { sortBy } = payload;
+  const { sortBy, reversed, search, searchedTags } = payload;
 
+  // first filter the data
+  const filteredData = filterData(data, search, searchedTags);
+
+  // if no sortBy is specified, return the filtered data
   if (!sortBy) {
-    return filterData(data, payload.search);
+    return reversed ? filteredData.reverse() : filteredData;
   }
 
-  return filterData(
-    [...data].sort((a, b) => {
-      if (sortBy === "totalSize") {
-        // Duration needs a numeric sort
-        const durationA = parseFloat(a[sortBy]);
-        const durationB = parseFloat(b[sortBy]);
+  // otherwise sort the data
+  const sortedData = [...filteredData].sort((a, b) => {
+    // numeric sorting
+    if (sortBy === "totalSize") {
+      const durationA = parseFloat(a[sortBy]);
+      const durationB = parseFloat(b[sortBy]);
+      return durationA - durationB;
+    }
 
-        if (payload.reversed) {
-          return durationB - durationA;
-        }
+    // sort an array of tags by the first tag name
+    if (sortBy === "tags") {
+      const tagA = a.tags?.[0]?.name ?? "";
+      const tagB = b.tags?.[0]?.name ?? "";
+      return tagA.localeCompare(tagB);
+    }
 
-        return durationA - durationB;
-      }
+    // default sorting
+    return String(a[sortBy]).localeCompare(String(b[sortBy]));
+  });
 
-      // sorting for tags based on the first tag of the tags list
-      if (sortBy === "tags") {
-        const tagA = a.tags && a.tags.length > 0 ? a.tags[0]?.name ?? "" : "";
-        const tagB = b.tags && b.tags.length > 0 ? b.tags[0]?.name ?? "" : "";
-
-        return payload.reversed
-          ? tagB.localeCompare(tagA)
-          : tagA.localeCompare(tagB);
-      }
-
-      // Other fields can be sorted alphabetically
-      if (payload.reversed) {
-        return String(b[sortBy]).localeCompare(String(a[sortBy]));
-      }
-
-      return String(a[sortBy]).localeCompare(String(b[sortBy]));
-    }),
-    payload.search,
-  );
+  // return the sorted data in the correct order
+  return reversed ? sortedData.reverse() : sortedData;
 }
 
 export function Overview() {
@@ -135,6 +141,7 @@ export function Overview() {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchedTags, setSearchedTags] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -169,7 +176,9 @@ export function Overview() {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setRenderedData(sortData(fetchedData, { sortBy: field, reversed, search }));
+    setRenderedData(
+      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags }),
+    );
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,6 +189,7 @@ export function Overview() {
         sortBy,
         reversed: reverseSortDirection,
         search: value,
+        searchedTags,
       }),
     );
   };
@@ -201,66 +211,116 @@ export function Overview() {
       <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.remarks}</Table.Td>
-      <Table.Td onClick={(e) => e.stopPropagation()}>
-        <Menu>
-          <Menu.Target>
-            <div>
-              <RenderTagsOverview tags={row.tags} />
-              {row.tags.length === 0 && (
-                <Center>
-                  <IconPlus size={16} stroke={1.5} color="gray" />
-                </Center>
-              )}
-            </div>
-          </Menu.Target>
-          {/*Actions for the Tag Picker*/}
-          <Menu.Dropdown style={{ padding: "10px" }}>
-            <TagPicker
-              tags={row.tags}
-              onAddNewTag={(tagName, tagColor) => {
-                //update tags in backend
-                createTag(tagName, tagColor);
-                addTagToMission(row.missionId, tagName);
-                // update tags in frontend
-                row.tags.push({ tagId: 0, name: tagName, color: tagColor });
-                setRenderedData([...renderedData]);
+      <Table.Td
+        onClick={(e) => e.stopPropagation()}
+        style={{ cursor: "default" }}
+      >
+        <Group gap="xs">
+          {/* render tags */}
+          {row.tags.map((item) => (
+            <Badge
+              key={item.name}
+              color={item.color}
+              variant={"light"}
+              style={{
+                textTransform: "none",
+                cursor: "pointer",
+                border: searchedTags.includes(item.name) ? "2px solid" : "none",
               }}
-              onRemoveTag={async (tagName) => {
-                // update tags in backend
-                await removeTagFromMission(row.missionId, tagName);
-                const missionsWithTag = await getMissionsByTag(tagName);
-                if (missionsWithTag.length === 0) {
-                  // delete tag from database if no missions are using it
-                  deleteTag(tagName);
-                }
-                // update tags in frontend
-                row.tags = row.tags.filter((tag) => tag.name !== tagName);
-                setRenderedData([...renderedData]);
+              onClick={(e) => {
+                e.stopPropagation();
+                const updatedTags = searchedTags.includes(item.name)
+                  ? searchedTags.filter((tag) => tag !== item.name) // remove tag from search
+                  : [...searchedTags, item.name]; // add tag to search
+                setSearchedTags(updatedTags);
+                setRenderedData(
+                  sortData(fetchedData, {
+                    sortBy,
+                    reversed: reverseSortDirection,
+                    search,
+                    searchedTags: updatedTags,
+                  }),
+                );
               }}
-              onChangeTagColor={(tagName, newColor) => {
-                // update tag color in backend
-                changeTagColor(tagName, newColor);
+            >
+              {item.name}
+            </Badge>
+          ))}
+          <Menu>
+            {/*edit button*/}
+            <Menu.Target>
+              <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
+                <IconPencil
+                  size={16}
+                  style={{ transform: "translateY(2px)" }}
+                />
+              </Badge>
+            </Menu.Target>
+            {/*Actions for the Tag Picker*/}
+            <Menu.Dropdown
+              style={{ padding: "10px", marginLeft: "-25px", marginTop: "2px" }}
+            >
+              <TagPicker
+                tags={row.tags}
+                onAddNewTag={(tagName, tagColor) => {
+                  //update tags in backend
+                  createTag(tagName, tagColor);
+                  addTagToMission(row.missionId, tagName);
+                  // update tags in frontend
+                  row.tags.push({ name: tagName, color: tagColor });
+                  setRenderedData([...renderedData]);
+                }}
+                onRemoveTag={async (tagName) => {
+                  // update tags in backend
+                  await removeTagFromMission(row.missionId, tagName);
+                  const missionsWithTag = await getMissionsByTag(tagName);
+                  if (missionsWithTag.length === 0) {
+                    // delete tag from database if no missions are using it
+                    deleteTag(tagName);
+                  }
+                  // update tags in frontend
+                  row.tags = row.tags.filter((tag) => tag.name !== tagName);
+                  setRenderedData([...renderedData]);
+                }}
+                onChangeTagColor={(tagName, newColor) => {
+                  // update tag color in backend
+                  changeTagColor(tagName, newColor);
 
-                // update tags in frontend
-                const updatedRenderedData = renderedData.map((missionRow) => {
-                  // Find the tag in each row and update its color if found
-                  const updatedTags = missionRow.tags.map((tag) => {
-                    if (tag.name === tagName) {
-                      return { ...tag, color: newColor }; // update the color of the matching tag
-                    }
-                    return tag;
+                  // update tags in frontend
+                  const updatedRenderedData = renderedData.map((missionRow) => {
+                    // Find the tag in each row and update its color if found
+                    const updatedTags = missionRow.tags.map((tag) => {
+                      if (tag.name === tagName) {
+                        return { ...tag, color: newColor }; // update the color of the matching tag
+                      }
+                      return tag;
+                    });
+
+                    // Return the updated row with the updated tags
+                    return { ...missionRow, tags: updatedTags };
                   });
 
-                  // Return the updated row with the updated tags
-                  return { ...missionRow, tags: updatedTags };
-                });
+                  const updatedFetchedData = fetchedData.map((missionRow) => {
+                    // Find the tag in each row and update its color if found
+                    const updatedTags = missionRow.tags.map((tag) => {
+                      if (tag.name === tagName) {
+                        return { ...tag, color: newColor }; // update the color of the matching tag
+                      }
+                      return tag;
+                    });
 
-                // Set the updated state with the updated array
-                setRenderedData(updatedRenderedData);
-              }}
-            />
-          </Menu.Dropdown>
-        </Menu>
+                    // Return the updated row with the updated tags
+                    return { ...missionRow, tags: updatedTags };
+                  });
+
+                  // Set the updated state with the updated array
+                  setRenderedData(updatedRenderedData);
+                  setFetchedData(updatedFetchedData);
+                }}
+              />
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
       </Table.Td>
     </Table.Tr>
   ));
