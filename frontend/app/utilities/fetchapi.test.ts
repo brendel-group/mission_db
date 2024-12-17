@@ -163,6 +163,12 @@ describe('Fetch API Functions', () => {
                 json: jest.fn().mockResolvedValueOnce(backendMission)
             });
 
+            // Mock getTagsByMission
+            (fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: jest.fn().mockResolvedValueOnce([])
+            });
+
             // If USE_RANDOM_DATA is true, it will return from mission_table_data
             const result = await fetchAndTransformMission(1);
             
@@ -212,7 +218,7 @@ describe('Fetch API Functions', () => {
     describe('Tag Management', () => {
         test('getTags should fetch all tags', async () => {
             const mockTags: Tag[] = [
-                { tagId: 1, name: 'Tag1', color: '#FF0000' }
+                { name: 'Tag1', color: '#FF0000' }
             ];
             
             (fetch as jest.Mock).mockResolvedValueOnce({
@@ -258,14 +264,13 @@ describe('Fetch API Functions', () => {
 
         test('changeTagColor should change the color of a tag by name', async () => {
             const mockResponse: Tag = { 
-                tagId: 1, 
                 name: 'ImportantTag',
                 color: '#00FF00' 
             };
             (fetch as jest.Mock).mockResolvedValueOnce({
                 ok: true,
                 json: jest.fn().mockResolvedValueOnce({
-                    id: 1,
+                    //id: 1,
                     name: 'ImportantTag',
                     color: '#00FF00'
                 }),
@@ -281,8 +286,8 @@ describe('Fetch API Functions', () => {
         });
 
         test('createTag should create a new tag', async () => {
-            const newTag = { tagID: 1, name: 'NewTag', color: '#FF0000' };
-            const mockResponse = { tagId: 1, ...newTag };
+            const newTag = { name: 'NewTag', color: '#FF0000' };
+            const mockResponse = { ...newTag };
             (fetch as jest.Mock).mockResolvedValueOnce({
                 ok: true,
                 json: jest.fn().mockResolvedValueOnce(mockResponse),
@@ -309,8 +314,7 @@ describe('Fetch API Functions', () => {
 
         test('getTagsByMission should fetch tags for a mission', async () => {
             const mockResponse = [
-                { 
-                    tagID: 1, 
+                {
                     name: 'Tag1', 
                     color: '#FF0000'
                 }
