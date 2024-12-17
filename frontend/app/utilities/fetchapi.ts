@@ -1,7 +1,7 @@
 // Variable to switch between backend data and RandomData is in config.tsx
 
 import { MissionData, BackendMissionData , Tag} from "~/data";
-import { mission_table_data } from "../RandomData"
+import { mission_table_data } from "../RandomData";
 import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from "~/config";
 
 // Function to fetch all missions
