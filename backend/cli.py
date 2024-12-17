@@ -6,7 +6,14 @@ import argcomplete
 import argparse
 import django
 import logging
+import shlex
+import code
 from datetime import datetime
+
+try:
+    import readline
+except ImportError:
+    readline = None
 
 # Set up Django env
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")  # Adjust as needed
@@ -18,6 +25,21 @@ from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
+
+# set up repl
+REPL_HISTFILE = os.path.expanduser("~/.polybot_mission_db_cli.py_hist")
+REPL_HISTFILE_SIZE = 1000
+
+# handle wrong home directory
+HOME = os.path.expanduser("~")
+if not HOME or HOME == "/" or not os.path.exists(HOME):
+    # try env variable USERPROFILE
+    HOME = os.environ.get("USERPROFILE")
+    if HOME and os.path.exists(HOME):
+        REPL_HISTFILE = os.path.join(HOME, ".polybot_mission_db_cli.py_hist")
+    else:
+        # fall back to current working directory
+        REPL_HISTFILE = os.path.join(os.path.curdir, ".polybot_mission_db_cli.py_hist")
 
 
 def extract_info_from_folder(folder_name):
@@ -220,7 +242,7 @@ def remove_tag(id=None, name=None):
         missions_with_tag = Mission.objects.filter(mission_tags__tag=tag)
         if missions_with_tag.exists():
             response = input(
-                f"The Tag is used in {len(missions_with_tag)} Mission(s).\nDo you really want to remove it? [Y/n] "
+                f"The Tag is used in {len(missions_with_tag)} Mission(s).\nDo you really want to remove it? [y/N] "
             ).lower()
             if response == "y":
                 tag.delete()
@@ -434,6 +456,65 @@ def remove_tag_from_mission(id, tag_id=None, tag_name=None):
             logging.error(f"No Tag with name '{tag_name}' found")
 
 
+class Interactive(code.InteractiveConsole):
+    def __init__(self, help):
+        super().__init__(locals=None, filename="<console>")
+        self.help = help
+
+    def runsource(self, source, filename="<input>", symbol="single"):
+        args = shlex.split(source)
+        if not args:
+            return
+        if "exit" in args:
+            raise SystemExit
+        if args == ["help"]:
+            print(
+                self.help
+                + "\n"
+                + "only interactive:\n"
+                + "  exit\t\t\texit the command prompt\n"
+                + "  help\t\t\tshow this help message"
+            )
+            return
+        try:
+            main(args)
+        except SystemExit:
+            pass
+
+
+def interactive(parser: argparse.ArgumentParser):
+    if readline:
+        if os.path.exists(REPL_HISTFILE):
+            try:
+                readline.read_history_file(REPL_HISTFILE)
+            except PermissionError as p:
+                print(p, REPL_HISTFILE, "\nCould not read history file")
+
+        readline.set_completer_delims("")
+        readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
+        readline.parse_and_bind("tab: complete")
+
+    console = Interactive(parser.format_help())
+    try:
+        console.interact(
+            banner="cli.py interactive mode\n  type 'help' for help or 'exit' to exit",
+            exitmsg="",
+        )
+    except SystemExit:
+        pass
+
+    if readline:
+        readline.set_history_length(REPL_HISTFILE_SIZE)
+        try:
+            readline.write_history_file(REPL_HISTFILE)
+        except PermissionError as p:
+            print(
+                p,
+                REPL_HISTFILE,
+                "\nCould not write history to file",
+            )
+
+
 def mission_command(mission_parser, mission_tag_parser, args):
     match args.mission:
         case "add":
@@ -621,7 +702,7 @@ def main(args):
         case "tag":
             tag_command(tag_parser, tag_mission_parser, args)
         case _:
-            parser.print_help()
+            interactive(parser)
 
 
 if __name__ == "__main__":

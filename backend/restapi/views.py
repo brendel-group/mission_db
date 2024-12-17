@@ -10,6 +10,7 @@ from .serializer import (
     MissionTagSerializer,
     FileWithTypeSerializer,
 )
+import urllib.parse
 
 
 @api_view(["GET"])
@@ -107,6 +108,7 @@ def tag_detail(request, name):
     ### Returns
     Tag data or HTTP error in Response
     """
+    name = urllib.parse.unquote(name)
     try:
         tag = Tag.objects.get(name=name)
     except Tag.DoesNotExist:
@@ -140,8 +142,9 @@ class MissionByTagAPI(generics.ListAPIView):
         ### Raises
         NotFound if Tag with given name not found
         """
+        name = urllib.parse.unquote(self.kwargs["name"])
         try:
-            tag = Tag.objects.get(name=self.kwargs["name"])
+            tag = Tag.objects.get(name=name)
         except Tag.DoesNotExist:
             raise NotFound(f"Tag with name {self.kwargs['name']} not found")
         mission_ids = Mission_tags.objects.filter(tag=tag).values_list(
@@ -208,6 +211,7 @@ def delete_mission_tag(request, mission_id, tag_name):
     success response or
     HTTP_404_NOT_FOUND if mission, tag or relation not found
     """
+    tag_name = urllib.parse.unquote(tag_name)
     try:
         # Retrieve the mission using the mission_id
         mission = Mission.objects.get(id=mission_id)

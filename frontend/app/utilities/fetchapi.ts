@@ -86,8 +86,11 @@ export const fetchAndTransformMission = async (
   
     try {
       const mission: BackendMissionData = await getMission(id); // Fetch the mission using the REST API
+      const tags: Tag[] = await getTagsByMission(id); //Fetch the tags for the mission
+      tags.sort((a, b) => a.name.localeCompare(b.name));
   
       const exampleData: MissionData = mission_table_data[id % mission_table_data.length];
+
   
       const transformedMission: MissionData = {
           missionId: mission.id,
@@ -97,7 +100,7 @@ export const fetchAndTransformMission = async (
           totalSize: exampleData?.totalSize || "",
           robot: exampleData?.robot || "",
           remarks: mission.other || "",
-          tags: exampleData?.tags || [],
+          tags: tags || [],
         };
   
       return transformedMission;
@@ -116,6 +119,7 @@ export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
         let renderedMissions: MissionData[] = [];
         for (let i = 0; i < missions.length; i++) {
             const tags: Tag[] = await getTagsByMission(missions[i].id);
+            tags.sort((a, b) => a.name.localeCompare(b.name));
             const exampleData = mission_table_data.at(i % 5);
             renderedMissions.push(
                 {
@@ -179,7 +183,7 @@ export const addTagToMission = async (missionId: number, tagName: string): Promi
 
 // Remove a tag from a mission
 export const removeTagFromMission = async (missionId: number, tagName: string): Promise<void> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/delete/${missionId}/${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/delete/${missionId}/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -192,7 +196,7 @@ export const removeTagFromMission = async (missionId: number, tagName: string): 
 
 // Change the color of a tag
 export const changeTagColor = async (tagName: string, newColor: string): Promise<Tag> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -209,7 +213,6 @@ export const changeTagColor = async (tagName: string, newColor: string): Promise
     }
     const data = await response.json();
     return {
-        tagId: data.id,
         name: data.name,
         color: data.color,
     };
@@ -233,7 +236,6 @@ export const createTag = async (tagName: string, color?: string): Promise<Tag> =
     }
     const data = await response.json();
     return {
-        tagId: data.id,
         name: data.name,
         color: data.color,
     };
@@ -241,7 +243,7 @@ export const createTag = async (tagName: string, color?: string): Promise<Tag> =
 
 // Delete a tag by its name
 export const deleteTag = async (tagName: string): Promise<void> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -279,7 +281,7 @@ export const getTagsByMission = async (missionId: number): Promise<Tag[]> => {
 
 // Get all missions for a tag
 export const getMissionsByTag = async (tagName: string): Promise<{ id: number; name: string; location: string }[]> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/tags/missions/${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${FETCH_API_BASE_URL}/tags/missions/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Checkbox,
   Container,
@@ -8,27 +9,48 @@ import {
   Title,
 } from "@mantine/core";
 import classes from "./LoginPage.module.css";
+import { Form } from "@remix-run/react";
+import { IconInfoCircle } from "@tabler/icons-react";
 
-export function LoginView() {
+export function LoginView({ error }: { error?: string }) {
   return (
-    <Container size={420} my={40}>
-      <Title ta="center" className={classes.title}>
-        Login
-      </Title>
+    <Form method="post">
+      <Container size={420} my={40}>
+        <Title ta="center" className={classes.title}>
+          Login
+        </Title>
 
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <TextInput label="Username" placeholder="robot enjoyer" required />
-        <PasswordInput
-          label="Password"
-          placeholder="i like robots"
-          required
-          mt="md"
-        />
-        <Checkbox label="Remember me" mt="lg" />
-        <Button fullWidth mt="xl">
-          Sign in
-        </Button>
-      </Paper>
-    </Container>
+        {error && (
+          <Alert
+            variant="light"
+            mt="lg"
+            color="red"
+            title="Login error"
+            icon={<IconInfoCircle />}
+          >
+            {error}
+          </Alert>
+        )}
+
+        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+          <TextInput
+            name="username"
+            label="Username"
+            placeholder="robot enjoyer"
+            required
+          />
+          <PasswordInput
+            name="password"
+            label="Password"
+            placeholder="i like robots"
+            required
+            mt="md"
+          />
+          <Button type="submit" fullWidth mt="xl">
+            Sign in
+          </Button>
+        </Paper>
+      </Container>
+    </Form>
   );
 }
