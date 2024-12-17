@@ -300,9 +300,22 @@ export function Overview() {
                     return { ...missionRow, tags: updatedTags };
                   });
 
+                  const updatedFetchedData = fetchedData.map((missionRow) => {
+                    // Find the tag in each row and update its color if found
+                    const updatedTags = missionRow.tags.map((tag) => {
+                      if (tag.name === tagName) {
+                        return { ...tag, color: newColor }; // update the color of the matching tag
+                      }
+                      return tag;
+                    });
+
+                    // Return the updated row with the updated tags
+                    return { ...missionRow, tags: updatedTags };
+                  });
+
                   // Set the updated state with the updated array
                   setRenderedData(updatedRenderedData);
-                  setFetchedData(updatedRenderedData);
+                  setFetchedData(updatedFetchedData);
                 }}
               />
             </Menu.Dropdown>
