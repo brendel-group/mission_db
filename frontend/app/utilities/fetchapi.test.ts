@@ -19,6 +19,12 @@ import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from '~/config';
 import { BackendMissionData, MissionData, Tag } from '~/data';
 import { mission_table_data } from '../RandomData';
 
+/*
+How to run the tests:
+- cd to frontend directory
+- run `npm test`
+*/
+
 // Mock fetch and global objects
 global.fetch = jest.fn();
 global.console = { ...console, error: jest.fn() };
