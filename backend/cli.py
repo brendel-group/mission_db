@@ -78,7 +78,7 @@ def check_mission(name, date):
 def get_id(name, date):
     try:
         mission = Mission.objects.get(name=name, date=date)
-        return mission.id
+        return mission
     except Mission.DoesNotExist:
         print(f"No mission found with name '{name}' and date '{date}'.")
         return None
@@ -89,7 +89,7 @@ def get_id(name, date):
 def get_details_id(path):
     try:
         mission = File.objects.get(file_path=path)
-        return mission.id
+        return mission
     except File.DoesNotExist:
         print(f"No Details found for file '{path}'")
         return None
@@ -205,24 +205,26 @@ def add_details(mission_path, robot, id):
     for folder in os.listdir(mission_path):
         folder_path = os.path.join(mission_path, folder)
         typ = None
-        if folder == "test":
+        if os.path.basename(folder_path) == "test":
             typ = "test"
-        elif folder == "train":
-            typ == "train"
+        elif os.path.basename(folder_path) == "train":
+            typ = "train"
+
         if os.path.isdir(folder_path):
-            for item in os.listdir(folder_path):
-                item_path = os.path.join(folder_path, item)
-                if os.path.isdir(item_path):
-                    logging.debug("path: {item_path}")
-                    files = os.listdir(item_path)
-                    mcap = os.path.join(item_path, files[0])
-                    metadata = os.path.join(item_path, files[1])
-                    size = get_filsize(mcap)
-                    duration = get_duration(metadata)
-                    logging.debug("working fine till here")
-                    save_Details(item_path, size, duration, robot)
-                    details_id = get_details_id(item_path)
-                    save_missionfiles(id, details_id, typ)
+            for subfolder in os.listdir(folder_path):
+                subfolder_path = os.path.join(folder_path, subfolder)
+                if os.path.isdir(subfolder_path):
+                    for item in os.listdir(subfolder_path):
+                        if os.path.join(subfolder_path, item).endswith(".mcap"):
+                            mcap_path = os.path.join(subfolder_path, item)
+                            logging.debug("path: {item_path}")
+                            metadata = os.path.join(os.path.join(subfolder_path ,os.listdir(subfolder_path)[1]))
+                            size = get_filsize(mcap_path)
+                            duration = get_duration(metadata)
+                            logging.debug("working fine till here")
+                            save_Details(mcap_path, size, duration, robot)
+                            details_id = get_details_id(mcap_path)
+                            save_missionfiles(id, details_id, typ)
 
 def save_missionfiles(mission_id, details_id, typ):
     try:
@@ -239,7 +241,7 @@ def save_Details(path, size, duration, robot):
         except Exception as e:
             logging.error(f"Error Adding Details: {e}")
     else:
-        logging.warning("Skipping sue to issues with the metadata")
+        logging.warning("Skipping due to issues with the metadata")
 
 def remove_Details(id):
     details = File.objects.get(id=id)
