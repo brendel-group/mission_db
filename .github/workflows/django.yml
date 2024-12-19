@@ -43,11 +43,8 @@ jobs:
         python backend/manage.py makemigrations
         python backend/manage.py migrate
         echo "Migrations completed!"
-    - name: Run restapi Tests
+    - name: Run Tests
       if: success()
       run: |
-        python backend/manage.py test restapi
-    - name: Run cli Tests
-      if: success()
-      run: |
-        python backend/manage.py test tests_cli
+        python backend/manage.py test backend
+
