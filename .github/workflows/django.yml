@@ -47,7 +47,7 @@ jobs:
       if: success()
       run: |
         python backend/manage.py test restapi
-    - name: Run restapi Tests
+    - name: Run cli Tests
       if: success()
       run: |
         python backend/manage.py test tests_cli
