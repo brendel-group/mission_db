@@ -21,10 +21,10 @@ To test the API, one can use the django webserver. The backend/restapi/urls.py f
         "name": "picking apples",
         "date": "2024-10-29",
         "location": "Tuebingen",
-        "other": "good data"
+        "notes": "good data"
       }  
     ```
-    - `name` and `date` are required, while `location` and `other` are optional.
+    - `name` and `date` are required, while `location` and `notes` are optional.
 
 - GET, PUT and DELETE mission by id
     - [GET Mission by id](http://127.0.0.1:8000/restapi/missions/0) to access a certain mission, you have to add the mission id to the end of the URL (with the mission with id 0 as an example)

@@ -15,13 +15,13 @@ class RestApiPostMissionTestCase(APITestCase):
             name="TestMission",
             date="2024-10-29",
             location="TestLocation",
-            other="TestOther",
+            notes="TestOther",
         )
         self.secondMission = Mission.objects.create(
             name="TestMission2",
             date="2024-10-29",
             location="TestLocation2",
-            other="TestOther2",
+            notes="TestOther2",
         )
 
     def test_get_missions(self):
@@ -35,7 +35,7 @@ class RestApiPostMissionTestCase(APITestCase):
                 "name": "TestMission",
                 "date": "2024-10-29",
                 "location": "TestLocation",
-                "other": "TestOther",
+                "notes": "TestOther",
             },
         )
         self.assertEqual(
@@ -45,7 +45,7 @@ class RestApiPostMissionTestCase(APITestCase):
                 "name": "TestMission2",
                 "date": "2024-10-29",
                 "location": "TestLocation2",
-                "other": "TestOther2",
+                "notes": "TestOther2",
             },
         )
 
@@ -62,7 +62,7 @@ class RestApiPostMissionTestCase(APITestCase):
                 "name": "TestMission",
                 "date": "2024-10-29",
                 "location": "TestLocation",
-                "other": "TestOther",
+                "notes": "TestOther",
             },
         )
 
@@ -73,7 +73,7 @@ class RestApiPostMissionTestCase(APITestCase):
                 "name": "TestMissionUpdated",
                 "date": "2024-10-29",
                 "location": "TestLocation",
-                "other": "TestOther",
+                "notes": "TestOther",
             },
             format="json",
         )
@@ -85,7 +85,7 @@ class RestApiPostMissionTestCase(APITestCase):
                 "name": "TestMissionUpdated",
                 "date": "2024-10-29",
                 "location": "TestLocation",
-                "other": "TestOther",
+                "notes": "TestOther",
             },
         )
 
@@ -272,7 +272,7 @@ class RestAPIMissionTagsTestCase(APITestCase):
             name="TestMission",
             date=timezone.now(),
             location="TestLocation",
-            other="TestOther",
+            notes="TestOther",
         )
         self.tags = []
         for i in range(3):
@@ -458,7 +458,7 @@ class MissionFilesTestCase(APITestCase):
             name="TestMission",
             date=timezone.now(),
             location="TestLocation",
-            other="TestOther",
+            notes="TestOther",
         )
 
         # Create files

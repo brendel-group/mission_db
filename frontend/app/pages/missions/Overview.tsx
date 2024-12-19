@@ -210,7 +210,7 @@ export function Overview() {
       <Table.Td>{row.totalDuration}</Table.Td>
       <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
-      <Table.Td>{row.remarks === null ? "None" : row.remarks}</Table.Td>
+      <Table.Td>{row.notes === null ? "None" : row.notes}</Table.Td>
       <Table.Td
         onClick={(e) => e.stopPropagation()}
         style={{ cursor: "default" }}
@@ -331,7 +331,7 @@ export function Overview() {
     { key: "totalDuration", label: "Duration" },
     { key: "totalSize", label: "Size (MB)" },
     { key: "robot", label: "Robot" },
-    { key: "remarks", label: "Remarks" },
+    { key: "notes", label: "Notes" },
     { key: "tags", label: "Tags" },
   ];
 
