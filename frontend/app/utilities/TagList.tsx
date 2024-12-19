@@ -24,7 +24,7 @@ export function RenderTagsDetailView({
   return (
     <Group gap="xs">
       {/*edit button*/}
-      <Menu>
+      <Menu closeOnClickOutside={false}>
         <Menu.Target>
           <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
             <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
