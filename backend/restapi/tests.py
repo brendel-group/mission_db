@@ -11,7 +11,7 @@ import urllib.parse
 
 class RestApiPostMissionTestCase(APITestCase):
     def setUp(self):
-        self.fristMission = Mission.objects.create(
+        self.firstMission = Mission.objects.create(
             name="TestMission",
             date="2024-10-29",
             location="TestLocation",
@@ -31,7 +31,7 @@ class RestApiPostMissionTestCase(APITestCase):
         self.assertEqual(
             response.data[0],
             {
-                "id": self.fristMission.id,
+                "id": self.firstMission.id,
                 "name": "TestMission",
                 "date": "2024-10-29",
                 "location": "TestLocation",
@@ -51,14 +51,14 @@ class RestApiPostMissionTestCase(APITestCase):
 
     def test_get_by_id(self):
         response = self.client.get(
-            reverse("mission_detail", kwargs={"pk": self.fristMission.id}),
+            reverse("mission_detail", kwargs={"pk": self.firstMission.id}),
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.data,
             {
-                "id": self.fristMission.id,
+                "id": self.firstMission.id,
                 "name": "TestMission",
                 "date": "2024-10-29",
                 "location": "TestLocation",
@@ -68,7 +68,7 @@ class RestApiPostMissionTestCase(APITestCase):
 
     def test_put_by_id(self):
         response = self.client.put(
-            reverse("mission_detail", kwargs={"pk": self.fristMission.id}),
+            reverse("mission_detail", kwargs={"pk": self.firstMission.id}),
             {
                 "name": "TestMissionUpdated",
                 "date": "2024-10-29",
@@ -81,7 +81,7 @@ class RestApiPostMissionTestCase(APITestCase):
         self.assertEqual(
             response.data,
             {
-                "id": self.fristMission.id,
+                "id": self.firstMission.id,
                 "name": "TestMissionUpdated",
                 "date": "2024-10-29",
                 "location": "TestLocation",
