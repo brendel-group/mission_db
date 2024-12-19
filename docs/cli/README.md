@@ -23,7 +23,7 @@ cli.py interactive mode
 >>> mission add --name "Example for interactive shell" --date "2024-12-10" 
 INFO:root:'Example for interactive shell' added.
 >>> mission list
-id │ name                          │ date       │ location │ other
+id │ name                          │ date       │ location │ notes
 ───┼───────────────────────────────┼────────────┼──────────┼──────
 1  │ Example for interactive shell │ 2024-12-10 │ None     │ None 
 >>> exit
@@ -51,11 +51,11 @@ Arguments:
 - `--name` mission name
 - `--date` mission date in format YYYY-MM-DD
 - `--location` (optional) the location where the mission took place
-- `--other` (optional) additional information
+- `--notes` (optional) additional information
 
 Example:
 ```
-./cli.py mission add --name "Missionname" --date "2024-11-29" --location "location" --other "other"
+./cli.py mission add --name "Missionname" --date "2024-11-29" --location "location" --notes "other"
 ```
 ### `cli.py mission remove`
 removes a Mission from the Database
@@ -128,7 +128,7 @@ adds a mission using the filepath
 Arguments:
 - `--path` path to mission folder of format `YYYY.MM.DD_mission_name` without trailing /
 - `--location` (optional) the location where the mission took place
-- `--other` (optional) additional information
+- `--notes` (optional) additional information
 
 ### `cli.py syncfolder`
 adds all missions from a folder not currently in the database
@@ -136,11 +136,11 @@ adds all missions from a folder not currently in the database
 Arguments:
 - `--path` path to mission folder containing the missionfolders 
 - `--location` (optional) the location where the mission took place
-- `--other` (optional) additional information
+- `--notes` (optional) additional information
 
 Example:
 ```
-./cli.py syncfolder --path "your/path/name" --location "location(optional)" --other "other(optional)"
+./cli.py syncfolder --path "your/path/name" --location "location(optional)" --notes "other(optional)"
 ```
 
 ### `cli.py tag`

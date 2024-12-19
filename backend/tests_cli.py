@@ -164,7 +164,7 @@ class AddMissionTests(TestCase):
                 name="test_add_mission_2",
                 date="2024-12-02",
                 location="TestLocation",
-                other="other info",
+                notes="other info",
             ).exists()
         )
 
@@ -177,10 +177,10 @@ class AddMissionTests(TestCase):
         self.assertEqual(
             len(Mission.objects.filter(name="TestAddMission", date="2024-12-02")), 2
         )
-        cli.add_mission("TestAddMission", "2024-12-02", other="other")
+        cli.add_mission("TestAddMission", "2024-12-02", notes="notes")
         self.assertTrue(
             Mission.objects.filter(
-                name="TestAddMission", date="2024-12-02", other="other"
+                name="TestAddMission", date="2024-12-02", notes="notes"
             ).exists()
         )
 
@@ -226,7 +226,7 @@ class CapturedOutputTest(TestCase):
         sys.stdout.flush()
         self.assertEqual(
             self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
-            "id│name│date│location│other\n"
+            "id│name│date│location│notes\n"
             + "┼┼┼┼\n"
             + f"{missions[0].id}│Test│2024-12-02│None│None\n"
             + f"{missions[1].id}│Test│2024-12-02│None│None\n"
@@ -286,7 +286,7 @@ class MainFunctionTests(TestCase):
             "2024-12-02",
             "--location",
             "Tübingen",
-            "--other",
+            "--notes",
             "Test with all fields",
         ]
         with self.assertLogs(level="INFO") as log:
@@ -296,7 +296,7 @@ class MainFunctionTests(TestCase):
                     name="Test",
                     date="2024-12-02",
                     location="Tübingen",
-                    other="Test with all fields",
+                    notes="Test with all fields",
                 ).exists()
             )
             self.assertEqual(log.output, ["INFO:root:'Test' added."])

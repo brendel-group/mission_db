@@ -2,11 +2,11 @@
 ![ER Diagram](db_scheme_er_diagram.png)
 The above diagram is an ER Diagram. Information on how to read those diagrams can be found [here](https://www.pertuniti.com/documentation/eer/).
 
-The first table is the `missions` table. It has the columns `id`, `name`, `date`, `location` and `other`.\
+The first table is the `missions` table. It has the columns `id`, `name`, `date`, `location` and `notes`.\
 The `id` field is underlined which means it's the primary key and is an integer with auto increment.\
 `name` is a string.\
 `date` is a DateField.\
-`location` and `other` are strings and are optional.
+`location` and `notes` are strings and are optional.
 
 The second table is the `files` table. It has the columns `id`, `file_path`, `robot`, `duration` and `size`.\
 `id` is the primary key and is an integer with auto increment.\
