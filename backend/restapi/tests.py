@@ -9,6 +9,94 @@ import logging
 import urllib.parse
 
 
+class RestApiPostMissionTestCase(APITestCase):
+    def setUp(self):
+        self.firstMission = Mission.objects.create(
+            name="TestMission",
+            date="2024-10-29",
+            location="TestLocation",
+            other="TestOther",
+        )
+        self.secondMission = Mission.objects.create(
+            name="TestMission2",
+            date="2024-10-29",
+            location="TestLocation2",
+            other="TestOther2",
+        )
+
+    def test_get_missions(self):
+        response = self.client.get(reverse("get_missions"), format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(
+            response.data[0],
+            {
+                "id": self.firstMission.id,
+                "name": "TestMission",
+                "date": "2024-10-29",
+                "location": "TestLocation",
+                "other": "TestOther",
+            },
+        )
+        self.assertEqual(
+            response.data[1],
+            {
+                "id": self.secondMission.id,
+                "name": "TestMission2",
+                "date": "2024-10-29",
+                "location": "TestLocation2",
+                "other": "TestOther2",
+            },
+        )
+
+    def test_get_by_id(self):
+        response = self.client.get(
+            reverse("mission_detail", kwargs={"pk": self.firstMission.id}),
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data,
+            {
+                "id": self.firstMission.id,
+                "name": "TestMission",
+                "date": "2024-10-29",
+                "location": "TestLocation",
+                "other": "TestOther",
+            },
+        )
+
+    def test_put_by_id(self):
+        response = self.client.put(
+            reverse("mission_detail", kwargs={"pk": self.firstMission.id}),
+            {
+                "name": "TestMissionUpdated",
+                "date": "2024-10-29",
+                "location": "TestLocation",
+                "other": "TestOther",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data,
+            {
+                "id": self.firstMission.id,
+                "name": "TestMissionUpdated",
+                "date": "2024-10-29",
+                "location": "TestLocation",
+                "other": "TestOther",
+            },
+        )
+
+    def test_delete_by_id(self):
+        response = self.client.delete(
+            reverse("mission_detail", kwargs={"pk": self.secondMission.id})
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(Mission.objects.filter(id=self.secondMission.id)), 0)
+
+
 class TagTestCase(TestCase):
     test_names = list()
 
