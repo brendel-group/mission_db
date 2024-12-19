@@ -40,6 +40,7 @@ jobs:
   
     - name: Run migrations
       run: |
+        python backend/manage.py makemigrations
         python backend/manage.py migrate
         echo "Migrations completed!"
     - name: Run Tests
