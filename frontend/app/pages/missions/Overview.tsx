@@ -9,9 +9,9 @@ import {
   TextInput,
   rem,
   keys,
-  Menu,
   Skeleton,
   Badge,
+  Popover,
 } from "@mantine/core";
 import {
   IconSelector,
@@ -246,25 +246,23 @@ export function Overview() {
               {item.name}
             </Badge>
           ))}
-          <Menu closeOnClickOutside={false}>
+          <Popover>
             {/*edit button*/}
-            <Menu.Target>
+            <Popover.Target>
               <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
                 <IconPencil
                   size={16}
                   style={{ transform: "translateY(2px)" }}
                 />
               </Badge>
-            </Menu.Target>
+            </Popover.Target>
             {/*Actions for the Tag Picker*/}
-            <Menu.Dropdown
+            <Popover.Dropdown
               style={{
                 padding: "10px",
                 marginLeft: "-25px",
                 marginTop: "2px",
-                maxHeight: "230px",
-                overflowY: "auto",
-                overflowX: "hidden",
+                width: "300px",
               }}
             >
               <TagPicker
@@ -325,8 +323,8 @@ export function Overview() {
                   setFetchedData(updatedFetchedData);
                 }}
               />
-            </Menu.Dropdown>
-          </Menu>
+            </Popover.Dropdown>
+          </Popover>
         </Group>
       </Table.Td>
     </Table.Tr>

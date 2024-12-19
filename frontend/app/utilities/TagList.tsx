@@ -1,4 +1,4 @@
-import { Badge, Group, Menu } from "@mantine/core";
+import { Badge, Group, Popover } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { Tag } from "~/data";
 import { TagPicker } from "./TagPicker";
@@ -24,14 +24,16 @@ export function RenderTagsDetailView({
   return (
     <Group gap="xs">
       {/*edit button*/}
-      <Menu closeOnClickOutside={false}>
-        <Menu.Target>
+      <Popover>
+        <Popover.Target>
           <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
             <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
           </Badge>
-        </Menu.Target>
+        </Popover.Target>
         {/*Actions for the Tag Picker*/}
-        <Menu.Dropdown style={{ padding: "10px", marginLeft: "75px" }}>
+        <Popover.Dropdown
+          style={{ padding: "10px", marginLeft: "75px", width: "300px" }}
+        >
           <TagPicker
             tags={tags}
             onAddNewTag={(tagName, tagColor) => {
@@ -67,8 +69,8 @@ export function RenderTagsDetailView({
               );
             }}
           />
-        </Menu.Dropdown>
-      </Menu>
+        </Popover.Dropdown>
+      </Popover>
       {/*list of tags*/}
       {tags.map((item) => (
         <Badge
