@@ -14,7 +14,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")  # Adjust as
 django.setup()
 
 # Importing Models, adjust as needed
-from restapi.models import Mission, Tag, Mission_tags, File  # noqa
+from restapi.models import Mission, Tag, Mission_tags, File, Mission_files  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 
 # Set up logging
@@ -40,11 +40,10 @@ def extract_info_from_folder(folder_name):
         )
         return None, None
     
-def extract_Data_from_File(path):
+def get_duration(path):
     metadata = load_yaml_metadata(path)
-    size = get_filsize(path)
     duration = get_mcap_duration_from_yaml(metadata)
-    return size, duration
+    return duration
     
 def load_yaml_metadata(yaml_filepath):
     """Load YAML metadata."""
@@ -69,6 +68,32 @@ def check_mission_exists(id):
     false it mission doesn't exist
     """
     return Mission.objects.filter(id=id).exists()
+
+def check_mission(name, date):
+    """
+    Checks if Mission with the same name and date exists
+    """
+    return Mission.objects.filter(name=name, date=date).exists()
+
+def get_id(name, date):
+    try:
+        mission = Mission.objects.get(name=name, date=date)
+        return mission.id
+    except Mission.DoesNotExist:
+        print(f"No mission found with name '{name}' and date '{date}'.")
+        return None
+    except Mission.MultipleObjectsReturned:
+        print(f"Multiple missions found with name '{name}' and date '{date}'.")
+        return None
+
+def get_details_id(path):
+    try:
+        mission = File.objects.get(file_path=path)
+        return mission.id
+    except File.DoesNotExist:
+        print(f"No Details found for file '{path}'")
+        return None
+
 
 
 def validate_date(date_str):
@@ -156,33 +181,57 @@ def add_mission_from_folder(folder_path, location=None, other=None):
     mission_date, name = extract_info_from_folder(folder_name)
 
     if mission_date and name:
-        mission = Mission(name=name, date=mission_date, location=location, other=other)
-        try:
-            mission.save()
-            logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
-        except Exception as e:
-            logging.error(f"Error adding mission: {e}")
+        if not check_mission(name, mission_date):
+            mission = Mission(
+                name=name, date=mission_date, location=location, other=other
+            )
+            try:
+                mission.save()
+                logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
+                robot = None
+                id = get_id(name, mission_date)
+                logging.debug("id: {id}")
+                add_details(folder_path, robot, id)
+            except Exception as e:
+                logging.error(f"Error adding mission: {e}")
+        else:
+            logging.warning("skipping because this mission has already been added")
     else:
         logging.warning("Skipping folder due to naming issues.")
+        
 
-def add_details(mission_path, robot):
+
+def add_details(mission_path, robot, id):
     for folder in os.listdir(mission_path):
         folder_path = os.path.join(mission_path, folder)
+        typ = None
+        if folder == "test":
+            typ = "test"
+        elif folder == "train":
+            typ == "train"
         if os.path.isdir(folder_path):
             for item in os.listdir(folder_path):
                 item_path = os.path.join(folder_path, item)
                 if os.path.isdir(item_path):
-                    for file in os.listdir(item_path):
-                        if file.endswith(".yaml"):
-                            addDetails(os.path.join(item_path, file), robot)
-                            print("details found")
-                        else:
-                            logging.warning("no metadata found")
+                    logging.debug("path: {item_path}")
+                    files = os.listdir(item_path)
+                    mcap = os.path.join(item_path, files[0])
+                    metadata = os.path.join(item_path, files[1])
+                    size = get_filsize(mcap)
+                    duration = get_duration(metadata)
+                    logging.debug("working fine till here")
+                    save_Details(item_path, size, duration, robot)
+                    details_id = get_details_id(item_path)
+                    save_missionfiles(id, details_id, typ)
+
+def save_missionfiles(mission_id, details_id, typ):
+    try:
+        files = Mission_files(mission=mission_id, file=details_id, type=typ)
+        files.save()
+    except Exception as e:
+        logging.error(f"Error Adding Mission_files: {e}")                      
                 
-
-
-def addDetails(path, robot):
-    size, duration = extract_Data_from_File(path)
+def save_Details(path, size, duration, robot):
     if size and duration:
         file = File(file_path=path, robot=robot, duration=duration, size=size)
         try:
@@ -191,6 +240,11 @@ def addDetails(path, robot):
             logging.error(f"Error Adding Details: {e}")
     else:
         logging.warning("Skipping sue to issues with the metadata")
+
+def remove_Details(id):
+    details = File.objects.get(id=id)
+    details.delete()
+
 
 def add_mission(name, mission_date, location=None, other=None):
     """
@@ -606,6 +660,10 @@ def details_parser(subparser):
     details_parser.add_argument("--path", required=True, help="Filepath")
     details_parser.add_argument("--robot", required=False, help="Robot")
 
+def remove_details_parser(subparser):
+    remove_parser = subparser.add_parser("removedetails", help="remove Details")
+    remove_parser.add_argument("--id", required=True, help="id")
+
 
 def tag_arg_parser(subparser):
     tag_parser = subparser.add_parser("tag", help="Modify Tags")
@@ -661,6 +719,8 @@ def main(args):
 
     details_parser(subparser)
 
+    remove_details_parser(subparser)
+
     tag_parser, tag_mission_parser = tag_arg_parser(subparser)
 
     argcomplete.autocomplete(parser)
@@ -677,6 +737,8 @@ def main(args):
             tag_command(tag_parser, tag_mission_parser, args)
         case "adddetails":
             add_details(args.path, args.robot)
+        case "removedetails":
+            remove_Details(args.id)
         case _:
             parser.print_help()
 
