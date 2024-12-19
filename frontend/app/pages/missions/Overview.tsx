@@ -246,7 +246,7 @@ export function Overview() {
               {item.name}
             </Badge>
           ))}
-          <Menu>
+          <Menu closeOnClickOutside={false}>
             {/*edit button*/}
             <Menu.Target>
               <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
@@ -258,7 +258,14 @@ export function Overview() {
             </Menu.Target>
             {/*Actions for the Tag Picker*/}
             <Menu.Dropdown
-              style={{ padding: "10px", marginLeft: "-25px", marginTop: "2px" }}
+              style={{
+                padding: "10px",
+                marginLeft: "-25px",
+                marginTop: "2px",
+                maxHeight: "230px",
+                overflowY: "auto",
+                overflowX: "hidden",
+              }}
             >
               <TagPicker
                 tags={row.tags}

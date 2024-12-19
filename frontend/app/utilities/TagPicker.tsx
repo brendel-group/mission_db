@@ -7,6 +7,7 @@ import {
   TextInput,
   Stack,
   ColorPicker,
+  ColorInput,
 } from "@mantine/core";
 import { IconTrash, IconPlus, IconPalette } from "@tabler/icons-react";
 import { Tag } from "~/data";
@@ -26,7 +27,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("#390099");
-  const [error, setError] = useState<string | null>(null);
+  const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
+  const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
   const swatches = [
     "#390099",
     "#2c7da0",
@@ -38,35 +40,46 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     "#80b918",
   ];
 
+  function isHexCode(str: string) {
+    const hexRegex = /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
+    return hexRegex.test(str);
+  }
+
   const handleAddTag = () => {
     if (newTagName) {
       // check if tag already exists
       if (tags.find((tag) => tag.name === newTagName)) {
-        setError("This tag already exists");
+        setNewTagNameError("This tag already exists");
         setNewTagName("");
         return;
       }
       // check if tag name is too long (max 42 characters)
       if (newTagName.length > 42) {
-        setError("This tag name is too long");
+        setNewTagNameError("This tag name is too long");
         setNewTagName("");
+        return;
+      }
+      // check if color is valid
+      if (!isHexCode(selectedColor)) {
+        setNewTagColorError("Color input is not a valid hex code");
+        setSelectedColor("#390099");
         return;
       }
       onAddNewTag(newTagName, selectedColor);
       setNewTagName("");
-      setError(null);
+      setNewTagNameError(null);
     }
   };
 
   return (
     <Stack gap={4}>
-      <Group gap="xs" style={{ display: "flex", marginBottom: "2px" }}>
+      <Group gap="xs" style={{ display: "flex" }}>
         {/*input for new tag name*/}
         <TextInput
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
           placeholder="Add a new tag"
-          error={error}
+          error={newTagNameError}
           onKeyDown={(e) => {
             e.key === "Enter" && handleAddTag();
           }}
@@ -81,24 +94,28 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           <IconPlus size={16} />
         </Button>
       </Group>
-      {/*custom color picker*/}
-      <div style={{ display: "flex", gap: "8px" }}>
-        {swatches.map((swatch) => (
-          <div
-            key={swatch}
-            style={{
-              width: "30px",
-              height: "30px",
-              backgroundColor: swatch,
-              border:
-                selectedColor === swatch ? "3px solid black" : "1px solid gray",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-            onClick={() => setSelectedColor(swatch)}
-          />
-        ))}
-      </div>
+
+      {/*color input*/}
+      <ColorInput
+        placeholder="placeholder"
+        value={selectedColor}
+        onChange={setSelectedColor}
+        style={{ marginBottom: -7, marginTop: 1 }}
+        error={newTagColorError}
+        onKeyDown={(e) => {
+          e.key === "Enter" && handleAddTag();
+        }}
+      />
+
+      {/*color picker*/}
+      <ColorPicker
+        onChange={setSelectedColor}
+        value={selectedColor}
+        swatchesPerRow={8}
+        swatches={swatches}
+        withPicker={false}
+        style={{ width: "100%" }}
+      />
 
       {/*list of tags*/}
       {tags.map((tag) => (
@@ -117,7 +134,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               shadow="md"
               styles={{
                 dropdown: {
-                  padding: 4,
+                  padding: 6,
                 },
               }}
             >
@@ -132,13 +149,23 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <ColorPicker
-                  size="xs"
-                  onChange={(color) => onChangeTagColor(tag.name, color)}
-                  withPicker={false}
-                  swatchesPerRow={4}
-                  swatches={swatches}
-                />
+                <Stack gap={0}>
+                  <ColorInput
+                    size="sm"
+                    value={tag.color}
+                    onChange={(color) => onChangeTagColor(tag.name, color)}
+                    error={newTagColorError}
+                    style={{ width: "179px", marginBottom: -3, marginTop: 2 }}
+                  />
+                  <ColorPicker
+                    size="xs"
+                    onChange={(color) => onChangeTagColor(tag.name, color)}
+                    withPicker={false}
+                    swatchesPerRow={4}
+                    swatches={swatches}
+                    style={{ marginBottom: -1 }}
+                  />
+                </Stack>
               </Menu.Dropdown>
             </Menu>
 
