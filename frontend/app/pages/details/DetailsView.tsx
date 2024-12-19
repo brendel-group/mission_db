@@ -2,7 +2,7 @@ import { Grid } from "@mantine/core";
 import React from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
-import { ShowStatsView } from "./StatsView";
+import { ShowStatsView } from "./InformationView";
 import { MissionData } from "~/data";
 import { detail_view_data } from "~/RandomData";
 import AbstractPage from "../AbstractPage";
