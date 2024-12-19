@@ -175,12 +175,12 @@ class AddMissionTests(TestCase):
         )
         cli.add_mission("TestAddMission", "2024-12-02")
         self.assertEqual(
-            len(Mission.objects.filter(name="TestAddMission", date="2024-12-02")), 2
+            len(Mission.objects.filter(name="TestAddMission", date="2024-12-02")), 1
         )
-        cli.add_mission("TestAddMission", "2024-12-02", other="other")
+        cli.add_mission("TestAddMission2", "2024-12-02", other="other")
         self.assertTrue(
             Mission.objects.filter(
-                name="TestAddMission", date="2024-12-02", other="other"
+                name="TestAddMission2", date="2024-12-02", other="other"
             ).exists()
         )
 
@@ -219,7 +219,7 @@ class CapturedOutputTest(TestCase):
 
     def test_print_mission_table(self):
         missions = [
-            Mission.objects.create(name="Test", date="2024-12-02") for i in range(3)
+            Mission.objects.create(name=f"Test{i}", date="2024-12-02") for i in range(3)
         ]
         serializer = MissionSerializer(missions, many=True)
         cli.print_table(serializer.data)
@@ -228,9 +228,9 @@ class CapturedOutputTest(TestCase):
             self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
             "id│name│date│location│other\n"
             + "┼┼┼┼\n"
-            + f"{missions[0].id}│Test│2024-12-02│None│None\n"
-            + f"{missions[1].id}│Test│2024-12-02│None│None\n"
-            + f"{missions[2].id}│Test│2024-12-02│None│None",
+            + f"{missions[0].id}│Test0│2024-12-02│None│None\n"
+            + f"{missions[1].id}│Test1│2024-12-02│None│None\n"
+            + f"{missions[2].id}│Test2│2024-12-02│None│None",
         )
 
     def test_print_tag_table(self):
