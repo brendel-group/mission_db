@@ -8,6 +8,7 @@ from .models import Tag, Mission, Mission_tags, File, Mission_files
 import logging
 import urllib.parse
 
+
 class RestApiPostMissionTestCase(APITestCase):
     def setUp(self):
         self.fristMission = Mission.objects.create(
@@ -22,7 +23,7 @@ class RestApiPostMissionTestCase(APITestCase):
             location="TestLocation2",
             other="TestOther2",
         )
-    
+
     def test_get_missions(self):
         response = self.client.get(reverse("get_missions"), format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -50,7 +51,8 @@ class RestApiPostMissionTestCase(APITestCase):
 
     def test_get_by_id(self):
         response = self.client.get(
-            reverse("mission_detail", kwargs={"pk": self.fristMission.id}), format="json"
+            reverse("mission_detail", kwargs={"pk": self.fristMission.id}),
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -63,11 +65,16 @@ class RestApiPostMissionTestCase(APITestCase):
                 "other": "TestOther",
             },
         )
-    
+
     def test_put_by_id(self):
         response = self.client.put(
             reverse("mission_detail", kwargs={"pk": self.fristMission.id}),
-            {"name": "TestMissionUpdated", "date": "2024-10-29", "location": "TestLocation", "other": "TestOther"},
+            {
+                "name": "TestMissionUpdated",
+                "date": "2024-10-29",
+                "location": "TestLocation",
+                "other": "TestOther",
+            },
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -81,13 +88,14 @@ class RestApiPostMissionTestCase(APITestCase):
                 "other": "TestOther",
             },
         )
-    
+
     def test_delete_by_id(self):
         response = self.client.delete(
             reverse("mission_detail", kwargs={"pk": self.secondMission.id})
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(Mission.objects.filter(id=self.secondMission.id)), 0)
+
 
 class TagTestCase(TestCase):
     test_names = list()
