@@ -1,0 +1,48 @@
+name: Django CI
+
+on: [push, pull_request]
+
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+       
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x' 
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Set environment variables
+      run: |
+        echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> $GITHUB_ENV
+        echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> $GITHUB_ENV
+        echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
+        echo "DATABASE_HOST=localhost" >> $GITHUB_ENV
+        echo "DATABASE_PORT=5432" >> $GITHUB_ENV
+  
+    - name: Run migrations
+      run: |
+        python backend/manage.py migrate
+        echo "Migrations completed!"
+    - name: Run Tests
+      if: success()
+      run: |
+        python backend/manage.py test restapi
