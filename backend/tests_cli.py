@@ -175,12 +175,12 @@ class AddMissionTests(TestCase):
         )
         cli.add_mission("TestAddMission", "2024-12-02")
         self.assertEqual(
-            len(Mission.objects.filter(name="TestAddMission", date="2024-12-02")), 2
+            len(Mission.objects.filter(name="TestAddMission", date="2024-12-02")), 1
         )
-        cli.add_mission("TestAddMission", "2024-12-02", other="other")
+        cli.add_mission("TestAddMission2", "2024-12-02", other="other")
         self.assertTrue(
             Mission.objects.filter(
-                name="TestAddMission", date="2024-12-02", other="other"
+                name="TestAddMission2", date="2024-12-02", other="other"
             ).exists()
         )
 
