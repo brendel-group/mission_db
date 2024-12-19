@@ -26,7 +26,7 @@ export function ShowDatasets({ data }: { data: DetailViewData }) {
     </Table.Tr>
   ));
 
-  // Returns the filled table with DatasetView, which is opend on state change
+  // Returns the filled table with DatasetView
   return (
     <>
       <Table>
