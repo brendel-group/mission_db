@@ -74,6 +74,13 @@ def check_mission_exists(id):
     return Mission.objects.filter(id=id).exists()
 
 
+def check_mission(name, date):
+    """
+    Checks if Mission with the same name and date exists
+    """
+    return Mission.objects.filter(name=name, date=date).exists()
+
+
 def validate_date(date_str):
     """
     Validate datetime format
@@ -159,14 +166,32 @@ def add_mission_from_folder(folder_path, location=None, other=None):
     mission_date, name = extract_info_from_folder(folder_name)
 
     if mission_date and name:
-        mission = Mission(name=name, date=mission_date, location=location, other=other)
-        try:
-            mission.save()
-            logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
-        except Exception as e:
-            logging.error(f"Error adding mission: {e}")
+        if not check_mission(name, mission_date):
+            mission = Mission(
+                name=name, date=mission_date, location=location, other=other
+            )
+            try:
+                mission.save()
+                logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
+            except Exception as e:
+                logging.error(f"Error adding mission: {e}")
+        else:
+            logging.warning("skipping because this mission has already been added")
     else:
         logging.warning("Skipping folder due to naming issues.")
+
+
+def sync_folder(folder_path, location=None, other=None):
+    """
+    Adds all Missions from a folder wich are not yet in the DB
+    """
+    if os.path.isdir(folder_path):
+        for item in os.listdir(folder_path):
+            item_path = os.path.join(folder_path, item)
+            if os.path.isdir(item_path):
+                add_mission_from_folder(item_path, location, other)
+    else:
+        logging.error("invalid path")
 
 
 def add_mission(name, mission_date, location=None, other=None):
@@ -635,6 +660,15 @@ def folder_arg_parser(subparser):
     folder_parser.add_argument("--other", required=False, help="other mission details")
 
 
+def sync_arg_parser(subparser):
+    sync_parser = subparser.add_parser(
+        "syncfolder", help="adds all missions from folder"
+    )
+    sync_parser.add_argument("--path", required=True, help="Filepath")
+    sync_parser.add_argument("--location", required=False, help="location")
+    sync_parser.add_argument("--other", required=False, help="other mission details")
+
+
 def tag_arg_parser(subparser):
     tag_parser = subparser.add_parser("tag", help="Modify Tags")
     tag_subparser = tag_parser.add_subparsers(dest="tag")
@@ -687,6 +721,8 @@ def main(args):
 
     folder_arg_parser(subparser)
 
+    sync_arg_parser(subparser)
+
     tag_parser, tag_mission_parser = tag_arg_parser(subparser)
 
     argcomplete.autocomplete(parser)
@@ -699,6 +735,8 @@ def main(args):
             mission_command(mission_parser, mission_tag_parser, args)
         case "addfolder":
             add_mission_from_folder(args.path, args.location, args.other)
+        case "syncfolder":
+            sync_folder(args.path, args.location, args.other)
         case "tag":
             tag_command(tag_parser, tag_mission_parser, args)
         case _:
