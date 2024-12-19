@@ -36,7 +36,6 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const [newColor, setNewColor] = useState(selectedColor);
   const [changeColorError, setChangeColorError] = useState<string | null>(null);
   const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
-  const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
   const swatches = [
     "#390099",
     "#2c7da0",
