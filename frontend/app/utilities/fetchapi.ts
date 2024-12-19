@@ -99,7 +99,7 @@ export const fetchAndTransformMission = async (
           totalDuration: exampleData?.totalDuration || "",
           totalSize: exampleData?.totalSize || "",
           robot: exampleData?.robot || "",
-          remarks: mission.other || "",
+          remarks: mission.other,
           tags: tags || [],
         };
   
@@ -129,7 +129,7 @@ export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
                     totalDuration: exampleData?.totalDuration || "",
                     totalSize: exampleData?.totalSize || "",
                     robot: exampleData?.robot || "",
-                    remarks: missions[i].other || "",
+                    remarks: missions[i].other,
                     tags: tags || []
                 }
             )
