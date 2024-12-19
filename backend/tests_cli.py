@@ -43,7 +43,7 @@ class SyncFolderArgumentTests(TestCase):
         self.patcher_listdir.stop()
         self.patcher_isdir.stop()
         self.patcher_add_mission_from_folder.stop()
-        
+
     def test_sync_folder_calls_add_mission_from_folder_with_correct_arguments(self):
         """
         Test sync_folder to ensure correct arguments are passed to add_mission_from_folder.
@@ -55,7 +55,7 @@ class SyncFolderArgumentTests(TestCase):
         self.mock_add_mission_from_folder.assert_any_call(
             "/test/2024.12.02_mission1", None, None
         )
-       self.mock_add_mission_from_folder.assert_any_call(
+        self.mock_add_mission_from_folder.assert_any_call(
             "/test/2024.12.03_mission2", None, None
         )
         # Ensure add_mission_from_folder is not called for invalid folders
