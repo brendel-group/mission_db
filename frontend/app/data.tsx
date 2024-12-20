@@ -3,9 +3,26 @@ export interface Tag {
   color: string;
 }
 
-// This represents a single mission in the missions table
+//Fetch this data by mission_id from MissionTableData
+export interface DetailViewData {
+  files: string[];
+  durations: string[];
+  sizes: string[];
+}
+
+//Represents a mission in the backend
 export interface MissionData {
-  missionId: number;
+  id: number;
+
+  name: string;
+  location: string;
+  date: string;
+  notes: string;
+}
+
+//This is a local representation used for mission table and details view
+export interface RenderedMission {
+  id: number;
 
   name: string;
   location: string;
@@ -15,22 +32,6 @@ export interface MissionData {
   notes: string;
 
   tags: Tag[];
-}
-
-//Fetch this data by mission_id from MissionTableData
-export interface DetailViewData {
-  files: string[];
-  durations: string[];
-  sizes: string[];
-}
-
-export interface BackendMissionData {
-  id: number;
-
-  name: string;
-  location: string;
-  date: string;
-  notes: string;
 }
 
 //User interface

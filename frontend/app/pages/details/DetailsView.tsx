@@ -3,41 +3,43 @@ import React from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { ShowStatsView } from "./StatsView";
-import { MissionData } from "~/data";
-import { detail_view_data } from "~/RandomData";
+import { RenderedMission } from "~/data";
 import AbstractPage from "../AbstractPage";
 
 interface DetailsViewProps {
-  missionData: MissionData | null;
+  missionData: RenderedMission;
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({
   missionData: selectedRow,
 }) => {
-  const detailViewData = selectedRow
-    ? detail_view_data[selectedRow.missionId]
-    : null;
+  const detailViewData = {
+    files: ["file1.mcap", "file2.mcap", "file3.mcap"],
+    durations: ["00:01:30", "00:02:45", "00:00:50"],
+    sizes: ["2000", "4500", "1000"],
+  };
 
   return (
     <AbstractPage
       headline={
         selectedRow
-          ? `${selectedRow.name}${selectedRow.location ? `, ${selectedRow.location}` : ""}${selectedRow.robot ? ` with ${selectedRow.robot}` : ""
-          }`
+          ? `${selectedRow.name}${
+              selectedRow.location ? `, ${selectedRow.location}` : ""
+            }${selectedRow.robot ? ` with ${selectedRow.robot}` : ""}`
           : "Mission Details"
       }
     >
       {/* Main content */}
-      < Grid gutter="md" >
+      <Grid gutter="md">
         {/* Left column occupying 80% */}
-        < Grid.Col span={9} >
+        <Grid.Col span={9}>
           <Grid gutter="md">
             {/* Tags */}
             <Grid.Col span={12}>
               {selectedRow && (
                 <RenderTagsDetailView
                   tags_={selectedRow.tags}
-                  missionId={selectedRow.missionId}
+                  missionId={selectedRow.id}
                 />
               )}
             </Grid.Col>
@@ -46,14 +48,14 @@ const DetailsView: React.FC<DetailsViewProps> = ({
               {detailViewData && <ShowDatasets data={detailViewData} />}
             </Grid.Col>
           </Grid>
-        </Grid.Col >
+        </Grid.Col>
 
         {/* Stats */}
-        < Grid.Col span={3} >
+        <Grid.Col span={3}>
           <ShowStatsView missionData={selectedRow} />
-        </Grid.Col >
-      </Grid >
-    </AbstractPage >
+        </Grid.Col>
+      </Grid>
+    </AbstractPage>
   );
 };
 

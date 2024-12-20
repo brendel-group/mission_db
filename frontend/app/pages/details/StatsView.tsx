@@ -1,8 +1,8 @@
 import { Text } from "@mantine/core";
-import { MissionData } from "~/data";
+import { RenderedMission } from "~/data";
 
 interface ShowStatsViewProps {
-  missionData: MissionData | null;
+  missionData: RenderedMission | null;
 }
 
 export const ShowStatsView: React.FC<ShowStatsViewProps> = ({
@@ -17,7 +17,9 @@ export const ShowStatsView: React.FC<ShowStatsViewProps> = ({
       </Text>
       <Text>Total Duration: {missionData.totalDuration}</Text>
       <Text>Total Size: {missionData.totalSize} GB</Text>
-      <Text>Notes: {missionData.notes === null ? "None" : missionData.notes}</Text>
+      <Text>
+        Notes: {missionData.notes === null ? "None" : missionData.notes}
+      </Text>
     </div>
   );
 };

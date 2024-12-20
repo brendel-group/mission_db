@@ -20,15 +20,16 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
-import { MissionData } from "~/data";
+import { MissionData, RenderedMission, Tag } from "~/data";
 import {
-  fetchAndTransformMissions,
   addTagToMission,
   changeTagColor,
   removeTagFromMission,
   createTag,
   getMissionsByTag,
   deleteTag,
+  getMissions,
+  getTagsByMission,
 } from "~/utilities/fetchapi";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
@@ -64,9 +65,9 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
 }
 
 function filterData(
-  data: MissionData[],
+  data: RenderedMission[],
   search: string,
-  searchedTags: string[] = [],
+  searchedTags: string[] = []
 ) {
   const query = search.toLowerCase().trim();
   return data.filter((item) => {
@@ -82,7 +83,7 @@ function filterData(
       searchedTags.length === 0 ||
       (item.tags &&
         searchedTags.every((tag) =>
-          item.tags.some((itemTag) => itemTag.name === tag),
+          item.tags.some((itemTag) => itemTag.name === tag)
         ));
 
     return matchesSearch && matchesTags;
@@ -90,13 +91,13 @@ function filterData(
 }
 
 function sortData(
-  data: MissionData[],
+  data: RenderedMission[],
   payload: {
-    sortBy: keyof MissionData | null;
+    sortBy: keyof RenderedMission | null;
     reversed: boolean;
     search: string;
     searchedTags: string[];
-  },
+  }
 ) {
   const { sortBy, reversed, search, searchedTags } = payload;
 
@@ -135,9 +136,9 @@ function sortData(
 export function Overview() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [fetchedData, setFetchedData] = useState<MissionData[]>([]);
-  const [renderedData, setRenderedData] = useState<MissionData[]>([]);
-  const [sortBy, setSortBy] = useState<keyof MissionData | null>(null);
+  const [fetchedData, setFetchedData] = useState<RenderedMission[]>([]);
+  const [renderedData, setRenderedData] = useState<RenderedMission[]>([]);
+  const [sortBy, setSortBy] = useState<keyof RenderedMission | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -146,13 +147,31 @@ export function Overview() {
   useEffect(() => {
     const fetchMissions = async () => {
       try {
-        const data = await fetchAndTransformMissions(); // Fetch data from API
-        if (data.length <= 0) {
+        const missions: MissionData[] = await getMissions(); // Fetch the missions using the REST API
+
+        // Map BackendMissionData missions to MissionData
+        let renderedMissions: RenderedMission[] = [];
+        for (let i = 0; i < missions.length; i++) {
+          const tags: Tag[] = await getTagsByMission(missions[i].id);
+          tags.sort((a, b) => a.name.localeCompare(b.name));
+          renderedMissions.push({
+            id: missions[i].id,
+            name: missions[i].name,
+            location: missions[i].location,
+            totalDuration: "00:00:00", // this fields need to be overriden in the future
+            totalSize: "0",
+            robot: "Vader",
+            notes: missions[i].notes,
+            tags: tags || [],
+          });
+        }
+
+        if (renderedMissions.length <= 0) {
           throw new Error("Data is empty");
         }
 
-        setFetchedData(data);
-        setRenderedData(data);
+        setFetchedData(renderedMissions);
+        setRenderedData(renderedMissions);
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message); // Display Error information
@@ -172,12 +191,12 @@ export function Overview() {
 
   if (error) return <p>Error: {error}</p>;
 
-  const setSorting = (field: keyof MissionData) => {
+  const setSorting = (field: keyof RenderedMission) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
     setRenderedData(
-      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags }),
+      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags })
     );
   };
 
@@ -190,14 +209,14 @@ export function Overview() {
         reversed: reverseSortDirection,
         search: value,
         searchedTags,
-      }),
+      })
     );
   };
 
   const rows = renderedData.map((row) => (
     <Table.Tr
       key={row.name}
-      onClick={() => navigate("/details?id=" + row.missionId)}
+      onClick={() => navigate("/details?id=" + row.id)}
       style={{
         cursor: "pointer",
         transition: "background-color 0.2s ease",
@@ -239,7 +258,7 @@ export function Overview() {
                     reversed: reverseSortDirection,
                     search,
                     searchedTags: updatedTags,
-                  }),
+                  })
                 );
               }}
             >
@@ -265,14 +284,14 @@ export function Overview() {
                 onAddNewTag={(tagName, tagColor) => {
                   //update tags in backend
                   createTag(tagName, tagColor);
-                  addTagToMission(row.missionId, tagName);
+                  addTagToMission(row.id, tagName);
                   // update tags in frontend
                   row.tags.push({ name: tagName, color: tagColor });
                   setRenderedData([...renderedData]);
                 }}
                 onRemoveTag={async (tagName) => {
                   // update tags in backend
-                  await removeTagFromMission(row.missionId, tagName);
+                  await removeTagFromMission(row.id, tagName);
                   const missionsWithTag = await getMissionsByTag(tagName);
                   if (missionsWithTag.length === 0) {
                     // delete tag from database if no missions are using it
@@ -325,7 +344,7 @@ export function Overview() {
     </Table.Tr>
   ));
 
-  const columns: { key: keyof MissionData; label: string }[] = [
+  const columns: { key: keyof RenderedMission; label: string }[] = [
     { key: "name", label: "Name" },
     { key: "location", label: "Location" },
     { key: "totalDuration", label: "Duration" },
