@@ -494,11 +494,17 @@ def add_api_key(name, expiry_date=None):
     )
 
 
-def remove_api_key(name):
-    api_key = APIKey.objects.filter(name=name)
+def remove_api_key(prefix=None, name=None):
+    if prefix:
+        api_key = APIKey.objects.filter(prefix=prefix)
+    elif name:
+        api_key = APIKey.objects.filter(name=name)
+    else:
+        logging.error("Either 'prefix' or 'name' must be provided")
+        return
 
     if not api_key.exists():
-        logging.error(f"API KEY with name '{name}' not found")
+        logging.error(f"API KEY '{prefix if prefix else name}' not found")
         return
 
     try:
@@ -507,7 +513,7 @@ def remove_api_key(name):
         logging.error(f"Couldn't remove API KEY: {e}")
         return
 
-    logging.info(f"Removed API KEY '{name}'")
+    logging.info(f"Removed API KEY '{prefix if prefix else name}'")
 
 
 def list_api_keys():
@@ -633,7 +639,7 @@ def api_key_command(api_key_parser, args):
         case "add":
             add_api_key(args.name, args.expiry_date)
         case "remove":
-            remove_api_key(args.name)
+            remove_api_key(args.prefix, args.name)
         case "list":
             list_api_keys()
         case _:
@@ -769,7 +775,8 @@ def api_key_arg_parser(subparser: argparse._SubParsersAction):
 
     # Remove command
     remove_parser = api_key_subparser.add_parser("remove", help="Remove API KEY")
-    remove_parser.add_argument("--name", required=True, help="Name of API KEY")
+    remove_parser.add_argument("--name", required=False, help="Name of API KEY")
+    remove_parser.add_argument("--prefix", required=False, help="Prefix of API KEY")
 
     # List command
     _ = api_key_subparser.add_parser("list", help="List all API KEYS")
