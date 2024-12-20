@@ -44,7 +44,7 @@ describe('Fetch API Functions', () => {
                     name: 'Test Mission', 
                     location: 'Test Location', 
                     date: '2023-01-01',
-                    other: 'Test remarks' 
+                    notes: 'Test remarks' 
                 }
             ];
             
@@ -67,7 +67,7 @@ describe('Fetch API Functions', () => {
                 name: 'New Mission',
                 location: 'New Location',
                 date: '2023-02-01',
-                other: 'New remarks'
+                notes: 'New remarks'
             };
 
             const mockResponse: MissionData = {
@@ -77,7 +77,7 @@ describe('Fetch API Functions', () => {
                 totalDuration: '',
                 totalSize: '',
                 robot: '',
-                remarks: 'New remarks',
+                notes: 'New remarks',
                 tags: []
             };
             
@@ -102,7 +102,7 @@ describe('Fetch API Functions', () => {
                 name: 'Single Mission',
                 location: 'Single Location',
                 date: '2023-03-01',
-                other: 'Single remarks'
+                notes: 'Single remarks'
             };
             
             (fetch as jest.Mock).mockResolvedValueOnce({
@@ -125,7 +125,7 @@ describe('Fetch API Functions', () => {
                 name: 'Updated Mission',
                 location: 'Updated Location',
                 date: '2023-04-01',
-                other: 'Updated remarks'
+                notes: 'Updated remarks'
             };
             
             (fetch as jest.Mock).mockResolvedValueOnce({
@@ -161,7 +161,7 @@ describe('Fetch API Functions', () => {
                 name: 'Backend Mission',
                 location: 'Backend Location',
                 date: '2023-05-01',
-                other: 'Backend remarks'
+                notes: 'Backend remarks'
             };
             
             (fetch as jest.Mock).mockResolvedValueOnce({
@@ -193,7 +193,7 @@ describe('Fetch API Functions', () => {
                     name: 'Mission 1',
                     location: 'Location 1',
                     date: '2023-06-01',
-                    other: 'Remarks 1'
+                    notes: 'Remarks 1'
                 }
             ];
             
