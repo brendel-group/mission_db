@@ -482,6 +482,34 @@ def remove_tag_from_mission(id, tag_id=None, tag_name=None):
             logging.error(f"No Tag with name '{tag_name}' found")
 
 
+def add_api_key(name, expiry_date=None):
+    try:
+        name, key = APIKey.objects.create_key(name=name, expiry_date=expiry_date)
+    except Exception as e:
+        logging.error(f"Couldn't create API KEY with name '{name}': {e}")
+        return
+
+    logging.info(
+        f"Api Key '{name}' created\nkey: '{key}'\nThis key will not be visible again!"
+    )
+
+
+def remove_api_key(name):
+    api_key = APIKey.objects.filter(name=name)
+
+    if not api_key.exists():
+        logging.error(f"API KEY with name '{name}' not found")
+        return
+
+    try:
+        api_key.delete()
+    except Exception as e:
+        logging.error(f"Couldn't remove API KEY: {e}")
+        return
+
+    logging.info(f"Removed API KEY '{name}'")
+
+
 def list_api_keys():
     keys = APIKey.objects.values()
     print_table(keys)
@@ -603,9 +631,9 @@ def tag_command(tag_parser, tag_mission_parser, args):
 def api_key_command(api_key_parser, args):
     match args.api_key:
         case "add":
-            pass
+            add_api_key(args.name, args.expiry_date)
         case "remove":
-            pass
+            remove_api_key(args.name)
         case "list":
             list_api_keys()
         case _:
@@ -735,6 +763,9 @@ def api_key_arg_parser(subparser: argparse._SubParsersAction):
     # Add command
     add_parser = api_key_subparser.add_parser("add", help="Add API KEY")
     add_parser.add_argument("--name", required=True, help="Name of API KEY")
+    add_parser.add_argument(
+        "--expiry-date", required=False, help="Set expiry date for key"
+    )
 
     # Remove command
     remove_parser = api_key_subparser.add_parser("remove", help="Remove API KEY")
