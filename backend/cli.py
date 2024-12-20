@@ -22,6 +22,7 @@ django.setup()
 # Importing Models, adjust as needed
 from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
+from rest_framework_api_key.models import APIKey  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -481,6 +482,11 @@ def remove_tag_from_mission(id, tag_id=None, tag_name=None):
             logging.error(f"No Tag with name '{tag_name}' found")
 
 
+def list_api_keys():
+    keys = APIKey.objects.values()
+    print_table(keys)
+
+
 class Interactive(code.InteractiveConsole):
     def __init__(self, help):
         super().__init__(locals=None, filename="<console>")
@@ -594,6 +600,18 @@ def tag_command(tag_parser, tag_mission_parser, args):
             tag_parser.print_help()
 
 
+def api_key_command(api_key_parser, args):
+    match args.api_key:
+        case "add":
+            pass
+        case "remove":
+            pass
+        case "list":
+            list_api_keys()
+        case _:
+            api_key_parser.print_help()
+
+
 def mission_arg_parser(subparser):
     """
     Parser setup for mission subcommand
@@ -683,8 +701,6 @@ def tag_arg_parser(subparser):
     remove_parser.add_argument("--id", required=False, help="id of Tag to remove")
     remove_parser.add_argument("--name", required=False, help="name of Tag to remove")
 
-    # remove_parser.add_argument("--id", required=True, help="ID")
-
     # List command
     _ = tag_subparser.add_parser("list", help="List all Tags")
 
@@ -712,6 +728,24 @@ def tag_arg_parser(subparser):
     return tag_parser, mission_parser
 
 
+def api_key_arg_parser(subparser: argparse._SubParsersAction):
+    api_key_parser = subparser.add_parser("api-key", help="Modify API-KEYS")
+    api_key_subparser = api_key_parser.add_subparsers(dest="api_key")
+
+    # Add command
+    add_parser = api_key_subparser.add_parser("add", help="Add API KEY")
+    add_parser.add_argument("--name", required=True, help="Name of API KEY")
+
+    # Remove command
+    remove_parser = api_key_subparser.add_parser("remove", help="Remove API KEY")
+    remove_parser.add_argument("--name", required=True, help="Name of API KEY")
+
+    # List command
+    _ = api_key_subparser.add_parser("list", help="List all API KEYS")
+
+    return api_key_arg_parser
+
+
 def main(args):
     # Arg parser
     parser = argparse.ArgumentParser(description="Mission CLI")
@@ -724,6 +758,8 @@ def main(args):
     sync_arg_parser(subparser)
 
     tag_parser, tag_mission_parser = tag_arg_parser(subparser)
+
+    api_key_parser = api_key_arg_parser(subparser)
 
     argcomplete.autocomplete(parser)
 
@@ -739,6 +775,8 @@ def main(args):
             sync_folder(args.path, args.location, args.notes)
         case "tag":
             tag_command(tag_parser, tag_mission_parser, args)
+        case "api-key":
+            api_key_command(api_key_parser, args)
         case _:
             interactive(parser)
 
