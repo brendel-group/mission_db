@@ -66,7 +66,7 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
 function filterData(
   data: MissionData[],
   search: string,
-  searchedTags: string[] = [],
+  searchedTags: string[] = []
 ) {
   const query = search.toLowerCase().trim();
   return data.filter((item) => {
@@ -82,7 +82,7 @@ function filterData(
       searchedTags.length === 0 ||
       (item.tags &&
         searchedTags.every((tag) =>
-          item.tags.some((itemTag) => itemTag.name === tag),
+          item.tags.some((itemTag) => itemTag.name === tag)
         ));
 
     return matchesSearch && matchesTags;
@@ -96,7 +96,7 @@ function sortData(
     reversed: boolean;
     search: string;
     searchedTags: string[];
-  },
+  }
 ) {
   const { sortBy, reversed, search, searchedTags } = payload;
 
@@ -177,7 +177,7 @@ export function Overview() {
     setReverseSortDirection(reversed);
     setSortBy(field);
     setRenderedData(
-      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags }),
+      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags })
     );
   };
 
@@ -190,7 +190,7 @@ export function Overview() {
         reversed: reverseSortDirection,
         search: value,
         searchedTags,
-      }),
+      })
     );
   };
 
@@ -239,7 +239,7 @@ export function Overview() {
                     reversed: reverseSortDirection,
                     search,
                     searchedTags: updatedTags,
-                  }),
+                  })
                 );
               }}
             >
