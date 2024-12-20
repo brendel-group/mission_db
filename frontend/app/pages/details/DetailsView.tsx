@@ -22,14 +22,15 @@ const DetailsView: React.FC<DetailsViewProps> = ({
     <AbstractPage
       headline={
         selectedRow
-          ? `${selectedRow.name}, ${selectedRow.location} with ${selectedRow.robot}`
+          ? `${selectedRow.name}${selectedRow.location ? `, ${selectedRow.location}` : ""}${selectedRow.robot ? ` with ${selectedRow.robot}` : ""
+          }`
           : "Mission Details"
       }
     >
       {/* Main content */}
-      <Grid gutter="md">
+      < Grid gutter="md" >
         {/* Left column occupying 80% */}
-        <Grid.Col span={9}>
+        < Grid.Col span={9} >
           <Grid gutter="md">
             {/* Tags */}
             <Grid.Col span={12}>
@@ -45,14 +46,14 @@ const DetailsView: React.FC<DetailsViewProps> = ({
               {detailViewData && <ShowDatasets data={detailViewData} />}
             </Grid.Col>
           </Grid>
-        </Grid.Col>
+        </Grid.Col >
 
         {/* Stats */}
-        <Grid.Col span={3}>
+        < Grid.Col span={3} >
           <ShowStatsView missionData={selectedRow} />
-        </Grid.Col>
-      </Grid>
-    </AbstractPage>
+        </Grid.Col >
+      </Grid >
+    </AbstractPage >
   );
 };
 
