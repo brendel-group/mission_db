@@ -4,14 +4,17 @@ import { MissionData, BackendMissionData , Tag} from "~/data";
 import { mission_table_data } from "../RandomData";
 import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from "~/config";
 
+const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Api-Key '+import.meta.env.VITE_BACKEND_API_KEY,
+}
+
 // Function to fetch all missions
 export const getMissions = async (): Promise<BackendMissionData[]> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         throw new Error('Failed to fetch missions');
@@ -24,9 +27,7 @@ export const createMission = async (mission: Omit<BackendMissionData, 'id'>): Pr
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/create`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(mission),
     });
     if (!response.ok) {
@@ -40,9 +41,7 @@ export const getMission = async (id: number): Promise<BackendMissionData> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/${id}`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         throw new Error(`Failed to fetch mission with id ${id}`);
@@ -55,9 +54,7 @@ export const updateMission = async (mission: BackendMissionData): Promise<Backen
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/${mission.id}`, {
         method: 'PUT',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(mission),
     });
     if (!response.ok) {
@@ -146,9 +143,7 @@ export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
 export const getTags = async (): Promise<Tag[]> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         throw new Error('Failed to fetch tags');
@@ -165,9 +160,7 @@ export const getTags = async (): Promise<Tag[]> => {
 export const addTagToMission = async (missionId: number, tagName: string): Promise<{ mission_id: number; tag_name: string }> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/create/`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({ mission_id: missionId, tag_name: tagName}),
     });
     if (!response.ok) {
@@ -198,9 +191,7 @@ export const removeTagFromMission = async (missionId: number, tagName: string): 
 export const changeTagColor = async (tagName: string, newColor: string): Promise<Tag> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({ name: tagName, color: newColor }),
     });
     if (!response.ok) {
@@ -223,9 +214,7 @@ export const changeTagColor = async (tagName: string, newColor: string): Promise
 export const createTag = async (tagName: string, color?: string): Promise<Tag> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/create/`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({ name: tagName, color: color || '#FFFFFF' }),
     });
     if (!response.ok) {
@@ -245,9 +234,7 @@ export const createTag = async (tagName: string, color?: string): Promise<Tag> =
 export const deleteTag = async (tagName: string): Promise<void> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
@@ -261,9 +248,7 @@ export const deleteTag = async (tagName: string): Promise<void> => {
 export const getTagsByMission = async (missionId: number): Promise<Tag[]> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/tags/${missionId}`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
@@ -283,9 +268,7 @@ export const getTagsByMission = async (missionId: number): Promise<Tag[]> => {
 export const getMissionsByTag = async (tagName: string): Promise<{ id: number; name: string; location: string }[]> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/missions/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
