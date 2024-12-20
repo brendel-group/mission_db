@@ -12,7 +12,7 @@ export interface MissionData {
   totalDuration: string;
   totalSize: string;
   robot: string;
-  notes: string;
+  remarks: string;
 
   tags: Tag[];
 }
@@ -30,7 +30,7 @@ export interface BackendMissionData {
   name: string;
   location: string;
   date: string;
-  notes: string;
+  other: string;
 }
 
 //User interface

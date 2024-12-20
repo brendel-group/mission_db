@@ -77,7 +77,7 @@ describe('Fetch API Functions', () => {
                 totalDuration: '',
                 totalSize: '',
                 robot: '',
-                notes: 'New remarks',
+                remarks: 'New remarks',
                 tags: []
             };
             
