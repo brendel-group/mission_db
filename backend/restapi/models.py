@@ -9,7 +9,7 @@ class Mission(models.Model):
     name = models.CharField(max_length=65536)
     date = models.DateField()
     location = models.CharField(max_length=65536, null=True, blank=True)
-    other = models.CharField(max_length=65536, null=True, blank=True)
+    notes = models.CharField(max_length=65536, null=True, blank=True)
 
     class Meta:
         unique_together = ["name", "date"]

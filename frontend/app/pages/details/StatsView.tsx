@@ -17,7 +17,7 @@ export const ShowStatsView: React.FC<ShowStatsViewProps> = ({
       </Text>
       <Text>Total Duration: {missionData.totalDuration}</Text>
       <Text>Total Size: {missionData.totalSize} GB</Text>
-      <Text>Remarks: {missionData.remarks === null ? "None" : missionData.remarks}</Text>
+      <Text>Notes: {missionData.notes === null ? "None" : missionData.notes}</Text>
     </div>
   );
 };
