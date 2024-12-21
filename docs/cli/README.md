@@ -217,7 +217,8 @@ Example:
 command to make changes to API KEYs
 
 ### `cli.py api-key add`
-Create a new API KEY
+Create a new API KEY\
+This is the only time the key itself is visible.
 
 Argumemts:
 - `--name` Name of the API KEY
