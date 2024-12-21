@@ -5,6 +5,15 @@ The request functions are located in the backend/restapi/views.py. The @api_view
 
 To test the API, one can use the django webserver. The backend/restapi/urls.py file defines the URL needed to visit, in order to test the function.
 
+## authorization
+When the server is started with `DEBUG=False` (default is `False` can be set in `.env` file) authorization is required.\
+This means that every request has to be sent together with an API KEY in the Authorization header. It must be formatted as:
+```
+Authorization: Api-Key <API_KEY>
+```
+without this every request will have a HTTP 403 response.\
+For information on how to get an API KEY refer to the [cli documentation](https://github.com/brendel-group/mission_db/blob/main/docs/cli/README.md) for the `api-key` command.
+
 ## how to test using the webserver
 ### starting the webserver
 - cd into the backend dir
