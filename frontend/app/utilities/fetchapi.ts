@@ -6,7 +6,10 @@ import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from "~/config";
 
 const headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Api-Key '+import.meta.env.VITE_BACKEND_API_KEY,
+    'Authorization': 
+        'VITE_BACKEND_API_KEY' in import.meta.env
+        ? 'Api-Key '+import.meta.env.VITE_BACKEND_API_KEY
+        : '',
 }
 
 // Function to fetch all missions
