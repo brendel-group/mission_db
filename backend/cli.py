@@ -483,6 +483,14 @@ def remove_tag_from_mission(id, tag_id=None, tag_name=None):
 
 
 def add_api_key(name, expiry_date=None):
+    """
+    Add/create a new API KEY with an optional expiration date.
+    The date is expected to be a date and time, but can also be just a date.
+
+    Args:
+        name: Name of new API
+        expiry_date (optional): Expiration date. Defaults to None.
+    """
     try:
         name, key = APIKey.objects.create_key(name=name, expiry_date=expiry_date)
     except Exception as e:
@@ -495,6 +503,17 @@ def add_api_key(name, expiry_date=None):
 
 
 def remove_api_key(prefix=None, name=None):
+    """"
+    Remove an API KEY either by name or prefix.\\
+    The prefix can be found with `api-key list`.\\
+    Both are optional but one has to be given.\\
+    If both are given the prefix is preferred, since it's unique.\\
+    If the name is used and there are mutliple entries with the same name, all are removed.
+    
+    Args:
+        prefix (optional): the prefix of an API KEY
+        name (optional): the name of one or more API KEYs
+    """
     if prefix:
         api_key = APIKey.objects.filter(prefix=prefix)
     elif name:
