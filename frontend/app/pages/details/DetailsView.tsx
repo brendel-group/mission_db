@@ -1,33 +1,29 @@
 import { Grid } from "@mantine/core";
-import React from "react";
+import React, { useState } from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
-import { ShowStatsView } from "./StatsView";
 import { RenderedMission } from "~/data";
 import AbstractPage from "../AbstractPage";
+import { ShowInformationView } from "./InformationView";
 
 interface DetailsViewProps {
   missionData: RenderedMission;
 }
 
-const DetailsView: React.FC<DetailsViewProps> = ({
-  missionData: selectedRow,
-}) => {
+const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
   const detailViewData = {
     files: ["file1.mcap", "file2.mcap", "file3.mcap"],
     durations: ["00:01:30", "00:02:45", "00:00:50"],
     sizes: ["2000", "4500", "1000"],
   };
 
+  const [location, setLocation] = useState<string>(missionData.location);
+
   return (
     <AbstractPage
-      headline={
-        selectedRow
-          ? `${selectedRow.name}${
-              selectedRow.location ? `, ${selectedRow.location}` : ""
-            }${selectedRow.robot ? ` with ${selectedRow.robot}` : ""}`
-          : "Mission Details"
-      }
+      headline={`${missionData.name}${location ? `, ${location}` : ""}${
+        missionData.robot ? ` with ${missionData.robot}` : ""
+      }`}
     >
       {/* Main content */}
       <Grid gutter="md">
@@ -36,10 +32,10 @@ const DetailsView: React.FC<DetailsViewProps> = ({
           <Grid gutter="md">
             {/* Tags */}
             <Grid.Col span={12}>
-              {selectedRow && (
+              {missionData && (
                 <RenderTagsDetailView
-                  tags_={selectedRow.tags}
-                  missionId={selectedRow.id}
+                  tags_={missionData.tags}
+                  missionId={missionData.id}
                 />
               )}
             </Grid.Col>
@@ -52,7 +48,10 @@ const DetailsView: React.FC<DetailsViewProps> = ({
 
         {/* Stats */}
         <Grid.Col span={3}>
-          <ShowStatsView missionData={selectedRow} />
+          <ShowInformationView
+            missionData={missionData}
+            setLocation_={setLocation}
+          />
         </Grid.Col>
       </Grid>
     </AbstractPage>
