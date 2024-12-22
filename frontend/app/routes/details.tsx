@@ -51,10 +51,11 @@ function Detail() {
           id: mission.id,
           name: mission.name,
           location: mission.location,
+          date: mission.date,
+          notes: mission.notes,
           totalDuration: "00:00:00",
           totalSize: "0",
           robot: "?",
-          notes: mission.notes,
           tags: tags || [],
         };
 
