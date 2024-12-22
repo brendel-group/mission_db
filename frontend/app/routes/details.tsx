@@ -7,9 +7,10 @@ import {
   useSearchParams,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
+import { MissionData, RenderedMission, Tag } from "~/data";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
-import { fetchAndTransformMission } from "~/utilities/fetchapi";
+import { getMission, getTagsByMission } from "~/utilities/fetchapi";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -42,8 +43,22 @@ function Detail() {
   useEffect(() => {
     const fetchMission = async () => {
       try {
-        const data = await fetchAndTransformMission(numberId);
-        setMissionData(data);
+        const mission: MissionData = await getMission(numberId); // Fetch the mission using the REST API
+        const tags: Tag[] = await getTagsByMission(numberId); //Fetch the tags for the mission
+        tags.sort((a, b) => a.name.localeCompare(b.name));
+
+        const transformedMission: RenderedMission = {
+          id: mission.id,
+          name: mission.name,
+          location: mission.location,
+          totalDuration: "00:00:00",
+          totalSize: "0",
+          robot: "?",
+          notes: mission.notes,
+          tags: tags || [],
+        };
+
+        setMissionData(transformedMission);
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);

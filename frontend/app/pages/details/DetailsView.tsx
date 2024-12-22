@@ -2,19 +2,20 @@ import { Grid } from "@mantine/core";
 import React, { useState } from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
-import { ShowInformationView } from "./InformationView";
-import { MissionData } from "~/data";
-import { detail_view_data } from "~/RandomData";
+import { RenderedMission } from "~/data";
 import AbstractPage from "../AbstractPage";
+import { ShowInformationView } from "./InformationView";
 
 interface DetailsViewProps {
-  missionData: MissionData;
+  missionData: RenderedMission;
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
-  const detailViewData = missionData
-    ? detail_view_data[missionData.missionId]
-    : null;
+  const detailViewData = {
+    files: ["file1.mcap", "file2.mcap", "file3.mcap"],
+    durations: ["00:01:30", "00:02:45", "00:00:50"],
+    sizes: ["2000", "4500", "1000"],
+  };
 
   const [location, setLocation] = useState<string>(missionData.location);
 
@@ -34,7 +35,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
               {missionData && (
                 <RenderTagsDetailView
                   tags_={missionData.tags}
-                  missionId={missionData.missionId}
+                  missionId={missionData.id}
                 />
               )}
             </Grid.Col>

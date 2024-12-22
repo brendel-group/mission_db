@@ -1,7 +1,7 @@
 import { Badge, Button, Group, Menu, Text, Textarea } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
-import { MissionData } from "~/data";
+import { RenderedMission } from "~/data";
 
 type EditableFieldProps = {
   fieldName: string;
@@ -76,7 +76,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
 };
 
 interface ShowInformationViewProps {
-  missionData: MissionData;
+  missionData: RenderedMission;
   setLocation_: (loc: string) => void;
 }
 
