@@ -141,8 +141,10 @@ def print_table(list_of_dict: list[dict]):
         vertical_line += horizontal_bar * (widths[key] + 1) + cross_bar + horizontal_bar
 
     # remove last 3 characters because there is no extra column
-    table += header[:-3] + "\n"
-    table += vertical_line[:-3] + "\n"
+    header = header[:-3]
+    vertical_line = vertical_line[:-3]
+    table += header + "\n"
+    table += vertical_line + "\n"
 
     # print content
 
@@ -152,7 +154,17 @@ def print_table(list_of_dict: list[dict]):
             line += f"{str(entry[key]):<{widths[key]}} {vertical_bar} "
         table += line[:-3] + "\n"
 
-    pager(table)
+    table = table[:-1]
+
+    terminal_cols, terminal_rows = os.get_terminal_size()
+    terminal_rows -= 1  # the bottom line in interactive mode is the input line
+    text_rows = table.count("\n") + 1
+    text_cols = len(vertical_line)
+
+    if (text_cols > terminal_cols) or (text_rows > terminal_rows):
+        pager(table)
+    else:
+        print(table)
 
 
 def add_mission_from_folder(folder_path, location=None, notes=None):
