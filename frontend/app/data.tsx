@@ -42,3 +42,16 @@ export interface User {
   username: string;
   password: string;
 }
+
+//Converts a rendered mission to mission data
+export function convertToMissionData(
+  renderedMission: RenderedMission
+): MissionData {
+  return {
+    id: renderedMission.id,
+    name: renderedMission.name,
+    location: renderedMission.location,
+    date: renderedMission.date,
+    notes: renderedMission.notes,
+  };
+}
