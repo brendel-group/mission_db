@@ -4,12 +4,15 @@ import { MissionData, BackendMissionData , Tag} from "~/data";
 import { mission_table_data } from "../RandomData";
 import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from "~/config";
 
-const headers = {
+const headers: {
+    'Content-Type': string,
+    'Authorization'?: string
+} = {
     'Content-Type': 'application/json',
-    'Authorization': 
-        'VITE_BACKEND_API_KEY' in import.meta.env
-        ? 'Api-Key '+import.meta.env.VITE_BACKEND_API_KEY
-        : '',
+}
+
+if ('VITE_BACKEND_API_KEY' in import.meta.env) {
+    headers['Authorization'] = 'Api-Key '+import.meta.env.VITE_BACKEND_API_KEY;
 }
 
 // Function to fetch all missions
