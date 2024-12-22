@@ -9,6 +9,7 @@ import logging
 import shlex
 import code
 from datetime import datetime
+from pydoc import pager
 
 try:
     import readline
@@ -129,6 +130,8 @@ def print_table(list_of_dict: list[dict]):
         list_of_widths.append(len(key))
         widths[key] = max(list_of_widths)
 
+    table = ""
+
     # print header
 
     header = ""
@@ -138,11 +141,8 @@ def print_table(list_of_dict: list[dict]):
         vertical_line += horizontal_bar * (widths[key] + 1) + cross_bar + horizontal_bar
 
     # remove last 3 characters because there is no extra column
-    header = header[:-3]
-    vertical_line = vertical_line[:-3]
-
-    print(header)
-    print(vertical_line)
+    table += header[:-3] + "\n"
+    table += vertical_line[:-3] + "\n"
 
     # print content
 
@@ -150,8 +150,9 @@ def print_table(list_of_dict: list[dict]):
         line = ""
         for key in keys:
             line += f"{str(entry[key]):<{widths[key]}} {vertical_bar} "
-        line = line[:-3]
-        print(line)
+        table += line[:-3] + "\n"
+
+    pager(table)
 
 
 def add_mission_from_folder(folder_path, location=None, notes=None):
