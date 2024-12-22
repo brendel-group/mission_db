@@ -156,7 +156,12 @@ def print_table(list_of_dict: list[dict]):
 
     table = table[:-1]
 
-    terminal_cols, terminal_rows = os.get_terminal_size()
+    try:
+        terminal_cols, terminal_rows = os.get_terminal_size()
+    except Exception:
+        terminal_cols = float("inf")
+        terminal_rows = float("inf")
+
     terminal_rows -= 1  # the bottom line in interactive mode is the input line
     text_rows = table.count("\n") + 1
     text_cols = len(vertical_line)
