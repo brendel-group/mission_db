@@ -23,14 +23,16 @@ export interface MissionData {
 //This is a local representation used for mission table and details view
 export interface RenderedMission {
   id: number;
-
+  // Pure mission fields
   name: string;
   location: string;
+  date: string;
+  notes: string;
+
+  // Inherited from other data structures (details, tags, ...)
   totalDuration: string;
   totalSize: string;
   robot: string;
-  notes: string;
-
   tags: Tag[];
 }
 

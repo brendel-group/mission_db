@@ -92,6 +92,7 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
       <Text size="xl" mb="sm">
         Information
       </Text>
+      <Text>Date: {missionData.date}</Text>
       <Text>Total Duration: {missionData.totalDuration}</Text>
       <Text>Total Size: {missionData.totalSize} GB</Text>
 

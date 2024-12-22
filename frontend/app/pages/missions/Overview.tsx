@@ -158,10 +158,11 @@ export function Overview() {
             id: missions[i].id,
             name: missions[i].name,
             location: missions[i].location,
+            date: missions[i].date,
+            notes: missions[i].notes,
             totalDuration: "00:00:00", // this fields need to be overriden in the future
             totalSize: "0",
             robot: "Vader",
-            notes: missions[i].notes,
             tags: tags || [],
           });
         }
@@ -229,6 +230,7 @@ export function Overview() {
       <Table.Td>{row.totalDuration}</Table.Td>
       <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
+      <Table.Td>{row.date}</Table.Td>
       <Table.Td>{row.notes === null ? "" : row.notes}</Table.Td>
       <Table.Td
         onClick={(e) => e.stopPropagation()}
@@ -350,6 +352,7 @@ export function Overview() {
     { key: "totalDuration", label: "Duration" },
     { key: "totalSize", label: "Size (MB)" },
     { key: "robot", label: "Robot" },
+    { key: "date", label: "Date" },
     { key: "notes", label: "Notes" },
     { key: "tags", label: "Tags" },
   ];
