@@ -800,7 +800,7 @@ def api_key_arg_parser(subparser: argparse._SubParsersAction):
     # List command
     _ = api_key_subparser.add_parser("list", help="List all API KEYS")
 
-    return api_key_arg_parser
+    return api_key_parser
 
 
 def main(args):
