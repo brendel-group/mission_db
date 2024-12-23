@@ -195,9 +195,7 @@ class CapturedOutputTest(TestCase):
 
         self.patcher_os_terminal_size = patch(
             "os.get_terminal_size",
-            return_value=os.terminal_size(
-                os.terminal_size((float("inf"), float("inf")))
-            ),
+            return_value=os.terminal_size((float("inf"), float("inf"))),
         )
         self.patcher_os_terminal_size.start()
 
