@@ -6,6 +6,7 @@ import cli
 import logging
 from io import StringIO
 import sys
+import os
 from unittest.mock import patch
 from rest_framework_api_key.models import APIKey
 
@@ -193,9 +194,17 @@ class CapturedOutputTest(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
     def tearDown(self):
         self.mission.delete()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_remove_misison(self):
         cli.remove_mission(self.mission.id)
@@ -256,10 +265,18 @@ class MainFunctionTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
     def tearDown(self):
         self.mission.delete()
         sys.stdout.flush()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_mission_add(self):
         args = [
@@ -427,11 +444,19 @@ class TagBasicTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
         # Setting up environment, creating common tags
         self.tag = Tag.objects.create(name="TestTag", color="#FFFFFF")
 
     def tearDown(self):
         self.logger.disabled = False
+
+        self.patcher_os_terminal_size.stop()
 
         sys.stdout.flush()
         sys.stdout = self.original_stdout
@@ -467,6 +492,12 @@ class ListMissionTagTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
         self.mission = Mission(name="Test", date=date.today())
         self.mission.save()
 
@@ -483,6 +514,8 @@ class ListMissionTagTests(TestCase):
     def tearDown(self):
         sys.stdout.flush()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_list_tags_by_mission(self):
         cli.list_tags_by_mission(self.mission.id)
