@@ -22,6 +22,7 @@ django.setup()
 # Importing Models, adjust as needed
 from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
+from rest_framework_api_key.models import APIKey  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -481,6 +482,64 @@ def remove_tag_from_mission(id, tag_id=None, tag_name=None):
             logging.error(f"No Tag with name '{tag_name}' found")
 
 
+def add_api_key(name, expiry_date=None):
+    """
+    Add/create a new API KEY with an optional expiration date.
+    The date is expected to be a date and time, but can also be just a date.
+
+    Args:
+        name: Name of new API
+        expiry_date (optional): Expiration date. Defaults to None.
+    """
+    try:
+        name, key = APIKey.objects.create_key(name=name, expiry_date=expiry_date)
+    except Exception as e:
+        logging.error(f"Couldn't create API KEY with name '{name}': {e}")
+        return
+
+    logging.info(
+        f"Api Key '{name}' created\nkey: '{key}'\nThis key will not be visible again!"
+    )
+
+
+def remove_api_key(prefix=None, name=None):
+    """"
+    Remove an API KEY either by name or prefix.\\
+    The prefix can be found with `api-key list`.\\
+    Both are optional but one has to be given.\\
+    If both are given the prefix is preferred, since it's unique.\\
+    If the name is used and there are mutliple entries with the same name, all are removed.
+    
+    Args:
+        prefix (optional): the prefix of an API KEY
+        name (optional): the name of one or more API KEYs
+    """
+    if prefix:
+        api_key = APIKey.objects.filter(prefix=prefix)
+    elif name:
+        api_key = APIKey.objects.filter(name=name)
+    else:
+        logging.error("Either 'prefix' or 'name' must be provided")
+        return
+
+    if not api_key.exists():
+        logging.error(f"API KEY '{prefix if prefix else name}' not found")
+        return
+
+    try:
+        api_key.delete()
+    except Exception as e:
+        logging.error(f"Couldn't remove API KEY: {e}")
+        return
+
+    logging.info(f"Removed API KEY '{prefix if prefix else name}'")
+
+
+def list_api_keys():
+    keys = APIKey.objects.values()
+    print_table(keys)
+
+
 class Interactive(code.InteractiveConsole):
     def __init__(self, help):
         super().__init__(locals=None, filename="<console>")
@@ -594,6 +653,18 @@ def tag_command(tag_parser, tag_mission_parser, args):
             tag_parser.print_help()
 
 
+def api_key_command(api_key_parser, args):
+    match args.api_key:
+        case "add":
+            add_api_key(args.name, args.expiry_date)
+        case "remove":
+            remove_api_key(args.prefix, args.name)
+        case "list":
+            list_api_keys()
+        case _:
+            api_key_parser.print_help()
+
+
 def mission_arg_parser(subparser):
     """
     Parser setup for mission subcommand
@@ -683,8 +754,6 @@ def tag_arg_parser(subparser):
     remove_parser.add_argument("--id", required=False, help="id of Tag to remove")
     remove_parser.add_argument("--name", required=False, help="name of Tag to remove")
 
-    # remove_parser.add_argument("--id", required=True, help="ID")
-
     # List command
     _ = tag_subparser.add_parser("list", help="List all Tags")
 
@@ -712,6 +781,28 @@ def tag_arg_parser(subparser):
     return tag_parser, mission_parser
 
 
+def api_key_arg_parser(subparser: argparse._SubParsersAction):
+    api_key_parser = subparser.add_parser("api-key", help="Modify API-KEYS")
+    api_key_subparser = api_key_parser.add_subparsers(dest="api_key")
+
+    # Add command
+    add_parser = api_key_subparser.add_parser("add", help="Add API KEY")
+    add_parser.add_argument("--name", required=True, help="Name of API KEY")
+    add_parser.add_argument(
+        "--expiry-date", required=False, help="Set expiry date for key"
+    )
+
+    # Remove command
+    remove_parser = api_key_subparser.add_parser("remove", help="Remove API KEY")
+    remove_parser.add_argument("--name", required=False, help="Name of API KEY")
+    remove_parser.add_argument("--prefix", required=False, help="Prefix of API KEY")
+
+    # List command
+    _ = api_key_subparser.add_parser("list", help="List all API KEYS")
+
+    return api_key_parser
+
+
 def main(args):
     # Arg parser
     parser = argparse.ArgumentParser(description="Mission CLI")
@@ -724,6 +815,8 @@ def main(args):
     sync_arg_parser(subparser)
 
     tag_parser, tag_mission_parser = tag_arg_parser(subparser)
+
+    api_key_parser = api_key_arg_parser(subparser)
 
     argcomplete.autocomplete(parser)
 
@@ -739,6 +832,8 @@ def main(args):
             sync_folder(args.path, args.location, args.notes)
         case "tag":
             tag_command(tag_parser, tag_mission_parser, args)
+        case "api-key":
+            api_key_command(api_key_parser, args)
         case _:
             interactive(parser)
 

@@ -63,7 +63,7 @@ export function RenderTagsDetailView({
                     return { ...tag, color: newColor };
                   }
                   return tag;
-                }),
+                })
               );
             }}
           />

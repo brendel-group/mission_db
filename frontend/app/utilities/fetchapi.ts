@@ -1,17 +1,25 @@
 // Variable to switch between backend data and RandomData is in config.tsx
 
-import { MissionData, BackendMissionData , Tag} from "~/data";
-import { mission_table_data } from "../RandomData";
-import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from "~/config";
+import { MissionData , Tag} from "~/data";
+import { FETCH_API_BASE_URL } from "~/config";
+
+const headers: {
+    'Content-Type': string,
+    'Authorization'?: string
+} = {
+    'Content-Type': 'application/json',
+}
+
+if ('VITE_BACKEND_API_KEY' in import.meta.env) {
+    headers['Authorization'] = 'Api-Key '+import.meta.env.VITE_BACKEND_API_KEY;
+}
 
 // Function to fetch all missions
-export const getMissions = async (): Promise<BackendMissionData[]> => {
+export const getMissions = async (): Promise<MissionData[]> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         throw new Error('Failed to fetch missions');
@@ -20,13 +28,11 @@ export const getMissions = async (): Promise<BackendMissionData[]> => {
 };
 
 // Function to create a new mission
-export const createMission = async (mission: Omit<BackendMissionData, 'id'>): Promise<MissionData> => {
+export const createMission = async (mission: Omit<MissionData, 'id'>): Promise<MissionData> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/create`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(mission),
     });
     if (!response.ok) {
@@ -36,13 +42,11 @@ export const createMission = async (mission: Omit<BackendMissionData, 'id'>): Pr
 };
 
 // Function to fetch a single mission by ID
-export const getMission = async (id: number): Promise<BackendMissionData> => {
+export const getMission = async (id: number): Promise<MissionData> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/${id}`, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         throw new Error(`Failed to fetch mission with id ${id}`);
@@ -51,13 +55,11 @@ export const getMission = async (id: number): Promise<BackendMissionData> => {
 };
 
 // Function to update an existing mission
-export const updateMission = async (mission: BackendMissionData): Promise<BackendMissionData> => {
+export const updateMission = async (mission: MissionData): Promise<MissionData> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/${mission.id}`, {
         method: 'PUT',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(mission),
     });
     if (!response.ok) {
@@ -76,79 +78,11 @@ export const deleteMission = async (id: number): Promise<void> => {
     }
 };
 
-//Debug functions because RestAPI and fetching is incomplete
-export const fetchAndTransformMission = async (
-    id: number
-  ): Promise<MissionData> => {
-    if (USE_RANDOM_DATA) {
-      return mission_table_data[id % mission_table_data.length];
-    } // Return only the RandomData
-  
-    try {
-      const mission: BackendMissionData = await getMission(id); // Fetch the mission using the REST API
-      const tags: Tag[] = await getTagsByMission(id); //Fetch the tags for the mission
-      tags.sort((a, b) => a.name.localeCompare(b.name));
-  
-      const exampleData: MissionData = mission_table_data[id % mission_table_data.length];
-
-  
-      const transformedMission: MissionData = {
-          missionId: mission.id,
-          name: mission.name,
-          location: mission.location,
-          totalDuration: exampleData?.totalDuration || "",
-          totalSize: exampleData?.totalSize || "",
-          robot: exampleData?.robot || "",
-          notes: mission.notes,
-          tags: tags || [],
-        };
-  
-      return transformedMission;
-    } catch (error) {
-      console.error("Failed to fetch and transform mission:", error);
-      throw error; // Re-throw the error to handle it upstream if needed
-    }
-  };
-
-export const fetchAndTransformMissions = async (): Promise<MissionData[]> => {
-    if (USE_RANDOM_DATA) { return mission_table_data } // Return only the RandomData
-    try {
-        const missions: BackendMissionData[] = await getMissions(); // Fetch the missions using the REST API
-
-        // Map BackendMissionData missions to MissionData
-        let renderedMissions: MissionData[] = [];
-        for (let i = 0; i < missions.length; i++) {
-            const tags: Tag[] = await getTagsByMission(missions[i].id);
-            tags.sort((a, b) => a.name.localeCompare(b.name));
-            const exampleData = mission_table_data.at(i % 5);
-            renderedMissions.push(
-                {
-                    missionId: missions[i].id,
-                    name: missions[i].name,
-                    location: missions[i].location,
-                    totalDuration: exampleData?.totalDuration || "",
-                    totalSize: exampleData?.totalSize || "",
-                    robot: exampleData?.robot || "",
-                    notes: missions[i].notes,
-                    tags: tags || []
-                }
-            )
-        }
-
-        return renderedMissions;
-    } catch (error) {
-        console.error('Failed to fetch and transform missions:', error);
-        throw error; // Re-throw the error to handle it upstream if needed
-    }
-};
-
 // Get all tags
 export const getTags = async (): Promise<Tag[]> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         throw new Error('Failed to fetch tags');
@@ -165,9 +99,7 @@ export const getTags = async (): Promise<Tag[]> => {
 export const addTagToMission = async (missionId: number, tagName: string): Promise<{ mission_id: number; tag_name: string }> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/create/`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({ mission_id: missionId, tag_name: tagName}),
     });
     if (!response.ok) {
@@ -198,9 +130,7 @@ export const removeTagFromMission = async (missionId: number, tagName: string): 
 export const changeTagColor = async (tagName: string, newColor: string): Promise<Tag> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({ name: tagName, color: newColor }),
     });
     if (!response.ok) {
@@ -223,9 +153,7 @@ export const changeTagColor = async (tagName: string, newColor: string): Promise
 export const createTag = async (tagName: string, color?: string): Promise<Tag> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/create/`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({ name: tagName, color: color || '#FFFFFF' }),
     });
     if (!response.ok) {
@@ -245,9 +173,7 @@ export const createTag = async (tagName: string, color?: string): Promise<Tag> =
 export const deleteTag = async (tagName: string): Promise<void> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
@@ -261,9 +187,7 @@ export const deleteTag = async (tagName: string): Promise<void> => {
 export const getTagsByMission = async (missionId: number): Promise<Tag[]> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/tags/${missionId}`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
@@ -283,9 +207,7 @@ export const getTagsByMission = async (missionId: number): Promise<Tag[]> => {
 export const getMissionsByTag = async (tagName: string): Promise<{ id: number; name: string; location: string }[]> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/tags/missions/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
