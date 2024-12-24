@@ -297,8 +297,8 @@ export const getMissionsByTag = async (tagName: string): Promise<{ id: number; n
 };
 
 // Get details by mission
-export const getDetailsByMission = async (missionId: number): Promise<DetailViewData[]> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/missions/${missionId}/files/`,{
+export const getDetailsByMission = async (missionId: number): Promise<DetailViewData> => {
+    const response = await fetch(`${FETCH_API_BASE_URL}/missions/${missionId}/details/`,{
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -306,7 +306,7 @@ export const getDetailsByMission = async (missionId: number): Promise<DetailView
     });
     if (!response.ok) {
         if (response.status === 404) {
-            throw new Error(`Mission with ID ${missionId} not found`);
+            throw new Error(`Details of mission with ID ${missionId} not found`);
         }
         throw new Error(`Failed to fetch details by mission ID ${missionId}`);
     }
