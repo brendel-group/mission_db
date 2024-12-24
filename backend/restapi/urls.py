@@ -11,6 +11,7 @@ from .views import (
     add_tag_to_mission,
     delete_mission_tag,
     get_files_by_mission_id,
+    get_details_by_mission_id,
 )
 
 urlpatterns = [
@@ -37,4 +38,5 @@ urlpatterns = [
         name="delete_mission_tag",
     ),
     path("missions/<int:mission_id>/files/", get_files_by_mission_id, name="get_files"),
+    path("missions/<int:mission_id>/details", get_details_by_mission_id, name="get_details"),
 ]
