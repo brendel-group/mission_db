@@ -1,11 +1,13 @@
 import { Grid } from "@mantine/core";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { ShowStatsView } from "./StatsView";
-import { MissionData } from "~/data";
-import { detail_view_data } from "~/RandomData";
+import { MissionData, DetailViewData } from "~/data";
 import AbstractPage from "../AbstractPage";
+import { getDetailsByMission } from "../../utilities/fetchapi";
+
+
 
 interface DetailsViewProps {
   missionData: MissionData | null;
@@ -14,9 +16,21 @@ interface DetailsViewProps {
 const DetailsView: React.FC<DetailsViewProps> = ({
   missionData: selectedRow,
 }) => {
-  const detailViewData = selectedRow
-    ? detail_view_data[selectedRow.missionId]
-    : null;
+  const [detailViewData, setDetailViewData] = useState<DetailViewData>();
+  useEffect(() => {
+    const fetchDetailViewData = async () => {
+      if (selectedRow) {
+        try {
+          const fetchedData = await getDetailsByMission(selectedRow.missionId);
+          setDetailViewData(fetchedData);
+        } catch (error) {
+          console.error("Error fetching detail view data:", error);
+        }
+      }
+    };
+  
+    fetchDetailViewData();
+  }, [selectedRow]);
 
   return (
     <AbstractPage
