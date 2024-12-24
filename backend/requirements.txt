@@ -10,3 +10,7 @@ psycopg2-binary
 pyreadline3; platform_system == 'Windows'
 ruff
 whitenoise
+mcap
+numpy
+opencv-python
+moviepy
