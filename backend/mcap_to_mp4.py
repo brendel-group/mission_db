@@ -4,6 +4,7 @@ from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
 import numpy as np
 import cv2
 
+
 def decode_bgr8(raw_data, width, height):
     """
     Decodes raw BGR8 image data into a NumPy array.
@@ -40,7 +41,7 @@ def extract_mcap_data(mcap_file):
         list of frames
     """
     frames = []
-    width, height = 224, 224  
+    width, height = 224, 224
 
     with open(mcap_file, "rb") as f:
         reader = make_reader(f)
@@ -48,7 +49,7 @@ def extract_mcap_data(mcap_file):
             # process video frames
             if channel.topic == "/camera/argus/image":
                 # extract image data from BGR8 byte string (removing header)
-                frame_data = message.data[message.data.find(b'bgr8')+16:]
+                frame_data = message.data[message.data.find(b"bgr8") + 16 :]
                 np_arr = np.frombuffer(frame_data, np.uint8)
                 frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
                 # if decoding fails, assume raw BGR8
@@ -64,6 +65,7 @@ def extract_mcap_data(mcap_file):
 
     return frames
 
+
 def convert_mcap_to_mp4(mcap_file, output_file):
     """
     Converts an MCAP file to an MP4 file.
@@ -76,8 +78,9 @@ def convert_mcap_to_mp4(mcap_file, output_file):
 
     # save video frames as an MP4 file
     if frames:
-        clip = ImageSequenceClip(frames, fps=30)  
+        clip = ImageSequenceClip(frames, fps=30)
         clip.write_videofile(output_file, codec="libx264")
+
 
 if __name__ == "__main__":
     mcap_file = r""  # MCAP file path
