@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_api_key",
     "restapi",
     "corsheaders",
 ]
@@ -137,3 +138,10 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+if not DEBUG:
+    REST_FRAMEWORK = {
+        "DEFAULT_PERMISSION_CLASSES": [
+            "rest_framework_api_key.permissions.HasAPIKey",
+        ]
+    }

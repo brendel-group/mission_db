@@ -33,3 +33,13 @@
 ## Frontend Configuration
    In the frontend configuration ```frontend/app/config.tsx``` you can set the base url for backend fetching, it is also possible to disable fetching from backend. ```MAX_SESSION_AGES``` determines how long a login session is valid. Setting it to ```undefined``` enables sessions without a time limit. 
 
+## API KEY Configuration
+   If the backend is started with `DEBUG=False` (the default) it is necessary to use an API KEY to communicate with the backend.\
+   Create a `.env` file in the `frontend/` folder with the content:
+   ```bash
+   VITE_BACKEND_API_KEY = '<api-key>'
+   ```
+   and replace `<api-key>` with an actual API KEY.\
+   For how to get an API KEY please refer to the [cli documentation](https://github.com/brendel-group/mission_db/blob/main/docs/cli/README.md) for the `api-key` command.\
+   Make sure to not add the `.env` file to git or publish in any way.
+
