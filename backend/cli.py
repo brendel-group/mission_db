@@ -8,6 +8,7 @@ import django
 import logging
 import shlex
 import code
+import traceback
 from datetime import datetime
 
 try:
@@ -593,6 +594,8 @@ def interactive(parser: argparse.ArgumentParser):
         )
     except SystemExit:
         pass
+    except Exception:
+        print(traceback.format_exc())
 
     if readline:
         readline.set_history_length(REPL_HISTFILE_SIZE)
