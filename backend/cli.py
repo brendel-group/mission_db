@@ -24,6 +24,8 @@ from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 from rest_framework_api_key.models import APIKey  # noqa
 
+USE_UNICODE = False
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
@@ -111,9 +113,14 @@ def print_table(list_of_dict: list[dict]):
     ### Parameters
     list_of_dict: A list containing flat dictionaries which all have the same keys
     """
-    vertical_bar = "│"  # U+2502
-    horizontal_bar = "─"  # U+2500
-    cross_bar = "┼"  # U+253C
+    if USE_UNICODE:
+        vertical_bar = "│"  # U+2502
+        horizontal_bar = "─"  # U+2500
+        cross_bar = "┼"  # U+253C
+    else:
+        vertical_bar = "|"
+        horizontal_bar = "-"
+        cross_bar = "+"
 
     if not list_of_dict:
         print("Empty list nothing to display")
