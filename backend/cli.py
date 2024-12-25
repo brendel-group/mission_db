@@ -134,7 +134,9 @@ def print_table(list_of_dict: list[dict]):
     widths = {}
 
     for key in keys:
-        list_of_widths = list(map(lambda d: len(str(d[key])), list_of_dict))
+        list_of_widths = list(
+            map(lambda d: get_width_of_multiline_string(str(d[key])), list_of_dict)
+        )
         list_of_widths.append(len(key))
         widths[key] = max(list_of_widths)
 
@@ -157,10 +159,44 @@ def print_table(list_of_dict: list[dict]):
 
     for entry in list_of_dict:
         line = ""
+        next_line = {}
+
+        # add normal content, but only first line
         for key in keys:
-            line += f"{str(entry[key]):<{widths[key]}} {vertical_bar} "
+            content = str(entry[key])
+            if "\n" in content:
+                # extract first line and store remaining lines in next_line dict
+                splitted = content.split("\n")
+                content = splitted[0]
+                next_line[key] = splitted[1:]
+
+            line += f"{content:<{widths[key]}} {vertical_bar} "
+
+        # add remaining lines
+        while next_line:
+            # trim line
+            line = line[:-3]
+            line += "\n"
+
+            for key in keys:
+                # add empty field or content
+                if key in next_line:
+                    contents = next_line[key]
+                    content = str(contents.pop(0))
+                    if not contents:
+                        del next_line[key]
+
+                    line += f"{content:<{widths[key]}} {vertical_bar} "
+                else:
+                    line += f"{" ":<{widths[key]}} {vertical_bar} "
+
         line = line[:-3]
         print(line)
+
+
+def get_width_of_multiline_string(str: str):
+    widths = map(len, str.split("\n"))
+    return max(widths)
 
 
 def add_mission_from_folder(folder_path, location=None, notes=None):
