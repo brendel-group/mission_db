@@ -25,7 +25,7 @@ from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 from rest_framework_api_key.models import APIKey  # noqa
 
-USE_UNICODE = False
+USE_UNICODE = True
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -574,7 +574,11 @@ class Interactive(code.InteractiveConsole):
             pass
 
 
-def interactive(parser: argparse.ArgumentParser):
+def interactive(parser: argparse.ArgumentParser, subparser):
+    if subparser:
+        subparser.add_parser("exit", help="exit the command prompt")
+        subparser.add_parser("help", help="show this help message")
+
     if readline:
         if os.path.exists(REPL_HISTFILE):
             try:
@@ -845,7 +849,7 @@ def main(args):
         case "api-key":
             api_key_command(api_key_parser, args)
         case _:
-            interactive(parser)
+            interactive(parser, subparser)
 
 
 if __name__ == "__main__":
