@@ -40,6 +40,13 @@ class FileWithTypeSerializer(serializers.ModelSerializer):
         model = Mission_files
         fields = ["type", "file"]
 
+class DetailOnlySerializer(serializers.ModelSerializer):
+    file = DetailSerializer(read_only=True)
+
+    class Meta:
+        model = Mission_files
+        fields = ["file"]
+
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:

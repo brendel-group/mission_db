@@ -9,7 +9,7 @@ from .serializer import (
     MissionSerializer,
     MissionTagSerializer,
     FileWithTypeSerializer,
-    DetailSerializer,
+    DetailOnlySerializer,
 )
 import urllib.parse
 
@@ -72,7 +72,7 @@ def get_files_by_mission_id(request, mission_id):
 @api_view(["GET"])
 def get_details_by_mission_id(request, mission_id):
     """
-    List all files with type of a mission by ID
+    List the details of a mission by ID
     ### Returns
     Response with list of files with type in json format\
     Or NotFound exception
@@ -81,23 +81,9 @@ def get_details_by_mission_id(request, mission_id):
         mission = Mission.objects.get(id=mission_id)
     except Mission.DoesNotExist:
         raise NotFound(f"Mission with ID {mission_id} not found")
-    file = Mission_files.objects.filter(mission__id=mission.id)
-    serializer = DetailSerializer(file, many=True)
+    mission_files = Mission_files.objects.filter(mission__id=mission.id)
+    serializer = DetailOnlySerializer(mission_files, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
-@api_view(["POST"])
-def create_details(request):
-    """
-    Create details for a mission
-    ### Returns
-    Response with data of created details\
-    Or HTTP_400_BAD_REQUEST Response
-    """
-    serializer = DetailSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
 def get_tags(request):
