@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from .views import (
     get_missions,
     create_mission,
@@ -37,4 +37,5 @@ urlpatterns = [
         name="delete_mission_tag",
     ),
     path("missions/<int:mission_id>/files/", get_files_by_mission_id, name="get_files"),
+    path("auth/", include("dj_rest_auth.urls")),
 ]

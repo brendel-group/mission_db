@@ -11,3 +11,4 @@ pyreadline3; platform_system == 'Windows'
 ruff
 whitenoise
 djangorestframework-api-key==3.*
+dj-rest-auth==7.*
