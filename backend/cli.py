@@ -23,6 +23,7 @@ django.setup()
 from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 from rest_framework_api_key.models import APIKey  # noqa
+from django.contrib.auth.models import User  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -665,6 +666,20 @@ def api_key_command(api_key_parser, args):
             api_key_parser.print_help()
 
 
+def user_command(user_parser, args):
+    match args.user:
+        case "add":
+            pass
+        case "remove":
+            pass
+        case "change-password":
+            pass
+        case "list":
+            pass
+        case _:
+            pass
+
+
 def mission_arg_parser(subparser):
     """
     Parser setup for mission subcommand
@@ -803,6 +818,39 @@ def api_key_arg_parser(subparser: argparse._SubParsersAction):
     return api_key_parser
 
 
+def user_arg_parser(subparser: argparse._SubParsersAction):
+    user_parser: argparse.ArgumentParser = subparser.add_parser(
+        "user", help="Modifiy Users"
+    )
+    user_subparser: argparse._SubParsersAction = user_parser.add_subparsers(dest="user")
+
+    # Add command
+    add_parser: argparse.ArgumentParser = user_subparser.add_parser(
+        "add", help="Add User"
+    )
+    add_parser.add_argument("--name", help="User name")
+    add_parser.add_argument(
+        "--email", required=False, help="email of User"
+    )  # email is used when requesting password reset via API ENDPOINT
+
+    # Remove command
+    remove_parser: argparse.ArgumentParser = user_subparser.add_parser(
+        "remove", help="Remove User"
+    )
+    remove_parser.add_argument("--name", help="User name")
+
+    # change-password command
+    change_parser: argparse.ArgumentParser = user_subparser.add_parser(
+        "change-password", help="Change the password of a user"
+    )
+    change_parser.add_argument("--name", help="User name")
+
+    # List command
+    _ = user_subparser.add_parser("list", help="List all Users")
+
+    return user_subparser
+
+
 def main(args):
     # Arg parser
     parser = argparse.ArgumentParser(description="Mission CLI")
@@ -817,6 +865,8 @@ def main(args):
     tag_parser, tag_mission_parser = tag_arg_parser(subparser)
 
     api_key_parser = api_key_arg_parser(subparser)
+
+    user_parser = user_arg_parser(subparser)
 
     argcomplete.autocomplete(parser)
 
@@ -834,6 +884,8 @@ def main(args):
             tag_command(tag_parser, tag_mission_parser, args)
         case "api-key":
             api_key_command(api_key_parser, args)
+        case "user":
+            user_command(user_parser, args)
         case _:
             interactive(parser)
 
