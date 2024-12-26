@@ -3,6 +3,7 @@
 import { MissionData, BackendMissionData, Tag, DetailViewData} from "~/data";
 import { mission_table_data } from "../RandomData";
 import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from "~/config";
+import DetailsView from "~/pages/details/DetailsView";
 
 // Function to fetch all missions
 export const getMissions = async (): Promise<BackendMissionData[]> => {
@@ -310,5 +311,15 @@ export const getDetailsByMission = async (missionId: number): Promise<DetailView
         }
         throw new Error(`Failed to fetch details by mission ID ${missionId}`);
     }
-    return response.json();
+    
+    const data = await response.json();
+    const files: string[] = [];
+    const durations: string[] = [];
+    const sizes: string[] = [];
+
+    files.push(data[0].file.file_path);
+    durations.push(data[0].file.duration);
+    sizes.push(data[0].file.size);
+
+    return { files, durations, sizes }
 };
