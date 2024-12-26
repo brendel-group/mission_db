@@ -18,6 +18,7 @@ class FileSerializer(serializers.ModelSerializer):
         model = File
         fields = "__all__"
 
+
 class DetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
@@ -39,6 +40,7 @@ class FileWithTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mission_files
         fields = ["type", "file"]
+
 
 class DetailOnlySerializer(serializers.ModelSerializer):
     file = DetailSerializer(read_only=True)
