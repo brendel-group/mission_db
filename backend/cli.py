@@ -25,7 +25,7 @@ from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 from rest_framework_api_key.models import APIKey  # noqa
 
-USE_UNICODE = True
+USE_UNICODE = os.getenv("USE_UNICODE", "True") == "True"
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
