@@ -590,7 +590,15 @@ class Interactive(code.InteractiveConsole):
         self.help = help
 
     def runsource(self, source, filename="<input>", symbol="single"):
-        args = shlex.split(source)
+        try:
+            args = shlex.split(source)
+        except ValueError as e:
+            if "No closing quotation" in e.args:
+                # will ask for more input when True returned
+                return True
+            else:
+                raise e
+
         if not args:
             return
         if "exit" in args:
@@ -611,9 +619,8 @@ class Interactive(code.InteractiveConsole):
 
 
 def interactive(parser: argparse.ArgumentParser, subparser):
-    if subparser:
-        subparser.add_parser("exit", help="exit the command prompt")
-        subparser.add_parser("help", help="show this help message")
+    subparser.add_parser("exit", help="exit the command prompt")
+    subparser.add_parser("help", help="show this help message")
 
     if readline:
         if os.path.exists(REPL_HISTFILE):
