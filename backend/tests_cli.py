@@ -653,6 +653,7 @@ class PrintTableTests(TestCase):
         self.original_stdout = sys.stdout
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
+        cli.USE_UNICODE = True
 
     def tearDown(self):
         self.mission.delete()
