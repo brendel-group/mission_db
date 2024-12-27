@@ -4,8 +4,6 @@ import {
     getMission,
     updateMission,
     deleteMission,
-    fetchAndTransformMission,
-    fetchAndTransformMissions,
     getTags,
     addTagToMission,
     removeTagFromMission,
@@ -16,9 +14,8 @@ import {
     getMissionsByTag,
     getDetailsByMission,
 } from './fetchapi';
-import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from '~/config';
-import { BackendMissionData, MissionData, Tag, DetailViewData } from '~/data';
-import { mission_table_data } from '../RandomData';
+import { FETCH_API_BASE_URL } from '~/config';
+import { MissionData, Tag, DetailViewData } from '~/data';
 
 /*
 How to run the tests:

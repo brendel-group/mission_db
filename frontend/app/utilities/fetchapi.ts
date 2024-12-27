@@ -1,6 +1,5 @@
 import { MissionData , Tag, DetailViewData} from "~/data";
 import { FETCH_API_BASE_URL } from "~/config";
-import DetailsView from "~/pages/details/DetailsView";
 
 const headers: {
     'Content-Type': string,
