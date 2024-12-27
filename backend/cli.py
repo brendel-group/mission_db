@@ -10,6 +10,8 @@ import shlex
 import code
 from datetime import datetime
 from django.core.exceptions import ValidationError
+from getpass import getpass
+
 
 try:
     import readline
@@ -547,13 +549,8 @@ def list_api_keys():
 def read_and_validate_password(
     prompt1="Password: ", prompt2="Verify Password: "
 ) -> str:
-    password = input(prompt1)
-    if readline:
-        readline.remove_history_item(readline.get_current_history_length() - 1)
-
-    password_verify = input(prompt2)
-    if readline:
-        readline.remove_history_item(readline.get_current_history_length() - 1)
+    password = getpass(prompt1)
+    password_verify = getpass(prompt2)
 
     if password != password_verify:
         raise ValidationError("The passwords do not match")
