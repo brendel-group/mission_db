@@ -91,6 +91,12 @@ The `fetchapi.ts` file provides utility functions to interact with the Mission D
 - **Parameters**: `tagName` (string)
 - **Returns**: `Promise<{ id: number; name: string; location: string }[]>`
 - **Endpoint**: `GET /restapi/tags/missions/{tagName}`
+
+### getDetailsByMission(missionID)
+- Fetches all details associated with a specific mission.
+- **Parameters**: `missionID` (number)
+- **Returns**: `Promise<{ DetailViewData }>`
+- **Endpoint**: `GET /restapi/missions/{missionID}/files/`
 -------------------------
 ## Configuration
 - **`FETCH_API_BASE_URL`**: The base URL for API requests, defined in `config.tsx`. Set to: `http://127.0.0.1:8000/restapi`
