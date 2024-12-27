@@ -378,7 +378,7 @@ describe('Fetch API Functions', () => {
                 }
             ];
 
-            const expectedResponse = {
+            const expectedResponse: DetailViewData = {
                     files: ['file1.mcap', 'file2.mcap'],
                     durations: ['60000', '120000'],
                     sizes: ['1024', '2048'],
