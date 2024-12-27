@@ -3,20 +3,20 @@ import React, { useEffect, useState } from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { ShowStatsView } from "./StatsView";
-import { MissionData, DetailViewData } from "~/data";
+import { RenderedMission, DetailViewData } from "~/data";
 import AbstractPage from "../AbstractPage";
 import { getDetailsByMission } from "../../utilities/fetchapi";
-
-
+import { ShowInformationView } from "./InformationView";
 
 interface DetailsViewProps {
-  missionData: MissionData | null;
+  missionData: RenderedMission;
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({
   missionData: selectedRow,
 }) => {
   const [detailViewData, setDetailViewData] = useState<DetailViewData>();
+  const [location, setLocation] = useState<string>(missionData.location);
   useEffect(() => {
     const fetchDetailViewData = async () => {
       if (selectedRow) {
@@ -34,24 +34,21 @@ const DetailsView: React.FC<DetailsViewProps> = ({
 
   return (
     <AbstractPage
-      headline={
-        selectedRow
-          ? `${selectedRow.name}${selectedRow.location ? `, ${selectedRow.location}` : ""}${selectedRow.robot ? ` with ${selectedRow.robot}` : ""
-          }`
-          : "Mission Details"
-      }
+      headline={`${missionData.name}${location ? `, ${location}` : ""}${
+        missionData.robot ? ` with ${missionData.robot}` : ""
+      }`}
     >
       {/* Main content */}
-      < Grid gutter="md" >
+      <Grid gutter="md">
         {/* Left column occupying 80% */}
-        < Grid.Col span={9} >
+        <Grid.Col span={9}>
           <Grid gutter="md">
             {/* Tags */}
             <Grid.Col span={12}>
-              {selectedRow && (
+              {missionData && (
                 <RenderTagsDetailView
-                  tags_={selectedRow.tags}
-                  missionId={selectedRow.missionId}
+                  tags_={missionData.tags}
+                  missionId={missionData.id}
                 />
               )}
             </Grid.Col>
@@ -60,14 +57,17 @@ const DetailsView: React.FC<DetailsViewProps> = ({
               {detailViewData && <ShowDatasets data={detailViewData} />}
             </Grid.Col>
           </Grid>
-        </Grid.Col >
+        </Grid.Col>
 
         {/* Stats */}
-        < Grid.Col span={3} >
-          <ShowStatsView missionData={selectedRow} />
-        </Grid.Col >
-      </Grid >
-    </AbstractPage >
+        <Grid.Col span={3}>
+          <ShowInformationView
+            missionData={missionData}
+            setLocation_={setLocation}
+          />
+        </Grid.Col>
+      </Grid>
+    </AbstractPage>
   );
 };
 

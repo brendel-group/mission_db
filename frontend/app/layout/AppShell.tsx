@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { AppShell, Burger, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Navbar } from "~/layout/NavBar/NavBar";
+import { Link } from "@remix-run/react";
 
 interface BasicAppShellProps {
   children: ReactNode;
@@ -19,11 +20,13 @@ export function CreateAppShell({ children }: BasicAppShellProps) {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <img
-            src="/favicon.ico"
-            alt="Custom Icon"
-            style={{ width: 30, height: 30 }}
-          />
+          <Link to="/" style={{ display: "flex", alignItems: "center" }}>
+            <img
+              src="/favicon.ico"
+              alt="Custom Icon"
+              style={{ width: 30, height: 30 }}
+            />
+          </Link>
           <span style={{ fontSize: "1.5rem" }}>Mission Explorer</span>
         </Group>
       </AppShell.Header>
