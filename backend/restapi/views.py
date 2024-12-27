@@ -68,6 +68,7 @@ def get_files_by_mission_id(request, mission_id):
     serializer = FileWithTypeSerializer(mission_files, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 @api_view(["GET"])
 def get_tags(request):
     """

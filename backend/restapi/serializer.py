@@ -18,6 +18,7 @@ class FileSerializer(serializers.ModelSerializer):
         model = File
         fields = "__all__"
 
+
 class MissionFileSerializer(serializers.ModelSerializer):
     mission_id = serializers.IntegerField(source="mission.id", initial=None)
     file_id = serializers.IntegerField(source="file.id", initial=None)
@@ -33,6 +34,7 @@ class FileWithTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mission_files
         fields = ["type", "file"]
+
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
