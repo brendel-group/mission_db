@@ -563,7 +563,7 @@ def add_user(name, email=None):
     try:
         password = read_and_validate_password()
     except ValidationError as e:
-        logging.error(e.message)
+        logging.error(e)
         return
 
     try:
@@ -580,7 +580,7 @@ def change_password(name):
     try:
         password = read_and_validate_password("New Password: ", "Verify new Password: ")
     except ValidationError as e:
-        logging.error(e.message)
+        logging.error(e)
         return
 
     try:
@@ -595,6 +595,7 @@ def change_password(name):
 
     try:
         user.set_password(password)
+        user.save()
     except Exception as e:
         logging.error(e)
         return
