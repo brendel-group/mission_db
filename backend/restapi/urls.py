@@ -11,7 +11,6 @@ from .views import (
     add_tag_to_mission,
     delete_mission_tag,
     get_files_by_mission_id,
-    get_details_by_mission_id,
 )
 
 urlpatterns = [

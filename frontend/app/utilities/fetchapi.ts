@@ -299,7 +299,7 @@ export const getMissionsByTag = async (tagName: string): Promise<{ id: number; n
 
 // Get details by mission
 export const getDetailsByMission = async (missionId: number): Promise<DetailViewData> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/missions/${missionId}/details/`,{
+    const response = await fetch(`${FETCH_API_BASE_URL}/missions/${missionId}/files/`,{
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -313,13 +313,16 @@ export const getDetailsByMission = async (missionId: number): Promise<DetailView
     }
     
     const data = await response.json();
+    
     const files: string[] = [];
     const durations: string[] = [];
     const sizes: string[] = [];
 
-    files.push(data[0].file.file_path);
-    durations.push(data[0].file.duration);
-    sizes.push(data[0].file.size);
+    for (const d in data) {
+        files.push(data[d].file.file_path);
+        durations.push(data[d].file.duration);
+        sizes.push(data[d].file.size);
+    }
 
     return { files, durations, sizes }
 };
