@@ -9,7 +9,6 @@ from .serializer import (
     MissionSerializer,
     MissionTagSerializer,
     FileWithTypeSerializer,
-    DetailOnlySerializer,
 )
 import urllib.parse
 
@@ -68,24 +67,6 @@ def get_files_by_mission_id(request, mission_id):
     mission_files = Mission_files.objects.filter(mission__id=mission.id)
     serializer = FileWithTypeSerializer(mission_files, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-@api_view(["GET"])
-def get_details_by_mission_id(request, mission_id):
-    """
-    List the details of a mission by ID
-    ### Returns
-    Response with list of files with type in json format\
-    Or NotFound exception
-    """
-    try:
-        mission = Mission.objects.get(id=mission_id)
-    except Mission.DoesNotExist:
-        raise NotFound(f"Mission with ID {mission_id} not found")
-    mission_files = Mission_files.objects.filter(mission__id=mission.id)
-    serializer = DetailOnlySerializer(mission_files, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 @api_view(["GET"])
 def get_tags(request):

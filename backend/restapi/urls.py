@@ -42,9 +42,4 @@ urlpatterns = [
         get_files_by_mission_id,
         name="get_files_by_mission_id",
     ),
-    path(
-        "missions/<int:mission_id>/details/",
-        get_details_by_mission_id,
-        name="get_details_by_mission_id",
-    ),
 ]
