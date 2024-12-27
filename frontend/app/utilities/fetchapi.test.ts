@@ -14,9 +14,10 @@ import {
     deleteTag,
     getTagsByMission,
     getMissionsByTag,
+    getDetailsByMission,
 } from './fetchapi';
 import { FETCH_API_BASE_URL, USE_RANDOM_DATA } from '~/config';
-import { BackendMissionData, MissionData, Tag } from '~/data';
+import { BackendMissionData, MissionData, Tag, DetailViewData } from '~/data';
 import { mission_table_data } from '../RandomData';
 
 /*
@@ -358,5 +359,43 @@ describe('Fetch API Functions', () => {
                 headers: { 'Content-Type': 'application/json' },
             });
         });
+
+        test('getDetailsByMission should fetch details of a mission', async () => {
+            const mockResponse = [
+                {
+                    file: {
+                        file_path: 'file1.mcap',
+                        duration: '60000',
+                        size: '1024',
+                    }
+                },
+                {
+                    file: {
+                        file_path: 'file2.mcap',
+                        duration: '120000',
+                        size: '2048',
+                    }
+                }
+            ];
+
+            const expectedResponse = {
+                    files: ['file1.mcap', 'file2.mcap'],
+                    durations: ['60000', '120000'],
+                    sizes: ['1024', '2048'],
+                };
+
+            (fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: jest.fn().mockResolvedValueOnce(mockResponse),
+            });
+
+            const details = await getDetailsByMission(1);
+            expect(details).toEqual(expectedResponse);
+            expect(fetch).toHaveBeenCalledWith(`${FETCH_API_BASE_URL}/missions/1/files/`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+        });
+
     });
 });
