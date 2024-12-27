@@ -571,6 +571,7 @@ def add_user(name, email=None):
         user.full_clean()
     except Exception as e:
         logging.error(e)
+        user.delete()
         return
 
     logging.info(f"User '{name}' added")
