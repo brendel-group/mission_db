@@ -9,6 +9,7 @@ import logging
 import shlex
 import code
 from datetime import datetime
+from django.core.exceptions import ValidationError
 
 try:
     import readline
@@ -24,6 +25,7 @@ from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 from rest_framework_api_key.models import APIKey  # noqa
 from django.contrib.auth.models import User  # noqa
+from django.contrib.auth.password_validation import validate_password  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -173,6 +175,7 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
                 name=name, date=mission_date, location=location, notes=notes
             )
             try:
+                mission.full_clean()
                 mission.save()
                 logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
             except Exception as e:
@@ -541,6 +544,87 @@ def list_api_keys():
     print_table(keys)
 
 
+def read_and_validate_password(
+    prompt1="Password: ", prompt2="Verify Password: "
+) -> str:
+    password = input(prompt1)
+    if readline:
+        readline.remove_history_item(readline.get_current_history_length() - 1)
+
+    password_verify = input(prompt2)
+    if readline:
+        readline.remove_history_item(readline.get_current_history_length() - 1)
+
+    if password != password_verify:
+        raise ValidationError("The passwords do not match")
+
+    validate_password(password)
+    return password
+
+
+def add_user(name, email=None):
+    try:
+        password = read_and_validate_password()
+    except ValidationError as e:
+        logging.error(e.message)
+        return
+
+    try:
+        user = User.objects.create_user(username=name, email=email, password=password)
+        user.full_clean()
+    except Exception as e:
+        logging.error(e)
+        return
+
+    logging.info(f"User '{name}' added")
+
+
+def change_password(name):
+    try:
+        password = read_and_validate_password("New Password: ", "Verify new Password: ")
+    except ValidationError as e:
+        logging.error(e.message)
+        return
+
+    try:
+        user = User.objects.get(username=name)
+    except User.DoesNotExist:
+        logging.error(f"User '{name}' does not exist")
+        return
+
+    if user.check_password(password):
+        logging.error("The new password can't be the same as the old password")
+        return
+
+    try:
+        user.set_password(password)
+    except Exception as e:
+        logging.error(e)
+        return
+
+    logging.info(f"Pasword of user '{name}' changed successfully")
+
+
+def remove_user(name):
+    try:
+        user = User.objects.get(username=name)
+    except User.DoesNotExist:
+        logging.error(f"User '{name}' does not exist")
+        return
+
+    try:
+        user.delete()
+    except Exception as e:
+        logging.error(e)
+
+    logging.info(f"User '{name}' removed")
+
+
+def list_user():
+    users = User.objects.values()
+    print_table(users)
+
+
 class Interactive(code.InteractiveConsole):
     def __init__(self, help):
         super().__init__(locals=None, filename="<console>")
@@ -669,15 +753,15 @@ def api_key_command(api_key_parser, args):
 def user_command(user_parser, args):
     match args.user:
         case "add":
-            pass
+            add_user(args.name, args.email)
         case "remove":
-            pass
+            remove_user(args.name)
         case "change-password":
-            pass
+            change_password(args.name)
         case "list":
-            pass
+            list_user()
         case _:
-            pass
+            user_parser.print_help()
 
 
 def mission_arg_parser(subparser):
@@ -848,7 +932,7 @@ def user_arg_parser(subparser: argparse._SubParsersAction):
     # List command
     _ = user_subparser.add_parser("list", help="List all Users")
 
-    return user_subparser
+    return user_parser
 
 
 def main(args):
