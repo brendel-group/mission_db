@@ -14,8 +14,8 @@ class MissionCommand(Command):
         ### Returns
         mission_parser: subparser here created
         """
-        self.mission_parser = subparser.add_parser("mission", help="Modify Missions")
-        mission_subparser = self.mission_parser.add_subparsers(dest="mission")
+        self.__mission_parser = subparser.add_parser("mission", help="Modify Missions")
+        mission_subparser = self.__mission_parser.add_subparsers(dest="mission")
 
         # Add command
         add_parser = mission_subparser.add_parser("add", help="Add mission")
