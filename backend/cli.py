@@ -112,17 +112,17 @@ commands: dict[str, Command] = {
     "syncfolder": SyncFolderCommand(),
 }
 
+# Arg parser
+parser = argparse.ArgumentParser(description="Mission CLI")
+subparser = parser.add_subparsers(dest="command")
+
+for command in commands:
+    commands[command].parser_setup(subparser)
+
+argcomplete.autocomplete(parser)
+
 
 def main(args):
-    # Arg parser
-    parser = argparse.ArgumentParser(description="Mission CLI")
-    subparser = parser.add_subparsers(dest="command")
-
-    for command in commands:
-        commands[command].parser_setup(subparser)
-
-    argcomplete.autocomplete(parser)
-
     args = parser.parse_args(args)
 
     # Execute command
