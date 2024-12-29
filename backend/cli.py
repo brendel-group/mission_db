@@ -30,7 +30,7 @@ from rest_framework_api_key.models import APIKey  # noqa
 logging.basicConfig(level=logging.INFO)
 
 env = environ.Env(USE_UNICODE=(bool, True))
-environ.Env.read_env()
+environ.Env.read_env("./backend/.env")
 
 USE_UNICODE = env("USE_UNICODE")
 
