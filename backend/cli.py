@@ -9,6 +9,7 @@ import logging
 import shlex
 import code
 from datetime import datetime
+from cli_commands.Command import Command
 
 try:
     import readline
@@ -23,6 +24,7 @@ django.setup()
 from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 from rest_framework_api_key.models import APIKey  # noqa
+from cli_commands.MissionCommand import MissionCommand  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -82,79 +84,6 @@ def check_mission(name, date):
     return Mission.objects.filter(name=name, date=date).exists()
 
 
-def validate_date(date_str):
-    """
-    Validate datetime format
-    ### Parameters
-    date_str: date string in the format YYYY-MM-DD
-    ### Returns
-    datetime object if format is valid\\
-    None if string is of invalid format
-    """
-    try:
-        return datetime.strptime(date_str, "%Y-%m-%d").date()
-    except ValueError:
-        logging.error("Date and time format should be YYYY-MM-DD.")
-        return None
-
-
-def print_table(list_of_dict: list[dict]):
-    """
-    Print the contents of a list of dictionaries as a table.\\
-    A dictionary and a json are essentially the same in python.\\
-    So this function can be called with the data of a ListSerializer
-    to print a table of DB entries.\\
-    The keys/labels are printed in the header.\\
-    It assumes that the dictionaries are flat an contain the same keys.\\
-    The width of the columns are automatically adjusted to the max width
-    of any value in that column.
-    ### Parameters
-    list_of_dict: A list containing flat dictionaries which all have the same keys
-    """
-    vertical_bar = "│"  # U+2502
-    horizontal_bar = "─"  # U+2500
-    cross_bar = "┼"  # U+253C
-
-    if not list_of_dict:
-        print("Empty list nothing to display")
-        return
-
-    keys = list(list_of_dict[0])
-
-    # get widths of columns
-
-    widths = {}
-
-    for key in keys:
-        list_of_widths = list(map(lambda d: len(str(d[key])), list_of_dict))
-        list_of_widths.append(len(key))
-        widths[key] = max(list_of_widths)
-
-    # print header
-
-    header = ""
-    vertical_line = ""
-    for key in keys:
-        header += f"{key:<{widths[key]}} {vertical_bar} "
-        vertical_line += horizontal_bar * (widths[key] + 1) + cross_bar + horizontal_bar
-
-    # remove last 3 characters because there is no extra column
-    header = header[:-3]
-    vertical_line = vertical_line[:-3]
-
-    print(header)
-    print(vertical_line)
-
-    # print content
-
-    for entry in list_of_dict:
-        line = ""
-        for key in keys:
-            line += f"{str(entry[key]):<{widths[key]}} {vertical_bar} "
-        line = line[:-3]
-        print(line)
-
-
 def add_mission_from_folder(folder_path, location=None, notes=None):
     """
     Add mission to DB with data from filesystem
@@ -193,39 +122,6 @@ def sync_folder(folder_path, location=None, notes=None):
                 add_mission_from_folder(item_path, location, notes)
     else:
         logging.error("invalid path")
-
-
-def add_mission(name, mission_date, location=None, notes=None):
-    """
-    Add mission to DB
-    ### Parameters
-    name: string containing the mission name\\
-    mission_date: date object of the date\\
-    location: optional string containing information about the location\\
-    notes: optional string containing other extra information 
-    """
-    try:
-        mission = Mission(name=name, date=mission_date, location=location, notes=notes)
-        mission.full_clean()  # validation
-        mission.save()
-        logging.info(f"'{name}' added.")
-    except Exception as e:
-        logging.error(f"Error adding mission: {e}")
-
-
-def remove_mission(mission_id):
-    """
-    Remove mission from DB
-    ### Parameters
-    mission_id: id of mission to remove
-    """
-    try:
-        # Attempt to find the mission by ID
-        mission = Mission.objects.get(id=mission_id)
-        mission.delete()  # Delete the found mission
-        print(f"Mission with ID {mission_id} has been removed.")
-    except Mission.DoesNotExist:
-        print(f"No mission found with ID {mission_id}.")
 
 
 def add_tag(name, color=None):
@@ -291,7 +187,7 @@ def list_tags():
     """
     tags = Tag.objects.all().order_by("id")
     serializer = TagSerializer(tags, many=True)
-    print_table(serializer.data)
+    Command.print_table(serializer.data)
 
 
 def change_tag(id=None, name=None, color=None):
@@ -331,18 +227,6 @@ def change_tag(id=None, name=None, color=None):
         logging.error(f"Error changing Tag: {e}")
 
 
-def list_tags_by_mission(id):
-    """
-    List all Tags that belong to the same Mission
-
-    Args:
-        id: mission id
-    """
-    tags = Tag.objects.filter(mission_tags__mission_id=id).order_by("id")
-    serializer = TagSerializer(tags, many=True)
-    print_table(serializer.data)
-
-
 def list_missions_by_tag(id=None, name=None):
     """
     List all Missions that have the same Tag
@@ -374,112 +258,7 @@ def list_missions_by_tag(id=None, name=None):
     else:
         missions = Mission.objects.filter(mission_tags__tag__name=name).order_by("id")
     serializer = MissionSerializer(missions, many=True)
-    print_table(serializer.data)
-
-
-def add_tag_to_mission(id, tag_id=None, tag_name=None):
-    """
-    Either tag_id or tag_name must be given. If both are given it is checked, that they belong
-    to the same Tag.
-
-    Args:
-        id: Mission id
-        tag_id (optional): Tag id
-        tag_name (optional): Tag name
-    """
-    # Input check
-    if tag_id and tag_name:
-        try:
-            tag = Tag.objects.get(id=tag_id)
-        except Tag.DoesNotExist:
-            logging.error(f"No Tag with id {tag_id} found")
-            return
-        if tag.name != tag_name:
-            logging.error("Tag id and name given but dont match.")
-            return
-
-    if not (tag_id or tag_name):
-        logging.error("At least one of --tag-id or --tag-name must be provided")
-        return
-
-    # Actual processing
-    try:
-        mission = Mission.objects.get(id=id)
-        if tag_id:
-            tag = Tag.objects.get(id=tag_id)
-            created = False
-        else:
-            tag, created = Tag.objects.get_or_create(name=tag_name)
-        mission_tag = Mission_tags(mission=mission, tag=tag)
-        mission_tag.full_clean()
-        mission_tag.save()
-
-        # Output
-        if created:
-            logging.info(f"Tag '{tag.name}' created and tagged Mission with id {id}")
-        else:
-            logging.info(f"Tagged Mission with id {id} with '{tag.name}'")
-
-    # Error handling
-    except Mission.DoesNotExist:
-        logging.error(f"No Mission with id {id} found")
-    except Exception as e:
-        logging.error(e)
-
-
-def remove_tag_from_mission(id, tag_id=None, tag_name=None):
-    """
-    Either tag_id or tag_name must be given. If both are given it is checked, that they belong
-    to the same Tag.
-
-    Args:
-        id: Mission id
-        tag_id (optional): Tag id
-        tag_name (_type_, optional): Tag name
-    """
-    # Input check
-    if not (tag_id or tag_name):
-        logging.error("At least one of --tag-id or --tag-name must be provided")
-        return
-
-    try:
-        if tag_id and tag_name:
-            tag = Tag.objects.get(id=tag_id)
-            if tag.name != tag_name:
-                logging.error("Tag id and name given but dont match.")
-                return
-
-        # Actual processing
-        # using filter over get, because if for some reason the same Tag got added multiple times to the same Mission
-        # filter will handle it properly, while get throws an error
-        if tag_id:
-            mission_tag = Mission_tags.objects.filter(mission_id=id, tag_id=tag_id)
-        else:
-            mission_tag = Mission_tags.objects.filter(mission_id=id, tag__name=tag_name)
-        if not mission_tag.exists():
-            raise Mission_tags.DoesNotExist
-        mission_tag.delete()
-
-        # Output
-        tag = Tag.objects.filter(id=tag_id) | Tag.objects.filter(name=tag_name)
-        tag = tag.first()
-        logging.info(f"Removed Tag '{tag.name}' from Mission with id {id}")
-
-    # Error handling
-    except Mission.DoesNotExist:
-        logging.error(f"No Mission with id {id} found")
-    except Mission_tags.DoesNotExist:
-        if tag_id:
-            logging.error(f"No Tag with id {tag_id} found at Mission with id {id}")
-        else:
-            logging.error(
-                f"No Tag with name '{tag_name}' found at Mission with id {id}"
-            )
-    except Tag.DoesNotExist:
-        if tag_id:
-            logging.error(f"No Tag with id {tag_id} found")
-        else:
-            logging.error(f"No Tag with name '{tag_name}' found")
+    Command.print_table(serializer.data)
 
 
 def add_api_key(name, expiry_date=None):
@@ -537,7 +316,7 @@ def remove_api_key(prefix=None, name=None):
 
 def list_api_keys():
     keys = APIKey.objects.values()
-    print_table(keys)
+    Command.print_table(keys)
 
 
 class Interactive(code.InteractiveConsole):
@@ -599,40 +378,6 @@ def interactive(parser: argparse.ArgumentParser):
             )
 
 
-def mission_command(mission_parser, mission_tag_parser, args):
-    match args.mission:
-        case "add":
-            # Validate date
-            validated_date = validate_date(args.date)
-            if validated_date is None:
-                return
-
-            add_mission(
-                args.name,
-                validated_date,  # Pass the validated date
-                args.location,
-                args.notes,
-            )
-        case "remove":
-            remove_mission(args.id)
-        case "list":
-            missions = Mission.objects.all().order_by("id")
-            serializer = MissionSerializer(missions, many=True)
-            print_table(serializer.data)
-        case "tag":
-            match args.mission_tag:
-                case "list":
-                    list_tags_by_mission(args.id)
-                case "add":
-                    add_tag_to_mission(args.id, args.tag_id, args.tag_name)
-                case "remove":
-                    remove_tag_from_mission(args.id, args.tag_id, args.tag_name)
-                case _:
-                    mission_tag_parser.print_help()
-        case _:
-            mission_parser.print_help()
-
-
 def tag_command(tag_parser, tag_mission_parser, args):
     match args.tag:
         case "add":
@@ -663,60 +408,6 @@ def api_key_command(api_key_parser, args):
             list_api_keys()
         case _:
             api_key_parser.print_help()
-
-
-def mission_arg_parser(subparser):
-    """
-    Parser setup for mission subcommand
-    ### Parameters
-    subparser: subparser to which this subcommand belongs to
-    ### Returns
-    mission_parser: subparser here created
-    """
-    mission_parser = subparser.add_parser("mission", help="Modify Missions")
-    mission_subparser = mission_parser.add_subparsers(dest="mission")
-
-    # Add command
-    add_parser = mission_subparser.add_parser("add", help="Add mission")
-    add_parser.add_argument("--name", required=True, help="Mission name")
-    add_parser.add_argument("--date", required=True, help="Mission date (YYYY-MM-DD)")
-    add_parser.add_argument("--location", required=False, help="Mission location")
-    add_parser.add_argument("--notes", required=False, help="Other mission details")
-
-    # Remove command
-    remove_parser = mission_subparser.add_parser("remove", help="Remove mission")
-    remove_parser.add_argument("--id", required=True, help="ID")
-
-    # List command
-    _ = mission_subparser.add_parser("list", help="List all missions")
-
-    # tag subcommand
-    tag_parser = mission_subparser.add_parser("tag", help="Change tags of one mission")
-    tag_subparser = tag_parser.add_subparsers(dest="mission_tag")
-
-    # tag list
-    list_tag_parser = tag_subparser.add_parser("list", help="List tags of one mission")
-    list_tag_parser.add_argument("--id", required=True, help="Select mission by id")
-
-    # tag add
-    tag_add_parser = tag_subparser.add_parser("add", help="Add tag to mission")
-    tag_add_parser.add_argument("--id", required=True, help="Select mission by id")
-    tag_add_parser.add_argument(
-        "--tag-name", required=False, help="Add or create tag by name"
-    )
-    tag_add_parser.add_argument("--tag-id", required=False, help="Add tag by id")
-
-    # tag remove
-    tag_remove_parser = tag_subparser.add_parser(
-        "remove", help="Remove tag from mission"
-    )
-    tag_remove_parser.add_argument("--id", required=True, help="Select mission by id")
-    tag_remove_parser.add_argument(
-        "--tag-name", required=False, help="Remove tag by name"
-    )
-    tag_remove_parser.add_argument("--tag-id", required=False, help="Remove tag by id")
-
-    return mission_parser, tag_parser
 
 
 def folder_arg_parser(subparser):
@@ -803,12 +494,16 @@ def api_key_arg_parser(subparser: argparse._SubParsersAction):
     return api_key_parser
 
 
+commands: dict[str, Command] = {"mission": MissionCommand()}
+
+
 def main(args):
     # Arg parser
     parser = argparse.ArgumentParser(description="Mission CLI")
     subparser = parser.add_subparsers(dest="command")
 
-    mission_parser, mission_tag_parser = mission_arg_parser(subparser)
+    for command in commands:
+        commands[command].parser_setup(subparser)
 
     folder_arg_parser(subparser)
 
@@ -824,8 +519,6 @@ def main(args):
 
     # Execute command
     match args.command:
-        case "mission":
-            mission_command(mission_parser, mission_tag_parser, args)
         case "addfolder":
             add_mission_from_folder(args.path, args.location, args.notes)
         case "syncfolder":
@@ -835,7 +528,10 @@ def main(args):
         case "api-key":
             api_key_command(api_key_parser, args)
         case _:
-            interactive(parser)
+            if args.command in commands:
+                commands[args.command].command(args)
+            else:
+                interactive(parser)
 
 
 if __name__ == "__main__":
