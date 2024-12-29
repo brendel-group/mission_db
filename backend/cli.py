@@ -116,8 +116,8 @@ commands: dict[str, Command] = {
 parser = argparse.ArgumentParser(description="Mission CLI")
 subparser = parser.add_subparsers(dest="command")
 
-for command in commands:
-    commands[command].parser_setup(subparser)
+for _, command in commands.items():
+    command.parser_setup(subparser)
 
 argcomplete.autocomplete(parser)
 
