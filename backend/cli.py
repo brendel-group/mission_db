@@ -9,6 +9,7 @@ import logging
 import shlex
 import code
 import traceback
+import environ
 from datetime import datetime
 
 try:
@@ -25,10 +26,13 @@ from restapi.models import Mission, Tag, Mission_tags  # noqa
 from restapi.serializer import MissionSerializer, TagSerializer  # noqa
 from rest_framework_api_key.models import APIKey  # noqa
 
-USE_UNICODE = os.getenv("USE_UNICODE", "True") == "True"
-
 # Set up logging
 logging.basicConfig(level=logging.INFO)
+
+env = environ.Env(USE_UNICODE=(bool, True))
+environ.Env.read_env()
+
+USE_UNICODE = env("USE_UNICODE")
 
 # set up repl
 REPL_HISTFILE = os.path.expanduser("~/.polybot_mission_db_cli.py_hist")
