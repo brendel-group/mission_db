@@ -34,10 +34,10 @@ class MissionCommand(Command):
         _ = mission_subparser.add_parser("list", help="List all missions")
 
         # tag subcommand
-        self.tag_parser = mission_subparser.add_parser(
+        self.__tag_parser = mission_subparser.add_parser(
             "tag", help="Change tags of one mission"
         )
-        tag_subparser = self.tag_parser.add_subparsers(dest="mission_tag")
+        tag_subparser = self.__tag_parser.add_subparsers(dest="mission_tag")
 
         # tag list
         list_tag_parser = tag_subparser.add_parser(
@@ -96,9 +96,9 @@ class MissionCommand(Command):
                     case "remove":
                         remove_tag_from_mission(args.id, args.tag_id, args.tag_name)
                     case _:
-                        self.tag_parser.print_help()
+                        self.__tag_parser.print_help()
             case _:
-                self.mission_parser.print_help()
+                self.__mission_parser.print_help()
 
 
 def validate_date(date_str):
