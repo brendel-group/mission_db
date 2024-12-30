@@ -3,8 +3,8 @@ import argparse
 
 
 class Command(ABC):
-    def __init__(self):
-        pass
+    def __init__(self, subparser: argparse._SubParsersAction):
+        self.parser_setup(subparser)
 
     @property
     @abstractmethod

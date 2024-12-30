@@ -101,14 +101,12 @@ def interactive(parser: argparse.ArgumentParser):
             )
 
 
-commands: dict[str, Command] = {c.name: c() for c in Command.__subclasses__()}
-
 # Arg parser
 parser = argparse.ArgumentParser(description="Mission CLI")
 subparser = parser.add_subparsers(dest="command")
 
-for _, command in commands.items():
-    command.parser_setup(subparser)
+# add all commands and parser setup
+commands: dict[str, Command] = {c.name: c(subparser) for c in Command.__subclasses__()}
 
 argcomplete.autocomplete(parser)
 
