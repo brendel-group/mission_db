@@ -6,6 +6,8 @@ from datetime import datetime
 
 
 class MissionCommand(Command):
+    name = "mission"
+
     def parser_setup(self, subparser):
         """
         Parser setup for mission subcommand
@@ -14,7 +16,7 @@ class MissionCommand(Command):
         ### Returns
         mission_parser: subparser here created
         """
-        self.__mission_parser = subparser.add_parser("mission", help="Modify Missions")
+        self.__mission_parser = subparser.add_parser(self.name, help="Modify Missions")
         mission_subparser = self.__mission_parser.add_subparsers(dest="mission")
 
         # Add command

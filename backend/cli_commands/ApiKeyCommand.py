@@ -4,8 +4,10 @@ from rest_framework_api_key.models import APIKey
 
 
 class ApiKeyCommand(Command):
+    name = "api-key"
+
     def parser_setup(self, subparser):
-        self.__api_key_parser = subparser.add_parser("api-key", help="Modify API-KEYS")
+        self.__api_key_parser = subparser.add_parser(self.name, help="Modify API-KEYS")
         api_key_subparser = self.__api_key_parser.add_subparsers(dest="api_key")
 
         # Add command

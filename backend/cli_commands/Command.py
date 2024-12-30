@@ -6,6 +6,11 @@ class Command(ABC):
     def __init__(self):
         pass
 
+    @property
+    @abstractmethod
+    def name() -> str:
+        pass
+
     @abstractmethod
     def parser_setup(self, subparser: argparse._SubParsersAction):
         pass

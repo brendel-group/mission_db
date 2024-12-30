@@ -5,9 +5,11 @@ from .AddFolderCommand import add_mission_from_folder
 
 
 class SyncFolderCommand(Command):
+    name = "syncfolder"
+
     def parser_setup(self, subparser):
         sync_parser = subparser.add_parser(
-            "syncfolder", help="adds all missions from folder"
+            self.name, help="adds all missions from folder"
         )
         sync_parser.add_argument("--path", required=True, help="Filepath")
         sync_parser.add_argument("--location", required=False, help="location")

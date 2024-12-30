@@ -5,8 +5,10 @@ from restapi.serializer import TagSerializer, MissionSerializer
 
 
 class TagCommand(Command):
+    name = "tag"
+
     def parser_setup(self, subparser):
-        self.__tag_parser = subparser.add_parser("tag", help="Modify Tags")
+        self.__tag_parser = subparser.add_parser(self.name, help="Modify Tags")
         tag_subparser = self.__tag_parser.add_subparsers(dest="tag")
 
         # Add command

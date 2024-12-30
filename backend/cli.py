@@ -20,11 +20,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")  # Adjust as
 django.setup()
 
 # Importing Commands
-from cli_commands.MissionCommand import MissionCommand  # noqa
-from cli_commands.TagCommand import TagCommand  # noqa
-from cli_commands.ApiKeyCommand import ApiKeyCommand  # noqa
-from cli_commands.AddFolderCommand import AddFolderCommand  # noqa
-from cli_commands.SyncFolderCommand import SyncFolderCommand  # noqa
+from cli_commands import *  # noqa
+from cli_commands.Command import Command  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -104,13 +101,7 @@ def interactive(parser: argparse.ArgumentParser):
             )
 
 
-commands: dict[str, Command] = {
-    "mission": MissionCommand(),
-    "tag": TagCommand(),
-    "api-key": ApiKeyCommand(),
-    "addfolder": AddFolderCommand(),
-    "syncfolder": SyncFolderCommand(),
-}
+commands: dict[str, Command] = {c.name: c() for c in Command.__subclasses__()}
 
 # Arg parser
 parser = argparse.ArgumentParser(description="Mission CLI")
