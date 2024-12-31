@@ -8,6 +8,8 @@ import django
 import logging
 import shlex
 import code
+import traceback
+import environ
 from datetime import datetime
 
 try:
@@ -26,6 +28,11 @@ from rest_framework_api_key.models import APIKey  # noqa
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
+
+env = environ.Env(USE_UNICODE=(bool, True))
+environ.Env.read_env("./backend/.env")
+
+USE_UNICODE = env("USE_UNICODE")
 
 # set up repl
 REPL_HISTFILE = os.path.expanduser("~/.polybot_mission_db_cli.py_hist")
@@ -111,9 +118,14 @@ def print_table(list_of_dict: list[dict]):
     ### Parameters
     list_of_dict: A list containing flat dictionaries which all have the same keys
     """
-    vertical_bar = "│"  # U+2502
-    horizontal_bar = "─"  # U+2500
-    cross_bar = "┼"  # U+253C
+    if USE_UNICODE:
+        vertical_bar = "│"  # U+2502
+        horizontal_bar = "─"  # U+2500
+        cross_bar = "┼"  # U+253C
+    else:
+        vertical_bar = "|"
+        horizontal_bar = "-"
+        cross_bar = "+"
 
     if not list_of_dict:
         print("Empty list nothing to display")
@@ -126,7 +138,9 @@ def print_table(list_of_dict: list[dict]):
     widths = {}
 
     for key in keys:
-        list_of_widths = list(map(lambda d: len(str(d[key])), list_of_dict))
+        list_of_widths = list(
+            map(lambda d: get_width_of_multiline_string(str(d[key])), list_of_dict)
+        )
         list_of_widths.append(len(key))
         widths[key] = max(list_of_widths)
 
@@ -149,10 +163,44 @@ def print_table(list_of_dict: list[dict]):
 
     for entry in list_of_dict:
         line = ""
+        next_line = {}
+
+        # add normal content, but only first line
         for key in keys:
-            line += f"{str(entry[key]):<{widths[key]}} {vertical_bar} "
+            content = str(entry[key])
+            if "\n" in content:
+                # extract first line and store remaining lines in next_line dict
+                splitted = content.split("\n")
+                content = splitted[0]
+                next_line[key] = splitted[1:]
+
+            line += f"{content:<{widths[key]}} {vertical_bar} "
+
+        # add remaining lines
+        while next_line:
+            # trim line
+            line = line[:-3]
+            line += "\n"
+
+            for key in keys:
+                # add empty field or content
+                if key in next_line:
+                    contents = next_line[key]
+                    content = str(contents.pop(0))
+                    if not contents:
+                        del next_line[key]
+
+                    line += f"{content:<{widths[key]}} {vertical_bar} "
+                else:
+                    line += f"{" ":<{widths[key]}} {vertical_bar} "
+
         line = line[:-3]
         print(line)
+
+
+def get_width_of_multiline_string(str: str):
+    widths = map(len, str.split("\n"))
+    return max(widths)
 
 
 def add_mission_from_folder(folder_path, location=None, notes=None):
@@ -546,7 +594,15 @@ class Interactive(code.InteractiveConsole):
         self.help = help
 
     def runsource(self, source, filename="<input>", symbol="single"):
-        args = shlex.split(source)
+        try:
+            args = shlex.split(source)
+        except ValueError as e:
+            if "No closing quotation" in e.args:
+                # will ask for more input when True returned
+                return True
+            else:
+                raise e
+
         if not args:
             return
         if "exit" in args:
@@ -566,7 +622,10 @@ class Interactive(code.InteractiveConsole):
             pass
 
 
-def interactive(parser: argparse.ArgumentParser):
+def interactive(parser: argparse.ArgumentParser, subparser):
+    subparser.add_parser("exit", help="exit the command prompt")
+    subparser.add_parser("help", help="show this help message")
+
     if readline:
         if os.path.exists(REPL_HISTFILE):
             try:
@@ -586,6 +645,8 @@ def interactive(parser: argparse.ArgumentParser):
         )
     except SystemExit:
         pass
+    except Exception:
+        print(traceback.format_exc())
 
     if readline:
         readline.set_history_length(REPL_HISTFILE_SIZE)
@@ -835,7 +896,7 @@ def main(args):
         case "api-key":
             api_key_command(api_key_parser, args)
         case _:
-            interactive(parser)
+            interactive(parser, subparser)
 
 
 if __name__ == "__main__":
