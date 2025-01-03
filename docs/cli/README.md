@@ -60,6 +60,10 @@ Use
 to display help information\
 `--help` can be called on every command and subcommand
 
+When the output is too wide or long for the terminal and is a table, a pager will be used to display the table.\
+The pager can be set usin the  `PAGER` or `MANPAGER` environmental variables.\
+On Debian systems the default pager is `less` in most cases. With `less` the option `-S` can be used to disable folding of long lines to correctly display the table.
+
 ### `cli.py mission`
 
 command to make changes to missions

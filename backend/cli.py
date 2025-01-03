@@ -11,6 +11,7 @@ import code
 import traceback
 import environ
 from datetime import datetime
+from pydoc import pager
 
 try:
     import readline
@@ -144,6 +145,8 @@ def print_table(list_of_dict: list[dict]):
         list_of_widths.append(len(key))
         widths[key] = max(list_of_widths)
 
+    table = ""
+
     # print header
 
     header = ""
@@ -155,9 +158,8 @@ def print_table(list_of_dict: list[dict]):
     # remove last 3 characters because there is no extra column
     header = header[:-3]
     vertical_line = vertical_line[:-3]
-
-    print(header)
-    print(vertical_line)
+    table += header + "\n"
+    table += vertical_line + "\n"
 
     # print content
 
@@ -194,8 +196,24 @@ def print_table(list_of_dict: list[dict]):
                 else:
                     line += f"{" ":<{widths[key]}} {vertical_bar} "
 
-        line = line[:-3]
-        print(line)
+        table += line[:-3] + "\n"
+
+    table = table[:-1]
+
+    try:
+        terminal_cols, terminal_rows = os.get_terminal_size()
+    except Exception:
+        terminal_cols = float("inf")
+        terminal_rows = float("inf")
+
+    terminal_rows -= 1  # the bottom line in interactive mode is the input line
+    text_rows = table.count("\n") + 1
+    text_cols = len(vertical_line)
+
+    if (text_cols > terminal_cols) or (text_rows > terminal_rows):
+        pager(table)
+    else:
+        print(table)
 
 
 def get_width_of_multiline_string(str: str):
@@ -557,7 +575,7 @@ def remove_api_key(prefix=None, name=None):
     Both are optional but one has to be given.\\
     If both are given the prefix is preferred, since it's unique.\\
     If the name is used and there are mutliple entries with the same name, all are removed.
-    
+
     Args:
         prefix (optional): the prefix of an API KEY
         name (optional): the name of one or more API KEYs
