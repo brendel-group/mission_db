@@ -286,6 +286,9 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               )
             ) {
               tags.forEach((tag) => onRemoveTag(tag.name));
+              setOtherExistingTags(
+                allTags.sort((a, b) => a.name.localeCompare(b.name)),
+              );
             }
           }}
         >
