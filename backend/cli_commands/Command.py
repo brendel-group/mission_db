@@ -1,5 +1,11 @@
 from abc import ABC, abstractmethod
 import argparse
+import environ
+
+env = environ.Env(USE_UNICODE=(bool, True))
+environ.Env.read_env("./backend/.env")
+
+USE_UNICODE = env("USE_UNICODE")
 
 
 class Command(ABC):
@@ -33,9 +39,14 @@ class Command(ABC):
         ### Parameters
         list_of_dict: A list containing flat dictionaries which all have the same keys
         """
-        vertical_bar = "│"  # U+2502
-        horizontal_bar = "─"  # U+2500
-        cross_bar = "┼"  # U+253C
+        if USE_UNICODE:
+            vertical_bar = "│"  # U+2502
+            horizontal_bar = "─"  # U+2500
+            cross_bar = "┼"  # U+253C
+        else:
+            vertical_bar = "|"
+            horizontal_bar = "-"
+            cross_bar = "+"
 
         if not list_of_dict:
             print("Empty list nothing to display")
@@ -48,7 +59,9 @@ class Command(ABC):
         widths = {}
 
         for key in keys:
-            list_of_widths = list(map(lambda d: len(str(d[key])), list_of_dict))
+            list_of_widths = list(
+                map(lambda d: get_width_of_multiline_string(str(d[key])), list_of_dict)
+            )
             list_of_widths.append(len(key))
             widths[key] = max(list_of_widths)
 
@@ -73,7 +86,41 @@ class Command(ABC):
 
         for entry in list_of_dict:
             line = ""
+            next_line = {}
+
+            # add normal content, but only first line
             for key in keys:
-                line += f"{str(entry[key]):<{widths[key]}} {vertical_bar} "
+                content = str(entry[key])
+                if "\n" in content:
+                    # extract first line and store remaining lines in next_line dict
+                    splitted = content.split("\n")
+                    content = splitted[0]
+                    next_line[key] = splitted[1:]
+
+                line += f"{content:<{widths[key]}} {vertical_bar} "
+
+            # add remaining lines
+            while next_line:
+                # trim line
+                line = line[:-3]
+                line += "\n"
+
+                for key in keys:
+                    # add empty field or content
+                    if key in next_line:
+                        contents = next_line[key]
+                        content = str(contents.pop(0))
+                        if not contents:
+                            del next_line[key]
+
+                        line += f"{content:<{widths[key]}} {vertical_bar} "
+                    else:
+                        line += f"{" ":<{widths[key]}} {vertical_bar} "
+
             line = line[:-3]
             print(line)
+
+
+def get_width_of_multiline_string(str: str):
+    widths = map(len, str.split("\n"))
+    return max(widths)

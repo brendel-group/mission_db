@@ -47,3 +47,21 @@ class TableTests(TestCase):
             + f"{tags[1].id}│{tags[1].name}│#FFFFFF\n"
             + f"{tags[2].id}│{tags[2].name}│#FFFFFF",
         )
+
+    def test_mission_with_newline(self):
+        mission = [
+            Mission.objects.create(
+                name="Test\nlinebreak", date="2024-12-26", notes="Test\nwith\nnewline"
+            )
+        ]
+        serializer = MissionSerializer(mission, many=True)
+        Command.print_table(serializer.data)
+        sys.stdout.flush()
+        self.assertEqual(
+            self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
+            "id│name│date│location│notes\n"
+            + "┼┼┼┼\n"
+            + f"{mission[0].id}│Test│2024-12-26│None│Test\n"
+            + "│linebreak│││with\n"
+            + "││││newline",
+        )
