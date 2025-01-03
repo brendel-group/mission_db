@@ -19,7 +19,19 @@ For information on how to get an API KEY refer to the [cli documentation](https:
 - cd into the backend dir
 - run `python manage.py runserver`
 
-### using the webserver
+## authentication for the frontend
+Available URLs are:
+- `/restapi/auth/login/` (POST) returns 204 status code if credentials are valid. Creates django session
+- `/restapi/auth/logout/` (POST) Deletes django session
+- `/restapi/auth/user/` (GET,PUT,PATCH) User details
+- `/restapi/auth/password/change/` (POST) change password
+- `/restapi/auth/password/reset/` (POST) not usable until email delivery is supported
+- `/restapi/auth/password/reset/confirm/` (POST) also not usable until email delivery is supported
+
+This should only be a short overview about what is suported.\
+For more details about how to use the endpoints refer to the [dj-rest-auth documentation](https://dj-rest-auth.readthedocs.io/en/latest/api_endpoints.html).
+
+## using the webserver
 - GET Requests for missions
     - [GET Missions](http://127.0.0.1:8000/restapi/missions/) shows all stored missions in our database
 - POST Requests for missions
