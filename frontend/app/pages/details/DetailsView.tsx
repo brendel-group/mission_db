@@ -3,16 +3,18 @@ import React from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { ShowStatsView } from "./StatsView";
-import { MissionData } from "~/data";
+import { MissionData, Tag } from "~/data";
 import { detail_view_data } from "~/RandomData";
 import AbstractPage from "../AbstractPage";
 
 interface DetailsViewProps {
   missionData: MissionData | null;
+  allTags: Tag[];
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({
   missionData: selectedRow,
+  allTags,
 }) => {
   const detailViewData = selectedRow
     ? detail_view_data[selectedRow.missionId]
@@ -36,6 +38,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({
               {selectedRow && (
                 <RenderTagsDetailView
                   tags_={selectedRow.tags}
+                  allTags_={allTags}
                   missionId={selectedRow.missionId}
                 />
               )}
