@@ -1,6 +1,4 @@
-// Variable to switch between backend data and RandomData is in config.tsx
-
-import { MissionData , Tag} from "~/data";
+import { MissionData , Tag, DetailViewData} from "~/data";
 import { FETCH_API_BASE_URL } from "~/config";
 
 const headers: {
@@ -216,4 +214,34 @@ export const getMissionsByTag = async (tagName: string): Promise<{ id: number; n
         throw new Error('Failed to fetch missions for tag');
     }
     return response.json();
+};
+
+// Get details by mission
+export const getDetailsByMission = async (missionId: number): Promise<DetailViewData> => {
+    const response = await fetch(`${FETCH_API_BASE_URL}/missions/${missionId}/files/`,{
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error(`Details of mission with ID ${missionId} not found`);
+        }
+        throw new Error(`Failed to fetch details by mission ID ${missionId}`);
+    }
+    
+    const data = await response.json();
+    
+    const files: string[] = [];
+    const durations: string[] = [];
+    const sizes: string[] = [];
+
+    for (const d in data) {
+        files.push(data[d].file.file_path);
+        durations.push(data[d].file.duration);
+        sizes.push(data[d].file.size);
+    }
+
+    return { files, durations, sizes }
 };

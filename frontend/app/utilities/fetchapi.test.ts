@@ -1,20 +1,21 @@
 import {
-  getMissions,
-  createMission,
-  getMission,
-  updateMission,
-  deleteMission,
-  getTags,
-  addTagToMission,
-  removeTagFromMission,
-  changeTagColor,
-  createTag,
-  deleteTag,
-  getTagsByMission,
-  getMissionsByTag,
-} from "./fetchapi";
-import { FETCH_API_BASE_URL } from "~/config";
-import { MissionData, Tag } from "~/data";
+    getMissions,
+    createMission,
+    getMission,
+    updateMission,
+    deleteMission,
+    getTags,
+    addTagToMission,
+    removeTagFromMission,
+    changeTagColor,
+    createTag,
+    deleteTag,
+    getTagsByMission,
+    getMissionsByTag,
+    getDetailsByMission,
+} from './fetchapi';
+import { FETCH_API_BASE_URL } from '~/config';
+import { MissionData, Tag, DetailViewData } from '~/data';
 
 /*
 How to run the tests:
@@ -138,6 +139,7 @@ describe("Fetch API Functions", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedMission),
       });
+      
     });
 
     test("deleteMission should delete a mission by ID", async () => {
@@ -148,8 +150,45 @@ describe("Fetch API Functions", () => {
         method: "DELETE",
       });
     });
-  });
 
+    test('getDetailsByMission should fetch details of a mission', async () => {
+      const mockResponse = [
+          {
+              file: {
+                  file_path: 'file1.mcap',
+                  duration: '60000',
+                  size: '1024',
+              }
+          },
+          {
+              file: {
+                  file_path: 'file2.mcap',
+                  duration: '120000',
+                  size: '2048',
+              }
+          }
+      ];
+
+      const expectedResponse: DetailViewData = {
+              files: ['file1.mcap', 'file2.mcap'],
+              durations: ['60000', '120000'],
+              sizes: ['1024', '2048'],
+          };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: jest.fn().mockResolvedValueOnce(mockResponse),
+      });
+
+      const details = await getDetailsByMission(1);
+      expect(details).toEqual(expectedResponse);
+      expect(fetch).toHaveBeenCalledWith(`${FETCH_API_BASE_URL}/missions/1/files/`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+      });
+    });
+  });
+  
   // Tag-related Functions
   describe("Tag Management", () => {
     test("getTags should fetch all tags", async () => {

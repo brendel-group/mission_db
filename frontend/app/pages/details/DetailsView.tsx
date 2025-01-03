@@ -1,28 +1,40 @@
 import { Grid } from "@mantine/core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
-import { RenderedMission } from "~/data";
+import { RenderedMission, DetailViewData } from "~/data";
 import AbstractPage from "../AbstractPage";
+import { getDetailsByMission } from "../../utilities/fetchapi";
 import { ShowInformationView } from "./InformationView";
 
 interface DetailsViewProps {
   missionData: RenderedMission;
 }
 
-const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
-  const detailViewData = {
-    files: ["file1.mcap", "file2.mcap", "file3.mcap"],
-    durations: ["00:01:30", "00:02:45", "00:00:50"],
-    sizes: ["2000", "4500", "1000"],
-  };
-
-  const [location, setLocation] = useState<string>(missionData.location);
+const DetailsView: React.FC<DetailsViewProps> = ({
+  missionData: selectedRow,
+}) => {
+  const [detailViewData, setDetailViewData] = useState<DetailViewData>();
+  const [location, setLocation] = useState<string>(selectedRow.location);
+  useEffect(() => {
+    const fetchDetailViewData = async () => {
+      if (selectedRow) {
+        try {
+          const fetchedData = await getDetailsByMission(selectedRow.id);
+          setDetailViewData(fetchedData);
+        } catch (error) {
+          console.error("Error fetching detail view data:", error);
+        }
+      }
+    };
+  
+    fetchDetailViewData();
+  }, [selectedRow]);
 
   return (
     <AbstractPage
-      headline={`${missionData.name}${location ? `, ${location}` : ""}${
-        missionData.robot ? ` with ${missionData.robot}` : ""
+      headline={`${selectedRow.name}${location ? `, ${location}` : ""}${
+        selectedRow.robot ? ` with ${selectedRow.robot}` : ""
       }`}
     >
       {/* Main content */}
@@ -32,10 +44,10 @@ const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
           <Grid gutter="md">
             {/* Tags */}
             <Grid.Col span={12}>
-              {missionData && (
+              {selectedRow && (
                 <RenderTagsDetailView
-                  tags_={missionData.tags}
-                  missionId={missionData.id}
+                  tags_={selectedRow.tags}
+                  missionId={selectedRow.id}
                 />
               )}
             </Grid.Col>
@@ -49,7 +61,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
         {/* Stats */}
         <Grid.Col span={3}>
           <ShowInformationView
-            missionData={missionData}
+            missionData={selectedRow}
             setLocation_={setLocation}
           />
         </Grid.Col>
