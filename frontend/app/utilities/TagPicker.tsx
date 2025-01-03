@@ -15,6 +15,7 @@ interface TagPickerProps {
   tags: Tag[];
   allTags: Tag[];
   onAddNewTag: (tagName: string, tagColor: string) => void;
+  onAddExistingTag: (tagName: string) => void;
   onRemoveTag: (tagName: string) => void;
   onChangeTagColor: (tagName: string, newColor: string) => void;
 }
@@ -29,6 +30,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   tags,
   allTags,
   onAddNewTag,
+  onAddExistingTag,
   onRemoveTag,
   onChangeTagColor,
 }) => {
@@ -40,9 +42,11 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
   const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
   const [otherExistingTags, setOtherExistingTags] = useState<Tag[]>(
-    allTags.filter(
-      (tag) => !tags.some((existingTag) => existingTag.name === tag.name),
-    ),
+    allTags
+      .filter(
+        (tag) => !tags.some((existingTag) => existingTag.name === tag.name),
+      )
+      .sort((a, b) => a.name.localeCompare(b.name)),
   );
   const swatches = [
     "#390099",
@@ -225,48 +229,69 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         </Group>
       ))}
 
-      {/* add already existing tags */}
-      <Popover withArrow withinPortal={false}>
-        <Popover.Target>
-          <Badge
-            color="#228be6"
-            style={{ textTransform: "none", cursor: "pointer" }}
-          >
-            Add existing tags
-          </Badge>
-        </Popover.Target>
-        <Popover.Dropdown style={{ padding: 8 }}>
-          <Stack gap={8}>
-            {otherExistingTags.map((tag) => (
-              <Group key={tag.name} gap="md">
-                <Badge
-                  color={tag.color}
-                  variant="light"
-                  style={{ textTransform: "none" }}
-                >
-                  {tag.name}
-                </Badge>
-                <IconPlus
-                  size={16}
-                  color={"grey"}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => {
-                    onAddNewTag(tag.name, tag.color);
-                    setOtherExistingTags(
-                      otherExistingTags.filter(
-                        (existingTag) => existingTag.name !== tag.name,
-                      ),
-                    );
-                  }}
-                />
-              </Group>
-            ))}
-            {otherExistingTags.length === 0 && (
-              <div>no already existing tags</div>
-            )}
-          </Stack>
-        </Popover.Dropdown>
-      </Popover>
+      <Group gap="xs">
+        {/* add already existing tags */}
+        <Popover withArrow withinPortal={false}>
+          <Popover.Target>
+            <Button
+              color="#228be6"
+              size="xs"
+              style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
+            >
+              Add existing tags
+            </Button>
+          </Popover.Target>
+          <Popover.Dropdown style={{ padding: 8 }}>
+            <Stack gap={8}>
+              {otherExistingTags.map((tag) => (
+                <Group key={tag.name} gap="md">
+                  <Badge
+                    color={tag.color}
+                    variant="light"
+                    style={{ textTransform: "none" }}
+                  >
+                    {tag.name}
+                  </Badge>
+                  <IconPlus
+                    size={16}
+                    color={"grey"}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      onAddExistingTag(tag.name);
+                      setOtherExistingTags(
+                        otherExistingTags.filter(
+                          (existingTag) => existingTag.name !== tag.name,
+                        ),
+                      );
+                    }}
+                  />
+                </Group>
+              ))}
+              {otherExistingTags.length === 0 && (
+                <div>no already existing tags</div>
+              )}
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
+
+        {/* delete all tags */}
+        <Button
+          color="red"
+          size="xs"
+          style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
+          onClick={() => {
+            if (
+              window.confirm(
+                "Are you sure you want to remove all tags from this mission?",
+              )
+            ) {
+              tags.forEach((tag) => onRemoveTag(tag.name));
+            }
+          }}
+        >
+          Remove all tags
+        </Button>
+      </Group>
     </Stack>
   );
 };

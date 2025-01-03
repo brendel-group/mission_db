@@ -321,6 +321,19 @@ export function Overview() {
                   await addTagToMission(row.id, tagName);
                   // update tags in frontend
                   row.tags.push({ name: tagName, color: tagColor });
+                  setAllTags([...allTags, { name: tagName, color: tagColor }]);
+                  setRenderedData([...renderedData]);
+                }}
+                onAddExistingTag={async (tagName) => {
+                  // update tags in backend
+                  await addTagToMission(row.missionId, tagName);
+                  // update tags in frontend
+                  row.tags.push({
+                    name: tagName,
+                    color:
+                      allTags.find((tag) => tag.name === tagName)?.color ||
+                      "#000000",
+                  });
                   setRenderedData([...renderedData]);
                 }}
                 onRemoveTag={async (tagName) => {

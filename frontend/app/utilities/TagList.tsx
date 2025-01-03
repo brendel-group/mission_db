@@ -23,7 +23,7 @@ export function RenderTagsDetailView({
   missionId: number;
 }) {
   const [tags, setTags] = useState<Tag[]>(tags_);
-  const [allTags, setExistingTags] = useState<Tag[]>(allTags_);
+  const [allTags, setAllTags] = useState<Tag[]>(allTags_);
 
   return (
     <Group gap="xs">
@@ -41,12 +41,26 @@ export function RenderTagsDetailView({
           <TagPicker
             tags={tags}
             allTags={allTags}
-            onAddNewTag={(tagName, tagColor) => {
+            onAddNewTag={async (tagName, tagColor) => {
               //update tags in backend
-              createTag(tagName, tagColor);
-              addTagToMission(missionId, tagName);
+              await createTag(tagName, tagColor);
+              await addTagToMission(missionId, tagName);
               // update tags in frontend
               setTags([...tags, { name: tagName, color: tagColor }]);
+            }}
+            onAddExistingTag={async (tagName) => {
+              // update tags in backend
+              await addTagToMission(missionId, tagName);
+              // update tags in frontend
+              setTags([
+                ...tags,
+                {
+                  name: tagName,
+                  color:
+                    allTags.find((tag) => tag.name === tagName)?.color ||
+                    "#000000",
+                },
+              ]);
             }}
             onRemoveTag={async (tagName) => {
               // update tags in backend
