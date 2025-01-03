@@ -1,5 +1,9 @@
 # Command-line Interface
 
+When listing for example Missions the output is a table that uses unicode characters for nice formatting,\
+but if your terminal doesn't support unicode you can disable this by setting the envirment variable `USE_UNICODE` to `False` in the .env file.\
+The table will then be printed using ASCII characters.
+
 ## Interactive mode:
 Executing `cli.py` without any arguments will start an interactive shell mode.\
 Every argument is available as a command in the shell.\
@@ -28,6 +32,22 @@ id │ name                          │ date       │ location │ notes
 1  │ Example for interactive shell │ 2024-12-10 │ None     │ None 
 >>> exit
 ```
+
+It's possible to input multiple lines when using quotes.
+Example:
+```bash
+./cli.py
+cli.py interactive mode
+  type 'help' for help or 'exit' to exit
+>>> mission add --name "Multi
+... line
+... example" --date "2024-12-26"
+INFO:root:'Multi
+line
+example' added.
+>>> exit
+```
+Strings with linebreaks are also supported when listing something in a table.
 
 ## Argument mode:
 
