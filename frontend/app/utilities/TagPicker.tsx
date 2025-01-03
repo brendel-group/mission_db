@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { cloneElement, useState } from "react";
 import {
   Badge,
   Button,
   Group,
-  Menu,
   TextInput,
   Stack,
   ColorPicker,
+  ColorInput,
+  Popover,
 } from "@mantine/core";
 import { IconTrash, IconPlus, IconPalette } from "@tabler/icons-react";
 import { Tag } from "~/data";
@@ -25,8 +26,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   onChangeTagColor,
 }) => {
   const [newTagName, setNewTagName] = useState("");
-  const [selectedColor, setSelectedColor] = useState("#390099");
-  const [error, setError] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
   const swatches = [
     "#390099",
     "#2c7da0",
@@ -38,67 +39,73 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     "#80b918",
   ];
 
+  function isValidHexColor(input: string): boolean {
+    // Der reguläre Ausdruck prüft, ob der Input entweder ein 3-stelliger (#RGB) oder 6-stelliger (#RRGGBB) Hex-Code ist
+    const hexRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4})$/;
+    return hexRegex.test(input);
+  }
+
   const handleAddTag = () => {
     if (newTagName) {
       // check if tag already exists
       if (tags.find((tag) => tag.name === newTagName)) {
-        setError("This tag already exists");
+        setNewTagNameError("This tag already exists");
         setNewTagName("");
         return;
       }
       // check if tag name is too long (max 42 characters)
       if (newTagName.length > 42) {
-        setError("This tag name is too long");
+        setNewTagNameError("This tag name is too long");
         setNewTagName("");
         return;
       }
       onAddNewTag(newTagName, selectedColor);
       setNewTagName("");
-      setError(null);
+      setSelectedColor("");
+      setNewTagNameError(null);
     }
   };
 
   return (
     <Stack gap={4}>
-      <Group gap="xs" style={{ display: "flex", marginBottom: "2px" }}>
+      <Group gap="xs" style={{ display: "flex" }}>
         {/*input for new tag name*/}
         <TextInput
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
           placeholder="Add a new tag"
-          error={error}
+          error={newTagNameError}
           onKeyDown={(e) => {
             e.key === "Enter" && handleAddTag();
           }}
           style={{ flex: 0.89 }}
         />
+
         {/*button to add tag*/}
         <Button
           onClick={handleAddTag}
           style={{ flex: 0.11, alignSelf: "flex-start" }}
-          disabled={!newTagName}
+          disabled={!newTagName || !isValidHexColor(selectedColor)}
         >
           <IconPlus size={16} />
         </Button>
       </Group>
-      {/*custom color picker*/}
-      <div style={{ display: "flex", gap: "8px" }}>
-        {swatches.map((swatch) => (
-          <div
-            key={swatch}
-            style={{
-              width: "30px",
-              height: "30px",
-              backgroundColor: swatch,
-              border:
-                selectedColor === swatch ? "3px solid black" : "1px solid gray",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-            onClick={() => setSelectedColor(swatch)}
-          />
-        ))}
-      </div>
+
+      {/*color input*/}
+      <ColorInput
+        placeholder="#ffffff"
+        value={selectedColor}
+        onChange={setSelectedColor}
+        style={{ marginTop: 3 }}
+        onKeyDown={(e) => {
+          e.key === "Enter" && handleAddTag();
+        }}
+        swatches={swatches}
+        swatchesPerRow={8}
+        popoverProps={{
+          withinPortal: false,
+        }}
+      />
 
       {/*list of tags*/}
       {tags.map((tag) => (
@@ -112,16 +119,18 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           </Badge>
           <Group gap="xs">
             {/* Button to change tag color */}
-            <Menu
+            <Popover
               withArrow
               shadow="md"
               styles={{
                 dropdown: {
-                  padding: 4,
+                  padding: 6,
                 },
               }}
+              width={120}
+              withinPortal={false}
             >
-              <Menu.Target>
+              <Popover.Target>
                 <Button
                   size="xs"
                   color="gray"
@@ -130,17 +139,20 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 >
                   <IconPalette size={16} />
                 </Button>
-              </Menu.Target>
-              <Menu.Dropdown>
-                <ColorPicker
-                  size="xs"
-                  onChange={(color) => onChangeTagColor(tag.name, color)}
-                  withPicker={false}
-                  swatchesPerRow={4}
-                  swatches={swatches}
-                />
-              </Menu.Dropdown>
-            </Menu>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Stack gap={0}>
+                  <ColorInput
+                    size="sm"
+                    value={tag.color}
+                    onChange={(color) => onChangeTagColor(tag.name, color)}
+                    popoverProps={{ withinPortal: false }}
+                    swatches={swatches}
+                    swatchesPerRow={8}
+                  />
+                </Stack>
+              </Popover.Dropdown>
+            </Popover>
 
             {/* Button to remove tag */}
             <Button
