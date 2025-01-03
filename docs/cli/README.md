@@ -1,5 +1,9 @@
 # Command-line Interface
 
+When listing for example Missions the output is a table that uses unicode characters for nice formatting,\
+but if your terminal doesn't support unicode you can disable this by setting the envirment variable `USE_UNICODE` to `False` in the .env file.\
+The table will then be printed using ASCII characters.
+
 ## Interactive mode:
 Executing `cli.py` without any arguments will start an interactive shell mode.\
 Every argument is available as a command in the shell.\
@@ -28,6 +32,22 @@ id │ name                          │ date       │ location │ notes
 1  │ Example for interactive shell │ 2024-12-10 │ None     │ None 
 >>> exit
 ```
+
+It's possible to input multiple lines when using quotes.
+Example:
+```bash
+./cli.py
+cli.py interactive mode
+  type 'help' for help or 'exit' to exit
+>>> mission add --name "Multi
+... line
+... example" --date "2024-12-26"
+INFO:root:'Multi
+line
+example' added.
+>>> exit
+```
+Strings with linebreaks are also supported when listing something in a table.
 
 ## Argument mode:
 
@@ -216,6 +236,34 @@ Example:
 ```bash
 ./cli.py tag mission list --id 1
 ```
+
+### `cli.py api-key`
+command to make changes to API KEYs
+
+### `cli.py api-key add`
+Create a new API KEY\
+This is the only time the key itself is visible.
+
+Argumemts:
+- `--name` Name of the API KEY
+- `--expiry-date` (optional) Expiration Date of the API KEY\
+format: `YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]`
+
+### `cli.py api-key remove`
+Remove an API KEY\
+The API KEY can be selected using the name or prefix.\
+The prefix can be found when listing all keys.\
+If the name is used and there are multiple keys with that name, all of them will be removed.
+
+Arguments:
+- `--name` (optional) Name of the API KEY
+- `--prefix` (optional) Prefix of an API KEY
+
+### `cli.py api-key list`
+List all API KEYs\
+This will not display the keys itself.\
+It will display all information as stored in the database.\
+The keys itself are stored as hash values.
 
 ## Troubleshooting
 

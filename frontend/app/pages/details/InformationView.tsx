@@ -1,7 +1,8 @@
 import { Badge, Button, Group, Menu, Text, Textarea } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
-import { RenderedMission } from "~/data";
+import { convertToMissionData, MissionData, RenderedMission } from "~/data";
+import { updateMission } from "~/utilities/fetchapi";
 
 type EditableFieldProps = {
   fieldName: string;
@@ -92,6 +93,7 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
       <Text size="xl" mb="sm">
         Information
       </Text>
+      <Text>Date: {missionData.date}</Text>
       <Text>Total Duration: {missionData.totalDuration}</Text>
       <Text>Total Size: {missionData.totalSize} GB</Text>
 
@@ -100,10 +102,14 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         data={location}
         startName="Enter new location"
         sizeError="Location name too long"
-        onValueChange={(value) => {
-          console.log("Location updated to:", value);
+        onValueChange={async (value) => {
           setLocation(value);
           setLocation_(value);
+
+          const backend_data = convertToMissionData(missionData);
+          backend_data.location = value;
+
+          await updateMission(backend_data);
         }}
       />
 
@@ -112,9 +118,13 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         data={notes}
         startName="Add notes"
         sizeError="Notes too long"
-        onValueChange={(value) => {
-          console.log("Notes updated to", value);
+        onValueChange={async (value) => {
           setNotes(value);
+
+          const backend_data = convertToMissionData(missionData);
+          backend_data.notes = value;
+
+          await updateMission(backend_data);
         }}
       />
     </div>
