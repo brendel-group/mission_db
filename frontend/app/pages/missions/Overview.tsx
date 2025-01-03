@@ -33,6 +33,7 @@ import {
   getTagsByMission,
   getTotalDuration,
   getTotalSize,
+  getTags,
 } from "~/utilities/fetchapi";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
@@ -146,6 +147,7 @@ export function Overview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchedTags, setSearchedTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -192,6 +194,22 @@ export function Overview() {
       }
     };
 
+    const fetchTags = async () => {
+      try {
+        const tags = await getTags();
+        setAllTags(tags);
+      } catch (e: any) {
+        if (e instanceof Error) {
+          setError(e.message); // Display Error information
+        } else {
+          setError("An unknown error occurred"); // For non-Error types
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTags();
     fetchMissions();
     console.log(JSON.stringify(fetchedData));
   }, []);
@@ -296,10 +314,11 @@ export function Overview() {
             >
               <TagPicker
                 tags={row.tags}
-                onAddNewTag={(tagName, tagColor) => {
+                allTags={allTags}
+                onAddNewTag={async (tagName, tagColor) => {
                   //update tags in backend
-                  createTag(tagName, tagColor);
-                  addTagToMission(row.id, tagName);
+                  await createTag(tagName, tagColor);
+                  await addTagToMission(row.id, tagName);
                   // update tags in frontend
                   row.tags.push({ name: tagName, color: tagColor });
                   setRenderedData([...renderedData]);

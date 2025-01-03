@@ -15,12 +15,15 @@ import { useState } from "react";
 
 export function RenderTagsDetailView({
   tags_,
+  allTags_,
   missionId,
 }: {
   tags_: Tag[];
+  allTags_: Tag[];
   missionId: number;
 }) {
   const [tags, setTags] = useState<Tag[]>(tags_);
+  const [allTags, setExistingTags] = useState<Tag[]>(allTags_);
 
   return (
     <Group gap="xs">
@@ -37,6 +40,7 @@ export function RenderTagsDetailView({
         >
           <TagPicker
             tags={tags}
+            allTags={allTags}
             onAddNewTag={(tagName, tagColor) => {
               //update tags in backend
               createTag(tagName, tagColor);

@@ -13,6 +13,7 @@ import { Tag } from "~/data";
 
 interface TagPickerProps {
   tags: Tag[];
+  allTags: Tag[];
   onAddNewTag: (tagName: string, tagColor: string) => void;
   onRemoveTag: (tagName: string) => void;
   onChangeTagColor: (tagName: string, newColor: string) => void;
@@ -26,6 +27,7 @@ export function isValidHexColor(input: string): boolean {
 
 export const TagPicker: React.FC<TagPickerProps> = ({
   tags,
+  allTags,
   onAddNewTag,
   onRemoveTag,
   onChangeTagColor,
@@ -36,6 +38,12 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const [newColor, setNewColor] = useState(selectedColor);
   const [changeColorError, setChangeColorError] = useState<string | null>(null);
   const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
+  const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
+  const [otherExistingTags, setOtherExistingTags] = useState<Tag[]>(
+    allTags.filter(
+      (tag) => !tags.some((existingTag) => existingTag.name === tag.name),
+    ),
+  );
   const swatches = [
     "#390099",
     "#2c7da0",
@@ -83,6 +91,13 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       if (!isValidHexColor(selectedColor)) {
         setNewTagColorError("Invalid color");
         setSelectedColor("");
+        return;
+      }
+
+      // check if the new tag name is already in existing tags
+      if (otherExistingTags.find((tag) => tag.name === newTagName)) {
+        setNewTagNameError("Please add this tag with the button below");
+        setNewTagName("");
         return;
       }
       onAddNewTag(newTagName, selectedColor);
@@ -172,7 +187,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                   <IconPalette size={16} />
                 </Button>
               </Popover.Target>
-              <Popover.Dropdown>
+              <Popover.Dropdown style={{ padding: 6 }}>
                 <Stack gap={0}>
                   <ColorInput
                     size="sm"
@@ -195,7 +210,13 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               size="xs"
               color="red"
               variant="subtle"
-              onClick={() => onRemoveTag(tag.name)}
+              onClick={() => {
+                onRemoveTag(tag.name);
+                setOtherExistingTags((prevTags) => [
+                  ...prevTags,
+                  { name: tag.name, color: tag.color },
+                ]);
+              }}
               style={{ padding: 0 }}
             >
               <IconTrash size={16} />
@@ -203,6 +224,49 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           </Group>
         </Group>
       ))}
+
+      {/* add already existing tags */}
+      <Popover withArrow withinPortal={false}>
+        <Popover.Target>
+          <Badge
+            color="#228be6"
+            style={{ textTransform: "none", cursor: "pointer" }}
+          >
+            Add existing tags
+          </Badge>
+        </Popover.Target>
+        <Popover.Dropdown style={{ padding: 8 }}>
+          <Stack gap={8}>
+            {otherExistingTags.map((tag) => (
+              <Group key={tag.name} gap="md">
+                <Badge
+                  color={tag.color}
+                  variant="light"
+                  style={{ textTransform: "none" }}
+                >
+                  {tag.name}
+                </Badge>
+                <IconPlus
+                  size={16}
+                  color={"grey"}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    onAddNewTag(tag.name, tag.color);
+                    setOtherExistingTags(
+                      otherExistingTags.filter(
+                        (existingTag) => existingTag.name !== tag.name,
+                      ),
+                    );
+                  }}
+                />
+              </Group>
+            ))}
+            {otherExistingTags.length === 0 && (
+              <div>no already existing tags</div>
+            )}
+          </Stack>
+        </Popover.Dropdown>
+      </Popover>
     </Stack>
   );
 };
