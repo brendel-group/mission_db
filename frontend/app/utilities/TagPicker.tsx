@@ -241,7 +241,13 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               Add existing tags
             </Button>
           </Popover.Target>
-          <Popover.Dropdown style={{ padding: 8 }}>
+          <Popover.Dropdown
+            style={{
+              padding: 8,
+              maxHeight: "200px",
+              overflowY: "auto",
+            }}
+          >
             <Stack gap={8}>
               {otherExistingTags.map((tag) => (
                 <Group key={tag.name} gap="md">
