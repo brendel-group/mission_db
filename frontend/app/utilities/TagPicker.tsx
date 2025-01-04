@@ -229,7 +229,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         </Group>
       ))}
 
-      <Group gap="xs">
+      <Group gap="xs" style={{ marginTop: 3 }}>
         {/* add already existing tags */}
         <Popover withArrow withinPortal={false}>
           <Popover.Target>
