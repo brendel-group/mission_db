@@ -326,7 +326,7 @@ export function Overview() {
                 }}
                 onAddExistingTag={async (tagName) => {
                   // update tags in backend
-                  await addTagToMission(row.missionId, tagName);
+                  await addTagToMission(row.id, tagName);
                   // update tags in frontend
                   row.tags.push({
                     name: tagName,
