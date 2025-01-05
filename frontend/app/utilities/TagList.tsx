@@ -1,7 +1,8 @@
 import { Badge, Group, Popover } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { Tag } from "~/data";
-import { TagPicker } from "./TagPicker";
+import { TagPicker, isValidHexColor } from "./TagPicker";
+
 import {
   addTagToMission,
   changeTagColor,
@@ -56,7 +57,9 @@ export function RenderTagsDetailView({
             }}
             onChangeTagColor={(tagName, newColor) => {
               // update tag color in backend
-              changeTagColor(tagName, newColor);
+              isValidHexColor(newColor)
+                ? changeTagColor(tagName, newColor)
+                : null;
 
               // update tags in frontend
               setTags((prev) =>

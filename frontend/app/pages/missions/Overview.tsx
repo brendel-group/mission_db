@@ -13,6 +13,7 @@ import {
   Badge,
   Popover,
 } from "@mantine/core";
+import { isValidHexColor } from "~/utilities/TagPicker";
 import {
   IconSelector,
   IconChevronDown,
@@ -289,7 +290,9 @@ export function Overview() {
                 }}
                 onChangeTagColor={(tagName, newColor) => {
                   // update tag color in backend
-                  changeTagColor(tagName, newColor);
+                  isValidHexColor(newColor)
+                    ? changeTagColor(tagName, newColor)
+                    : null;
 
                   // update tags in frontend
                   const updatedRenderedData = renderedData.map((missionRow) => {

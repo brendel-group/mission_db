@@ -1,11 +1,10 @@
-import React, { cloneElement, useState } from "react";
+import React, { useState } from "react";
 import {
   Badge,
   Button,
   Group,
   TextInput,
   Stack,
-  ColorPicker,
   ColorInput,
   Popover,
 } from "@mantine/core";
@@ -19,6 +18,12 @@ interface TagPickerProps {
   onChangeTagColor: (tagName: string, newColor: string) => void;
 }
 
+export function isValidHexColor(input: string): boolean {
+  // checks if input is a valid hex color with 3 or 6 characters
+  const hexRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+  return hexRegex.test(input);
+}
+
 export const TagPicker: React.FC<TagPickerProps> = ({
   tags,
   onAddNewTag,
@@ -27,7 +32,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
+  const [newTagError, setNewTagError] = useState<string | null>(null);
   const swatches = [
     "#390099",
     "#2c7da0",
@@ -39,30 +44,30 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     "#80b918",
   ];
 
-  function isValidHexColor(input: string): boolean {
-    // Der reguläre Ausdruck prüft, ob der Input entweder ein 3-stelliger (#RGB) oder 6-stelliger (#RRGGBB) Hex-Code ist
-    const hexRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{4})$/;
-    return hexRegex.test(input);
-  }
-
   const handleAddTag = () => {
     if (newTagName) {
       // check if tag already exists
       if (tags.find((tag) => tag.name === newTagName)) {
-        setNewTagNameError("This tag already exists");
+        setNewTagError("This tag already exists");
         setNewTagName("");
         return;
       }
       // check if tag name is too long (max 42 characters)
       if (newTagName.length > 42) {
-        setNewTagNameError("This tag name is too long");
+        setNewTagError("This tag name is too long");
         setNewTagName("");
+        return;
+      }
+
+      // check if color is valid
+      if (!isValidHexColor(selectedColor)) {
+        setNewTagError("Invalid color");
         return;
       }
       onAddNewTag(newTagName, selectedColor);
       setNewTagName("");
       setSelectedColor("");
-      setNewTagNameError(null);
+      setNewTagError(null);
     }
   };
 
@@ -74,7 +79,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
           placeholder="Add a new tag"
-          error={newTagNameError}
+          error={newTagError}
           onKeyDown={(e) => {
             e.key === "Enter" && handleAddTag();
           }}
@@ -145,7 +150,9 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                   <ColorInput
                     size="sm"
                     value={tag.color}
-                    onChange={(color) => onChangeTagColor(tag.name, color)}
+                    onChange={(color) => {
+                      onChangeTagColor(tag.name, color);
+                    }}
                     popoverProps={{ withinPortal: false }}
                     swatches={swatches}
                     swatchesPerRow={8}
