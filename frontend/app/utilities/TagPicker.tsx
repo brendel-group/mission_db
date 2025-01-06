@@ -110,6 +110,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         popoverProps={{
           withinPortal: false,
         }}
+        withEyeDropper={false}
       />
 
       {/*list of tags*/}
@@ -156,6 +157,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                     popoverProps={{ withinPortal: false }}
                     swatches={swatches}
                     swatchesPerRow={8}
+                    withEyeDropper={false}
                   />
                 </Stack>
               </Popover.Dropdown>
