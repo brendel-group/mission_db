@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "rest_framework_api_key",
     "restapi",
     "corsheaders",
+    "dj_rest_auth",
 ]
 
 MIDDLEWARE = [
@@ -145,3 +146,9 @@ if not DEBUG:
             "rest_framework_api_key.permissions.HasAPIKey",
         ]
     }
+
+# Authentication
+# https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
+REST_AUTH = {
+    "TOKEN_MODEL": None,
+}

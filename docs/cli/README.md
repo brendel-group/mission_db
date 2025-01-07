@@ -265,6 +265,51 @@ This will not display the keys itself.\
 It will display all information as stored in the database.\
 The keys itself are stored as hash values.
 
+### `cli.py user`
+Make changes to Users
+
+### `cli.py user add`
+Add a user
+
+Arguments:
+- `--name` username of new user
+- `--email` (optional) email-address of new user
+
+The password can not be given as an argument and must be entered interactively after the command.\
+For rules for a password refer to the [password policies](../password_policy/README.md)
+
+Example:
+```bash
+./cli.py user add --name test
+```
+will then ask for a password:
+```bash
+Password: 
+```
+and to verify the password:
+```bash
+Verify Password: 
+```
+
+### `cli.py user remove`
+Delete/remove a User.
+
+Arguments:
+- `--name` username of user to remove
+
+### `cli.py user change-password`
+Change the password of a User. Doesn't ask for the old password, just the new password.
+
+Arguments:
+- `--name` username of User which wants to change the password
+
+The password rules can be found [here](../password_policy/README.md)
+
+### `cli.py user list`
+Show all users.\
+Lists the Users with the data stored in the database.\
+The password is not stored in clear-text but as a hash value.
+
 ## Troubleshooting
 
 - ### `Error adding mission: duplicate key value violates unique constraint "restapi_mission_pkey"`
