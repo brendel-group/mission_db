@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Badge,
   Button,
@@ -32,7 +32,11 @@ export const TagPicker: React.FC<TagPickerProps> = ({
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [newTagError, setNewTagError] = useState<string | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [newColor, setNewColor] = useState(selectedColor);
+  const [changeColorError, setChangeColorError] = useState<string | null>(null);
+  const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
+  const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
   const swatches = [
     "#390099",
     "#2c7da0",
@@ -44,30 +48,49 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     "#80b918",
   ];
 
+  const handleColorChange = (tagName: string, newTagColor: string) => {
+    setNewColor(newTagColor);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      if (isValidHexColor(newTagColor)) {
+        onChangeTagColor(tagName, newTagColor);
+        setChangeColorError("");
+      } else {
+        setChangeColorError("Invalid color");
+      }
+    }, 1); // This delay is needed because without delay it is not possible to edit the color input field anymore
+  };
+
   const handleAddTag = () => {
     if (newTagName) {
       // check if tag already exists
       if (tags.find((tag) => tag.name === newTagName)) {
-        setNewTagError("This tag already exists");
+        setNewTagNameError("This tag already exists");
         setNewTagName("");
         return;
       }
       // check if tag name is too long (max 42 characters)
       if (newTagName.length > 42) {
-        setNewTagError("This tag name is too long");
+        setNewTagNameError("This tag name is too long");
         setNewTagName("");
         return;
       }
 
       // check if color is valid
       if (!isValidHexColor(selectedColor)) {
-        setNewTagError("Invalid color");
+        setNewTagColorError("Invalid color");
+        setSelectedColor("");
         return;
       }
       onAddNewTag(newTagName, selectedColor);
       setNewTagName("");
       setSelectedColor("");
-      setNewTagError(null);
+      setNewTagColorError("");
+      setNewTagNameError("");
     }
   };
 
@@ -79,7 +102,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
           placeholder="Add a new tag"
-          error={newTagError}
+          error={newTagNameError}
           onKeyDown={(e) => {
             e.key === "Enter" && handleAddTag();
           }}
@@ -111,6 +134,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           withinPortal: false,
         }}
         withEyeDropper={false}
+        error={newTagColorError}
       />
 
       {/*list of tags*/}
@@ -135,6 +159,9 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               }}
               width={120}
               withinPortal={false}
+              onOpen={() => {
+                setNewColor(tag.color);
+              }}
             >
               <Popover.Target>
                 <Button
@@ -150,14 +177,15 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 <Stack gap={0}>
                   <ColorInput
                     size="sm"
-                    value={tag.color}
+                    value={newColor}
                     onChange={(color) => {
-                      onChangeTagColor(tag.name, color);
+                      handleColorChange(tag.name, color);
                     }}
                     popoverProps={{ withinPortal: false }}
                     swatches={swatches}
                     swatchesPerRow={8}
                     withEyeDropper={false}
+                    error={changeColorError}
                   />
                 </Stack>
               </Popover.Dropdown>
