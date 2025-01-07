@@ -609,6 +609,12 @@ def read_and_validate_password(
 
 def add_user(name, email=None):
     try:
+        User.username_validator(name)
+    except ValidationError as e:
+        logging.error(e)
+        return
+
+    try:
         password = read_and_validate_password()
     except ValidationError as e:
         logging.error(e)
@@ -619,7 +625,10 @@ def add_user(name, email=None):
         user.full_clean()
     except Exception as e:
         logging.error(e)
-        user.delete()
+        try:
+            user.delete()
+        except Exception:
+            pass
         return
 
     logging.info(f"User '{name}' added")
@@ -627,15 +636,15 @@ def add_user(name, email=None):
 
 def change_password(name):
     try:
-        password = read_and_validate_password("New Password: ", "Verify new Password: ")
-    except ValidationError as e:
-        logging.error(e)
-        return
-
-    try:
         user = User.objects.get(username=name)
     except User.DoesNotExist:
         logging.error(f"User '{name}' does not exist")
+        return
+
+    try:
+        password = read_and_validate_password("New Password: ", "Verify new Password: ")
+    except ValidationError as e:
+        logging.error(e)
         return
 
     if user.check_password(password):
@@ -663,6 +672,7 @@ def remove_user(name):
         user.delete()
     except Exception as e:
         logging.error(e)
+        return
 
     logging.info(f"User '{name}' removed")
 
@@ -972,7 +982,7 @@ def user_arg_parser(subparser: argparse._SubParsersAction):
     add_parser: argparse.ArgumentParser = user_subparser.add_parser(
         "add", help="Add User"
     )
-    add_parser.add_argument("--name", help="User name")
+    add_parser.add_argument("--name", required=True, help="User name")
     add_parser.add_argument(
         "--email", required=False, help="email of User"
     )  # email is used when requesting password reset via API ENDPOINT
@@ -981,13 +991,13 @@ def user_arg_parser(subparser: argparse._SubParsersAction):
     remove_parser: argparse.ArgumentParser = user_subparser.add_parser(
         "remove", help="Remove User"
     )
-    remove_parser.add_argument("--name", help="User name")
+    remove_parser.add_argument("--name", required=True, help="User name")
 
     # change-password command
     change_parser: argparse.ArgumentParser = user_subparser.add_parser(
         "change-password", help="Change the password of a user"
     )
-    change_parser.add_argument("--name", help="User name")
+    change_parser.add_argument("--name", required=True, help="User name")
 
     # List command
     _ = user_subparser.add_parser("list", help="List all Users")
