@@ -11,20 +11,43 @@ USE_UNICODE = env("USE_UNICODE")
 
 
 class Command(ABC):
+    """
+    To implement a new command implement a new class that inherits from this class \\
+    and implement the abstract methods and properties
+    """
+
     def __init__(self, subparser: argparse._SubParsersAction):
         self.parser_setup(subparser)
 
     @property
     @abstractmethod
     def name() -> str:
+        """
+        The name of this command, has to be the same as the command when adding it to the subparser with\\
+        subparser.add_parser    
+        """
         pass
 
     @abstractmethod
     def parser_setup(self, subparser: argparse._SubParsersAction):
+        """
+        abstract method to implement the parser setup. Is called automatically with the constructor.\\
+        Adds all the required arguments/parsers to the subparser
+        
+        Args:
+            subparser (argparse._SubParsersAction): subparser of main parser
+        """
         pass
 
     @abstractmethod
     def command(self, args: argparse.Namespace):
+        """
+        abstract method to implement command execution.\\
+        Takes the args and processeses them.
+
+        Args:
+            args (argparse.Namespace): args preprocessed by argparse
+        """
         pass
 
     @staticmethod
