@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 from io import StringIO
 from django.test import TestCase
 from cli_commands.TagCommand import (
@@ -11,6 +12,7 @@ from cli_commands.TagCommand import (
 )
 from restapi.models import Tag, Mission, Mission_tags
 from datetime import date
+from unittest.mock import patch
 
 
 class TagFunctionLogTests(TestCase):
@@ -44,11 +46,19 @@ class BasicTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
         # Setting up environment, creating common tags
         self.tag = Tag.objects.create(name="TestTag", color="#FFFFFF")
 
     def tearDown(self):
         self.logger.disabled = False
+
+        self.patcher_os_terminal_size.stop()
 
         sys.stdout.flush()
         sys.stdout = self.original_stdout

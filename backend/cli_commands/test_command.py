@@ -1,10 +1,12 @@
 import sys
+import os
 from io import StringIO
 from django.test import TestCase
 from restapi.models import Mission, Tag
 from restapi.serializer import MissionSerializer, TagSerializer
 from cli_commands.Command import Command
 from datetime import date
+from unittest.mock import patch
 
 
 class TableTests(TestCase):
@@ -14,9 +16,17 @@ class TableTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
     def tearDown(self):
         self.mission.delete()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_print_mission_table(self):
         missions = [

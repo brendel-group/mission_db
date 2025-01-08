@@ -12,6 +12,8 @@ from restapi.models import Mission, Tag, Mission_tags
 from io import StringIO
 import logging
 import sys
+import os
+from unittest.mock import patch
 
 
 class BasicTests(TestCase):
@@ -115,6 +117,12 @@ class ListMissionTagTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
         self.mission = Mission(name="Test", date=date.today())
         self.mission.save()
 
@@ -131,6 +139,8 @@ class ListMissionTagTests(TestCase):
     def tearDown(self):
         sys.stdout.flush()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_list_tags_by_mission(self):
         list_tags_by_mission(self.mission.id)

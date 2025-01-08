@@ -6,6 +6,8 @@ from cli_commands.Command import Command
 import cli
 from io import StringIO
 import sys
+import os
+from unittest.mock import patch
 
 
 class MainFunctionTests(TestCase):
@@ -15,10 +17,18 @@ class MainFunctionTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
     def tearDown(self):
         self.mission.delete()
         sys.stdout.flush()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_mission_add(self):
         args = [
