@@ -2,7 +2,6 @@
 
 import { MissionData, Tag } from "~/data";
 import { FETCH_API_BASE_URL } from "~/config";
-import Cookies from "js-cookie";
 
 const headers: {
   "Content-Type": string;
