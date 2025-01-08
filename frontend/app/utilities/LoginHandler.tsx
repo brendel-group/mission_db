@@ -4,6 +4,7 @@ import { User } from "~/data";
 
 import { createCookieSessionStorage } from "@remix-run/node";
 import { MAX_SESSION_AGES } from "~/config";
+import { attemptLogin, attemptLogout } from "./fetchapi";
 
 // export the whole sessionStorage object
 export const sessionStorage = createCookieSessionStorage({
@@ -18,6 +19,18 @@ export const sessionStorage = createCookieSessionStorage({
   },
 });
 
+//Cookie handler for crsf token
+import { createCookie } from "@remix-run/node";
+
+// Create a cookie utility to handle the `csrftoken` cookie
+const csrfTokenCookie = createCookie("csrftoken");
+
+// Function to read the CSRF token cookie
+async function readCsrfToken(request: Request): Promise<string | null> {
+  const cookieHeader = request.headers.get("Cookie");
+  return await csrfTokenCookie.parse(cookieHeader || "");
+}
+
 // you can also export the methods individually for your own usage
 export const { getSession, commitSession, destroySession } = sessionStorage;
 
@@ -25,7 +38,7 @@ export let authenticator = new Authenticator<User>();
 
 // Tell the Authenticator to use the form strategy
 authenticator.use(
-  new FormStrategy(async ({ form }) => {
+  new FormStrategy(async ({ form, request }) => {
     const name = form.get("username")?.toString() ?? "";
     const password = form.get("password")?.toString() ?? "";
     // the type of this user must match the type you pass to the Authenticator
@@ -39,9 +52,18 @@ authenticator.use(
       password: password,
     };
 
-    // Example login data, no backend is connected.
-    if (!(user.username === "admin" && user.password === "admin"))
+    // get token from a previous session
+    let csrfToken = await readCsrfToken(request);
+
+    if (csrfToken != null) {
+      try {
+        await attemptLogout(csrfToken);
+      } catch (e) {} //Django session is already expired, old csrfToken has no meaning anymore.
+    }
+
+    if (!(await attemptLogin(user.username, user.password))) {
       throw new Error("Invalid username or password");
+    }
 
     return user;
   }),
