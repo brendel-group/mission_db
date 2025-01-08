@@ -73,13 +73,22 @@ class Interactive(code.InteractiveConsole):
             return
         try:
             main(args)
-        except SystemExit:
+        except SystemExit or AttributeError:
             pass
 
 
-def interactive(parser: argparse.ArgumentParser, subparser):
-    subparser.add_parser("exit", help="exit the command prompt")
-    subparser.add_parser("help", help="show this help message")
+def interactive():
+    # Again parser setup, because adding autocompletion for "exit" and "help" by adding
+    # parsers to the subparser resulted in some errors with autocompletion
+    # it raised: AttributeError: 'ArgumentParser' object has no attribute '_argcomplete_namespace'
+    # when there are missing required arguments.
+    parser_interactive = argparse.ArgumentParser(description="Mission CLI")
+    subparser_interactive = parser_interactive.add_subparsers(dest="command")
+    for _, c in commands.items():
+        c.parser_setup(subparser_interactive)
+
+    subparser_interactive.add_parser("help")
+    subparser_interactive.add_parser("exit")
 
     if readline:
         if os.path.exists(REPL_HISTFILE):
@@ -89,7 +98,9 @@ def interactive(parser: argparse.ArgumentParser, subparser):
                 print(p, REPL_HISTFILE, "\nCould not read history file")
 
         readline.set_completer_delims("")
-        readline.set_completer(argcomplete.CompletionFinder(parser).rl_complete)
+        readline.set_completer(
+            argcomplete.CompletionFinder(parser_interactive).rl_complete
+        )
         readline.parse_and_bind("tab: complete")
 
     console = Interactive(parser.format_help())
@@ -133,7 +144,7 @@ def main(args):
     if args.command in commands:
         commands[args.command].command(args)
     else:
-        interactive(parser, subparser)
+        interactive()
 
 
 if __name__ == "__main__":
