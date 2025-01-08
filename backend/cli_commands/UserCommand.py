@@ -12,7 +12,7 @@ class UserCommand(Command):
 
     def parser_setup(self, subparser):
         self.parser: argparse.ArgumentParser = subparser.add_parser(
-            "user", help="Modifiy Users"
+            self.name, help="Modifiy Users"
         )
         user_subparser: argparse._SubParsersAction = self.parser.add_subparsers(
             dest="user"
