@@ -45,14 +45,14 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
   const [otherExistingTags, setOtherExistingTags] = useState<Tag[]>([]);
   const swatches = [
-    "#390099",
-    "#2c7da0",
-    "#9e0059",
-    "#ff0054",
     "#ff5400",
     "#ffbd00",
     "#007f5f",
     "#80b918",
+    "#2c7da0",
+    "#390099",
+    "#ff0054",
+    "#9e0059",
   ];
 
   useEffect(() => {
