@@ -234,12 +234,14 @@ function transformSizes(sizes: string[]): string[] {
         const bytes = parseInt(size, 10);
         const kilobytes = bytes / 1024;
         const megabytes = kilobytes / 1024;
+        const gigabytes = megabytes / 1024;
 
-        let value = megabytes;
-        let unit = 'MB';
+        let value = bytes;
+        let unit = 'B';
 
         if (megabytes < 1) { value = kilobytes; unit = 'KB'; }
-        else if (kilobytes < 1) { value = bytes; unit = 'B' }
+        else if (gigabytes < 1) { value = megabytes; unit = 'MB'; }
+        else { value = gigabytes; unit = 'GB' }
 
         return `${value.toFixed(2)} ${unit}`
     });
