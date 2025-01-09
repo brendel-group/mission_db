@@ -1,5 +1,9 @@
 # Command-line Interface
 
+When listing for example Missions the output is a table that uses unicode characters for nice formatting,\
+but if your terminal doesn't support unicode you can disable this by setting the envirment variable `USE_UNICODE` to `False` in the .env file.\
+The table will then be printed using ASCII characters.
+
 ## Interactive mode:
 Executing `cli.py` without any arguments will start an interactive shell mode.\
 Every argument is available as a command in the shell.\
@@ -29,6 +33,22 @@ id │ name                          │ date       │ location │ notes
 >>> exit
 ```
 
+It's possible to input multiple lines when using quotes.
+Example:
+```bash
+./cli.py
+cli.py interactive mode
+  type 'help' for help or 'exit' to exit
+>>> mission add --name "Multi
+... line
+... example" --date "2024-12-26"
+INFO:root:'Multi
+line
+example' added.
+>>> exit
+```
+Strings with linebreaks are also supported when listing something in a table.
+
 ## Argument mode:
 
 Instead of using the interactive mode you can directly call the CLI with the arguments.
@@ -39,6 +59,10 @@ Use
 ```
 to display help information\
 `--help` can be called on every command and subcommand
+
+When the output is too wide or long for the terminal and is a table, a pager will be used to display the table.\
+The pager can be set usin the  `PAGER` or `MANPAGER` environmental variables.\
+On Debian systems the default pager is `less` in most cases. With `less` the option `-S` can be used to disable folding of long lines to correctly display the table.
 
 ### `cli.py mission`
 
@@ -240,6 +264,51 @@ List all API KEYs\
 This will not display the keys itself.\
 It will display all information as stored in the database.\
 The keys itself are stored as hash values.
+
+### `cli.py user`
+Make changes to Users
+
+### `cli.py user add`
+Add a user
+
+Arguments:
+- `--name` username of new user
+- `--email` (optional) email-address of new user
+
+The password can not be given as an argument and must be entered interactively after the command.\
+For rules for a password refer to the [password policies](../password_policy/README.md)
+
+Example:
+```bash
+./cli.py user add --name test
+```
+will then ask for a password:
+```bash
+Password: 
+```
+and to verify the password:
+```bash
+Verify Password: 
+```
+
+### `cli.py user remove`
+Delete/remove a User.
+
+Arguments:
+- `--name` username of user to remove
+
+### `cli.py user change-password`
+Change the password of a User. Doesn't ask for the old password, just the new password.
+
+Arguments:
+- `--name` username of User which wants to change the password
+
+The password rules can be found [here](../password_policy/README.md)
+
+### `cli.py user list`
+Show all users.\
+Lists the Users with the data stored in the database.\
+The password is not stored in clear-text but as a hash value.
 
 ## Troubleshooting
 
