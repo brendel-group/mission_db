@@ -249,9 +249,7 @@ function transformSizes(sizes: string[]): string[] {
 export const getDetailsByMission = async (missionId: number): Promise<DetailViewData> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/${missionId}/files/`,{
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
