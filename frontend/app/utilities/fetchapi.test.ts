@@ -163,16 +163,16 @@ describe("Fetch API Functions", () => {
           {
               file: {
                   file_path: 'file2.mcap',
-                  duration: '120000',
-                  size: '2048',
+                  duration: '1200',
+                  size: '2621440',
               }
           }
       ];
 
       const expectedResponse: DetailViewData = {
               files: ['file1.mcap', 'file2.mcap'],
-              durations: ['60000', '120000'],
-              sizes: ['1024', '2048'],
+              durations: ['16:40:00', '00:20:00'],
+              sizes: ['1.00 KB', '2.50 MB'],
           };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
