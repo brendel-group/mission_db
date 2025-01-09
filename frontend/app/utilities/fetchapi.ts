@@ -216,6 +216,35 @@ export const getMissionsByTag = async (tagName: string): Promise<{ id: number; n
     return response.json();
 };
 
+// Helper function to transform durations from seconds to hh:mm:ss
+function transformDurations(durations: string[]): string[] {
+    return durations.map(duration => {
+        const totalSeconds = parseInt(duration, 10);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    })
+}
+
+// Helper function to transform sizes from bytes to megabytes
+function transformSizes(sizes: string[]): string[] {
+    return sizes.map(size => {
+        const bytes = parseInt(size, 10);
+        const kilobytes = bytes / 1024;
+        const megabytes = kilobytes / 1024;
+
+        let value = megabytes;
+        let unit = 'MB';
+
+        if (megabytes < 1) { value = kilobytes; unit = 'KB'; }
+        else if (kilobytes < 1) { value = bytes; unit = 'B' }
+
+        return `${value.toFixed(2)} ${unit}`
+    });
+}
+
 // Get details by mission
 export const getDetailsByMission = async (missionId: number): Promise<DetailViewData> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/${missionId}/files/`,{
@@ -234,14 +263,17 @@ export const getDetailsByMission = async (missionId: number): Promise<DetailView
     const data = await response.json();
     
     const files: string[] = [];
-    const durations: string[] = [];
-    const sizes: string[] = [];
+    const rawDurations: string[] = [];
+    const rawSizes: string[] = [];
 
     for (const d in data) {
         files.push(data[d].file.file_path);
-        durations.push(data[d].file.duration);
-        sizes.push(data[d].file.size);
+        rawDurations.push(data[d].file.duration);
+        rawSizes.push(data[d].file.size);
     }
+
+    const durations = transformDurations(rawDurations);
+    const sizes = transformSizes(rawSizes);
 
     return { files, durations, sizes }
 };
