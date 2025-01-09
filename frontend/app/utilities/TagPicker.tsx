@@ -276,7 +276,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 </Group>
               ))}
               {otherExistingTags.length === 0 && (
-                <div>no already existing tags</div>
+                <span style={{ color: "grey" }}>No more tags to add</span>
               )}
             </Stack>
           </Popover.Dropdown>
