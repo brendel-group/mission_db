@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Badge,
   Button,
@@ -18,6 +18,7 @@ interface TagPickerProps {
   onAddExistingTag: (tagName: string) => void;
   onRemoveTag: (tagName: string) => void;
   onChangeTagColor: (tagName: string, newColor: string) => void;
+  onDeleteAllTags: () => void;
 }
 
 export function isValidHexColor(input: string): boolean {
@@ -33,6 +34,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   onAddExistingTag,
   onRemoveTag,
   onChangeTagColor,
+  onDeleteAllTags,
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -41,13 +43,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const [changeColorError, setChangeColorError] = useState<string | null>(null);
   const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
   const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
-  const [otherExistingTags, setOtherExistingTags] = useState<Tag[]>(
-    allTags
-      .filter(
-        (tag) => !tags.some((existingTag) => existingTag.name === tag.name),
-      )
-      .sort((a, b) => a.name.localeCompare(b.name)),
-  );
+  const [otherExistingTags, setOtherExistingTags] = useState<Tag[]>([]);
   const swatches = [
     "#390099",
     "#2c7da0",
@@ -58,6 +54,16 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     "#007f5f",
     "#80b918",
   ];
+
+  useEffect(() => {
+    setOtherExistingTags(
+      allTags
+        .filter(
+          (tag) => !tags.some((existingTag) => existingTag.name === tag.name),
+        )
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    );
+  }, [tags, allTags]);
 
   const handleColorChange = (tagName: string, newTagColor: string) => {
     setNewColor(newTagColor);
@@ -216,10 +222,6 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               variant="subtle"
               onClick={() => {
                 onRemoveTag(tag.name);
-                setOtherExistingTags((prevTags) => [
-                  ...prevTags,
-                  { name: tag.name, color: tag.color },
-                ]);
               }}
               style={{ padding: 0 }}
             >
@@ -291,10 +293,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 "Are you sure you want to remove all tags from this mission?",
               )
             ) {
-              tags.forEach((tag) => onRemoveTag(tag.name));
-              setOtherExistingTags(
-                allTags.sort((a, b) => a.name.localeCompare(b.name)),
-              );
+              onDeleteAllTags();
             }
           }}
         >
