@@ -5,6 +5,7 @@ import { User } from "~/data";
 import { createCookieSessionStorage } from "@remix-run/node";
 import { MAX_SESSION_AGES } from "~/config";
 import { attemptLogin, attemptLogout } from "./fetchapi";
+import { createCookie } from "@remix-run/node";
 
 // export the whole sessionStorage object
 export const sessionStorage = createCookieSessionStorage({
@@ -19,17 +20,6 @@ export const sessionStorage = createCookieSessionStorage({
   },
 });
 
-//Cookie handler for crsf token
-import { createCookie } from "@remix-run/node";
-
-// Create a cookie utility to handle the `csrftoken` cookie
-const csrfTokenCookie = createCookie("csrftoken");
-
-// Function to read the CSRF token cookie
-async function readCsrfToken(request: Request): Promise<string | null> {
-  const cookieHeader = request.headers.get("Cookie");
-  return await csrfTokenCookie.parse(cookieHeader || "");
-}
 
 // you can also export the methods individually for your own usage
 export const { getSession, commitSession, destroySession } = sessionStorage;
@@ -53,17 +43,32 @@ authenticator.use(
     };
 
     // get token from a previous session
-    let csrfToken = await readCsrfToken(request);
+    const cookieHeader = request.headers.get("cookie");
 
-    if (csrfToken != null) {
+    const cookies = Object.fromEntries(
+      cookieHeader
+        ?.split(";")
+        .map((cookie) => cookie.trim().split("=")) || []
+    );
+    
+    const csrfToken = cookies["csrftoken"];
+    const sessionId = cookies["sessionid"];
+
+    if (csrfToken != null && sessionId != null) {
+      console.log("Old session found, attempting to logout");
+      console.log("CSRF Token: " + csrfToken);
+      console.log("Session ID: " + sessionId);
+      
       try {
-        await attemptLogout(csrfToken);
+        await attemptLogout(csrfToken, sessionId);
       } catch (e) {} //Django session is already expired, old csrfToken has no meaning anymore.
     }
 
-    if (!(await attemptLogin(user.username, user.password))) {
-      throw new Error("Invalid username or password");
-    }
+    const loginResult = await attemptLogin(user.username, user.password);
+
+    if (!loginResult.success) throw new Error("Invalid username or password");
+
+    if (loginResult.cookies) user.backendCookie = loginResult.cookies;
 
     return user;
   }),

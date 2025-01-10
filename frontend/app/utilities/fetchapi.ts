@@ -7,6 +7,7 @@ const headers: {
   "Content-Type": string;
   Authorization?: string;
   "X-CSRFToken"?: string;
+  Cookie?: string;
 } = {
   "Content-Type": "application/json",
 };
@@ -267,20 +268,37 @@ export const getMissionsByTag = async (
 export const attemptLogin = async (
   username: string,
   password: string
-): Promise<boolean> => {
+): Promise<{ success: boolean; cookies?: string }> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/auth/login/`, {
     method: "POST",
     headers: headers,
     body: JSON.stringify({ username, password }),
   });
 
-  if (!response.ok) return false;
+  if (!response.ok) return { success: false };
 
-  return true;
+  let cookies = "";
+
+  Array.from(response.headers.keys()).forEach((key: string) => {
+    const value = response.headers.get(key);
+    if (key.startsWith("set-cookie")) {
+      cookies = `${value}`;
+    }
+  });
+
+  return { success: true, cookies };
 };
 
-export const attemptLogout = async (csrf_token: string): Promise<void> => {
-  headers["X-CSRFToken"] = csrf_token;
+export const attemptLogout = async (
+  csrfToken: string,
+  sessionId: string
+): Promise<void> => {
+  console.log("Logging out");
+  console.log("CSRF Token: " + csrfToken);
+  console.log("Session ID: " + sessionId);
+
+  headers["X-CSRFToken"] = csrfToken;
+  headers["Cookie"] = "sessionid=" + sessionId + "; csrftoken=" + csrfToken;
 
   const response = await fetch(`${FETCH_API_BASE_URL}/auth/logout/`, {
     method: "POST",

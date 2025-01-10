@@ -27,8 +27,13 @@ export async function action({ request }: ActionFunctionArgs) {
   let session = await sessionStorage.getSession(request.headers.get("cookie"));
   session.set("user", user);
 
+  let backendCookie = ""
+
+  if (user.backendCookie) 
+    backendCookie = ", " + user.backendCookie;
+
   throw redirect("/missions", {
-    headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
+    headers: { "Set-Cookie": await sessionStorage.commitSession(session) + backendCookie},
   });
 }
 
