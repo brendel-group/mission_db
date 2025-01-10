@@ -13,10 +13,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       .map((cookie) => cookie.trim().split("=")) || []
   );
 
-  console.log("Logging out");
-  console.log("CSRF Token: " + cookies["csrftoken"]);
-  console.log("Session ID: " + cookies["sessionid"]);
-
   attemptLogout(cookies["csrftoken"], cookies["sessionid"]);
 
   let secure = "";

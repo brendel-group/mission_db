@@ -293,10 +293,6 @@ export const attemptLogout = async (
   csrfToken: string,
   sessionId: string
 ): Promise<void> => {
-  console.log("Logging out");
-  console.log("CSRF Token: " + csrfToken);
-  console.log("Session ID: " + sessionId);
-
   headers["X-CSRFToken"] = csrfToken;
   headers["Cookie"] = "sessionid=" + sessionId + "; csrftoken=" + csrfToken;
 

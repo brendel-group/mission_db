@@ -54,11 +54,7 @@ authenticator.use(
     const csrfToken = cookies["csrftoken"];
     const sessionId = cookies["sessionid"];
 
-    if (csrfToken != null && sessionId != null) {
-      console.log("Old session found, attempting to logout");
-      console.log("CSRF Token: " + csrfToken);
-      console.log("Session ID: " + sessionId);
-      
+    if (csrfToken != null && sessionId != null) {      
       try {
         await attemptLogout(csrfToken, sessionId);
       } catch (e) {} //Django session is already expired, old csrfToken has no meaning anymore.
