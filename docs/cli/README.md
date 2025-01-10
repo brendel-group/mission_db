@@ -319,3 +319,37 @@ The password is not stored in clear-text but as a hash value.
   ```bash
   ./manage.py flush
   ```
+
+## Notes for Developers:
+
+All commands are implemented in the folder cli_commands.\
+To add a new command import the abstract class `Command` from `Command.py`
+and make a new class that inherits from this abstract class and implements all abstract methods and properties.
+
+All .py files in the cli_commands folder are imported by cli.py except files that start with `test` and the file `__init__.py`\
+Like this all classes inheriting from the `Command` class are found and added as a command and no changes of cli.py are required to add a new command.
+
+There is one abstract property: `name`
+
+And 2 abstract methods: 
+- `parser_setup(self, subparser: argparse._SubParsersAction)`
+- `command(self, args: argparse.Namespace)`
+
+For information on what they do check `backend/cli_commands/Command.py`
+
+Example implementation:
+```python
+from .Command import Command
+
+class Example(Command):
+
+  name = "example"
+
+  def parser_setup(self, subparser):
+    self.parser = subparser.add_parser(self.name,help="example")
+    # add more arguments
+
+  def command(self, args):
+    pass # (remove this)
+    # do something
+```
