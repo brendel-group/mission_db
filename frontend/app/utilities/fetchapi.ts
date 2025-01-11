@@ -70,6 +70,7 @@ export const updateMission = async (mission: MissionData): Promise<MissionData> 
 export const deleteMission = async (id: number): Promise<void> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/missions/${id}`, {
         method: 'DELETE',
+        headers: headers,
     });
     if (!response.ok) {
         throw new Error(`Failed to delete mission with id ${id}`);
@@ -115,6 +116,7 @@ export const addTagToMission = async (missionId: number, tagName: string): Promi
 export const removeTagFromMission = async (missionId: number, tagName: string): Promise<void> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/delete/${missionId}/${encodeURIComponent(encodeURIComponent(tagName))}`, {
         method: 'DELETE',
+        headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
