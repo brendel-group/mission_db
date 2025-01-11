@@ -141,7 +141,7 @@ class Command(ABC):
 
                         line += f"{content:<{widths[key]}} {vertical_bar} "
                     else:
-                        line += f"{" ":<{widths[key]}} {vertical_bar} "
+                        line += f"{' ':<{widths[key]}} {vertical_bar} "
 
             table += line[:-3] + "\n"
 

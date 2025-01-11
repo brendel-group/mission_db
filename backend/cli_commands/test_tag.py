@@ -153,5 +153,5 @@ class ListMissionTagLogTests(TestCase):
         with self.assertLogs(level="ERROR") as log:
             list_missions_by_tag(self.tag1.id + 10, self.tag1.name)
             self.assertEqual(
-                log.output, [f"ERROR:root:No Tag with id {self.tag1.id+10} found"]
+                log.output, [f"ERROR:root:No Tag with id {self.tag1.id + 10} found"]
             )
