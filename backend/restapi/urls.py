@@ -41,4 +41,5 @@ urlpatterns = [
         get_files_by_mission_id,
         name="get_files_by_mission_id",
     ),
+    path("auth/", include("dj_rest_auth.urls")),
 ]
