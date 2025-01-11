@@ -268,21 +268,17 @@ export const getMissionsByTag = async (
 export const attemptLogin = async (
   username: string,
   password: string
-): Promise<{ success: boolean; cookies?: string }> => {
+): Promise<{ success: boolean; cookies?: string[] }> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/auth/login/`, {
     method: "POST",
     headers: headers,
     body: JSON.stringify({ username, password }),
   });
-
   if (!response.ok) return { success: false };
-
-  let cookies = "";
-
-  Array.from(response.headers.keys()).forEach((key: string) => {
-    const value = response.headers.get(key);
+  let cookies: string[] = [];
+  response.headers.forEach((value: string, key: string) => {
     if (key.startsWith("set-cookie")) {
-      cookies = `${value}`;
+      cookies.push(value);
     }
   });
 

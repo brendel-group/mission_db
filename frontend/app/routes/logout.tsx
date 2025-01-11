@@ -8,27 +8,30 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let user = session.get("user");
 
   const cookies = Object.fromEntries(
-    cookieHeader
-      ?.split(";")
-      .map((cookie) => cookie.trim().split("=")) || []
+    cookieHeader?.split(";").map((cookie) => cookie.trim().split("=")) || []
   );
 
   attemptLogout(cookies["csrftoken"], cookies["sessionid"]);
 
-  let secure = "";
-  if (user?.backendCookie?.toLowerCase().includes("secure;"))
-    secure = " Secure;";
+  let backendCookie: string[] = [];
+  if (user.backendCookie) {
+    backendCookie = user.backendCookie;
+  }
+  let headers = new Headers({
+    "set-cookie": await sessionStorage.destroySession(session),
+  });
+  backendCookie.forEach((cookie: string) => {
+    let name = cookie.split("=", 1)[0];
+    cookie = cookie.replace(/(sessionid|csrftoken)=[a-zA-Z0-9]*;/, `${name}=;`);
+    cookie = cookie.replace(
+      /[Ee]xpires=[a-zA-Z0-9 ,:]*;/,
+      "Expires=Thu, 01 Jan 1970 00:00:00 GMT;"
+    );
+    cookie = cookie.replace(/[Mm]ax-[Aa]ge=[0-9]*;/, "Max-Age=0;");
+    headers.append("set-cookie", cookie);
+  });
 
   return redirect("/login", {
-    headers: {
-      "Set-Cookie":
-        (await sessionStorage.destroySession(session)) +
-        ", csrftoken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly;" +
-        secure +
-        " SameSite=Lax, " +
-        " sessionid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly;" +
-        secure +
-        " SameSite=Lax",
-    },
+    headers: headers,
   });
 }
