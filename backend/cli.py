@@ -198,7 +198,7 @@ def print_table(list_of_dict: list[dict]):
 
                     line += f"{content:<{widths[key]}} {vertical_bar} "
                 else:
-                    line += f"{' ':<{widths[key]}} {vertical_bar} "
+                    line += f"{" ":<{widths[key]}} {vertical_bar} "
 
         table += line[:-3] + "\n"
 
