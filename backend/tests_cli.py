@@ -6,8 +6,10 @@ import cli
 import logging
 from io import StringIO
 import sys
+import os
 from unittest.mock import patch
 from rest_framework_api_key.models import APIKey
+from django.contrib.auth.models import User
 
 
 class SyncFolderArgumentTests(TestCase):
@@ -193,9 +195,17 @@ class CapturedOutputTest(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
     def tearDown(self):
         self.mission.delete()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_remove_misison(self):
         cli.remove_mission(self.mission.id)
@@ -218,36 +228,6 @@ class CapturedOutputTest(TestCase):
             f"No mission found with ID {id_no_mission}.",
         )
 
-    def test_print_mission_table(self):
-        missions = [
-            Mission.objects.create(name=f"Test{i}", date="2024-12-02") for i in range(3)
-        ]
-        serializer = MissionSerializer(missions, many=True)
-        cli.print_table(serializer.data)
-        sys.stdout.flush()
-        self.assertEqual(
-            self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
-            "id│name│date│location│notes\n"
-            + "┼┼┼┼\n"
-            + f"{missions[0].id}│Test0│2024-12-02│None│None\n"
-            + f"{missions[1].id}│Test1│2024-12-02│None│None\n"
-            + f"{missions[2].id}│Test2│2024-12-02│None│None",
-        )
-
-    def test_print_tag_table(self):
-        tags = [Tag.objects.create(name=f"Test{i}") for i in range(3)]
-        serializer = TagSerializer(tags, many=True)
-        cli.print_table(serializer.data)
-        sys.stdout.flush()
-        self.assertEqual(
-            self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
-            "id│name│color\n"
-            + "┼┼\n"
-            + f"{tags[0].id}│{tags[0].name}│#FFFFFF\n"
-            + f"{tags[1].id}│{tags[1].name}│#FFFFFF\n"
-            + f"{tags[2].id}│{tags[2].name}│#FFFFFF",
-        )
-
 
 class MainFunctionTests(TestCase):
     def setUp(self):
@@ -256,10 +236,18 @@ class MainFunctionTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
     def tearDown(self):
         self.mission.delete()
         sys.stdout.flush()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_mission_add(self):
         args = [
@@ -427,11 +415,19 @@ class TagBasicTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
         # Setting up environment, creating common tags
         self.tag = Tag.objects.create(name="TestTag", color="#FFFFFF")
 
     def tearDown(self):
         self.logger.disabled = False
+
+        self.patcher_os_terminal_size.stop()
 
         sys.stdout.flush()
         sys.stdout = self.original_stdout
@@ -467,6 +463,12 @@ class ListMissionTagTests(TestCase):
         self.captured_output = StringIO()
         sys.stdout = self.captured_output
 
+        self.patcher_os_terminal_size = patch(
+            "os.get_terminal_size",
+            return_value=os.terminal_size((float("inf"), float("inf"))),
+        )
+        self.patcher_os_terminal_size.start()
+
         self.mission = Mission(name="Test", date=date.today())
         self.mission.save()
 
@@ -483,6 +485,8 @@ class ListMissionTagTests(TestCase):
     def tearDown(self):
         sys.stdout.flush()
         sys.stdout = self.original_stdout
+
+        self.patcher_os_terminal_size.stop()
 
     def test_list_tags_by_mission(self):
         cli.list_tags_by_mission(self.mission.id)
@@ -675,3 +679,116 @@ class APIKeyTests(TestCase):
             self.assertFalse(APIKey.objects.filter(name=self.key.name).exists())
             self.assertIn(self.key.name, log.output[0])
             self.assertIn("Removed", log.output[0])
+
+
+class PrintTableTests(TestCase):
+    def setUp(self):
+        self.mission = Mission.objects.create(name="TestRemove", date=date.today())
+        self.original_stdout = sys.stdout
+        self.captured_output = StringIO()
+        sys.stdout = self.captured_output
+        cli.USE_UNICODE = True
+
+    def tearDown(self):
+        self.mission.delete()
+        sys.stdout = self.original_stdout
+
+    def test_print_mission_table(self):
+        missions = [
+            Mission.objects.create(name=f"Test{i}", date="2024-12-02") for i in range(3)
+        ]
+        serializer = MissionSerializer(missions, many=True)
+        cli.print_table(serializer.data)
+        sys.stdout.flush()
+        self.assertEqual(
+            self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
+            "id│name│date│location│notes\n"
+            + "┼┼┼┼\n"
+            + f"{missions[0].id}│Test0│2024-12-02│None│None\n"
+            + f"{missions[1].id}│Test1│2024-12-02│None│None\n"
+            + f"{missions[2].id}│Test2│2024-12-02│None│None",
+        )
+
+    def test_print_tag_table(self):
+        tags = [Tag.objects.create(name=f"Test{i}") for i in range(3)]
+        serializer = TagSerializer(tags, many=True)
+        cli.print_table(serializer.data)
+        sys.stdout.flush()
+        self.assertEqual(
+            self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
+            "id│name│color\n"
+            + "┼┼\n"
+            + f"{tags[0].id}│{tags[0].name}│#FFFFFF\n"
+            + f"{tags[1].id}│{tags[1].name}│#FFFFFF\n"
+            + f"{tags[2].id}│{tags[2].name}│#FFFFFF",
+        )
+
+    def test_mission_with_newline(self):
+        mission = [
+            Mission.objects.create(
+                name="Test\nlinebreak", date="2024-12-26", notes="Test\nwith\nnewline"
+            )
+        ]
+        serializer = MissionSerializer(mission, many=True)
+        cli.print_table(serializer.data)
+        sys.stdout.flush()
+        self.assertEqual(
+            self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
+            "id│name│date│location│notes\n"
+            + "┼┼┼┼\n"
+            + f"{mission[0].id}│Test│2024-12-26│None│Test\n"
+            + "│linebreak│││with\n"
+            + "││││newline",
+        )
+
+
+class PasswordInputTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.patcher_getpass = patch("cli.getpass", return_value="test12345!")
+        self.patcher_validate = patch("cli.validate_password")
+        self.patcher_check = patch("cli.User.check_password", return_value=False)
+
+        self.mock_getpass = self.patcher_getpass.start()
+        self.mock_validate = self.patcher_validate.start()
+        self.mock_check = self.patcher_check.start()
+
+    def tearDown(self):
+        super().tearDown()
+        self.patcher_getpass.stop()
+        self.patcher_validate.stop()
+        self.patcher_check.stop()
+
+    def test_add_user(self):
+        with self.assertLogs(level="INFO") as log:
+            cli.add_user("test_user")
+            self.assertTrue(User.objects.filter(username="test_user").exists())
+            self.assertIn("User 'test_user' added", log.output[0])
+            self.assertEqual(self.mock_getpass.call_count, 2)
+            self.assertEqual(self.mock_validate.call_count, 1)
+            self.assertEqual(self.mock_check.call_count, 0)
+
+    def test_remove_user(self):
+        with self.assertLogs(level="INFO") as log:
+            User.objects.create_user(username="test", password="test")
+            cli.remove_user("test")
+            self.assertFalse(User.objects.filter(username="test").exists())
+            self.assertIn("User 'test' removed", log.output[0])
+
+    def test_change_password(self):
+        with self.assertLogs(level="INFO") as log:
+            User.objects.create_user(username="test_change", password="test")
+            cli.change_password("test_change")
+            self.assertIn("changed successfully", log.output[0])
+            self.assertEqual(self.mock_getpass.call_count, 2)
+            self.assertEqual(self.mock_validate.call_count, 1)
+            self.assertEqual(self.mock_check.call_count, 1)
+
+            self.patcher_check.stop()
+
+            # changing again to same password should not work
+            cli.change_password("test_change")
+            self.assertIn("same as the old password", log.output[1])
+            self.assertEqual(self.mock_getpass.call_count, 4)
+            self.assertEqual(self.mock_validate.call_count, 2)
+            self.assertEqual(self.mock_check.call_count, 1)

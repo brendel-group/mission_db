@@ -9,10 +9,11 @@ import {
   TextInput,
   rem,
   keys,
-  Menu,
   Skeleton,
   Badge,
+  Popover,
 } from "@mantine/core";
+import { isValidHexColor } from "~/utilities/TagPicker";
 import {
   IconSelector,
   IconChevronDown,
@@ -274,19 +275,24 @@ export function Overview() {
               {item.name}
             </Badge>
           ))}
-          <Menu>
+          <Popover>
             {/*edit button*/}
-            <Menu.Target>
+            <Popover.Target>
               <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
                 <IconPencil
                   size={16}
                   style={{ transform: "translateY(2px)" }}
                 />
               </Badge>
-            </Menu.Target>
+            </Popover.Target>
             {/*Actions for the Tag Picker*/}
-            <Menu.Dropdown
-              style={{ padding: "10px", marginLeft: "-25px", marginTop: "2px" }}
+            <Popover.Dropdown
+              style={{
+                padding: "10px",
+                marginLeft: "-25px",
+                marginTop: "2px",
+                width: "300px",
+              }}
             >
               <TagPicker
                 tags={row.tags}
@@ -312,7 +318,9 @@ export function Overview() {
                 }}
                 onChangeTagColor={(tagName, newColor) => {
                   // update tag color in backend
-                  changeTagColor(tagName, newColor);
+                  isValidHexColor(newColor)
+                    ? changeTagColor(tagName, newColor)
+                    : null;
 
                   // update tags in frontend
                   const updatedRenderedData = renderedData.map((missionRow) => {
@@ -346,8 +354,8 @@ export function Overview() {
                   setFetchedData(updatedFetchedData);
                 }}
               />
-            </Menu.Dropdown>
-          </Menu>
+            </Popover.Dropdown>
+          </Popover>
         </Group>
       </Table.Td>
     </Table.Tr>
