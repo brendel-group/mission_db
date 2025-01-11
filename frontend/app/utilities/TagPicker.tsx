@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Badge,
   Button,
@@ -13,9 +13,12 @@ import { Tag } from "~/data";
 
 interface TagPickerProps {
   tags: Tag[];
+  allTags: Tag[];
   onAddNewTag: (tagName: string, tagColor: string) => void;
+  onAddExistingTag: (tagName: string) => void;
   onRemoveTag: (tagName: string) => void;
   onChangeTagColor: (tagName: string, newColor: string) => void;
+  onDeleteAllTags: () => void;
 }
 
 export function isValidHexColor(input: string): boolean {
@@ -26,9 +29,12 @@ export function isValidHexColor(input: string): boolean {
 
 export const TagPicker: React.FC<TagPickerProps> = ({
   tags,
+  allTags,
   onAddNewTag,
+  onAddExistingTag,
   onRemoveTag,
   onChangeTagColor,
+  onDeleteAllTags,
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -37,16 +43,27 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const [changeColorError, setChangeColorError] = useState<string | null>(null);
   const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
   const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
+  const [otherExistingTags, setOtherExistingTags] = useState<Tag[]>([]);
   const swatches = [
-    "#390099",
-    "#2c7da0",
-    "#9e0059",
-    "#ff0054",
     "#ff5400",
     "#ffbd00",
     "#007f5f",
     "#80b918",
+    "#2c7da0",
+    "#390099",
+    "#ff0054",
+    "#9e0059",
   ];
+
+  useEffect(() => {
+    setOtherExistingTags(
+      allTags
+        .filter(
+          (tag) => !tags.some((existingTag) => existingTag.name === tag.name),
+        )
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    );
+  }, [tags, allTags]);
 
   const handleColorChange = (tagName: string, newTagColor: string) => {
     setNewColor(newTagColor);
@@ -84,6 +101,13 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       if (!isValidHexColor(selectedColor)) {
         setNewTagColorError("Invalid color");
         setSelectedColor("");
+        return;
+      }
+
+      // check if the new tag name is already in existing tags
+      if (otherExistingTags.find((tag) => tag.name === newTagName)) {
+        setNewTagNameError("Please add this tag with the button below");
+        setNewTagName("");
         return;
       }
       onAddNewTag(newTagName, selectedColor);
@@ -173,7 +197,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                   <IconPalette size={16} />
                 </Button>
               </Popover.Target>
-              <Popover.Dropdown>
+              <Popover.Dropdown style={{ padding: 6 }}>
                 <Stack gap={0}>
                   <ColorInput
                     size="sm"
@@ -196,7 +220,9 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               size="xs"
               color="red"
               variant="subtle"
-              onClick={() => onRemoveTag(tag.name)}
+              onClick={() => {
+                onRemoveTag(tag.name);
+              }}
               style={{ padding: 0 }}
             >
               <IconTrash size={16} />
@@ -204,6 +230,76 @@ export const TagPicker: React.FC<TagPickerProps> = ({
           </Group>
         </Group>
       ))}
+
+      <Group gap="xs" style={{ marginTop: 3 }}>
+        {/* add already existing tags */}
+        <Popover withArrow withinPortal={false}>
+          <Popover.Target>
+            <Button
+              color="#228be6"
+              size="xs"
+              style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
+            >
+              Add existing tags
+            </Button>
+          </Popover.Target>
+          <Popover.Dropdown
+            style={{
+              padding: 8,
+              maxHeight: "200px",
+              overflowY: "auto",
+            }}
+          >
+            <Stack gap={8}>
+              {otherExistingTags.map((tag) => (
+                <Group key={tag.name} gap="md">
+                  <Badge
+                    color={tag.color}
+                    variant="light"
+                    style={{ textTransform: "none" }}
+                  >
+                    {tag.name}
+                  </Badge>
+                  <IconPlus
+                    size={16}
+                    color={"grey"}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      onAddExistingTag(tag.name);
+                      setOtherExistingTags(
+                        otherExistingTags.filter(
+                          (existingTag) => existingTag.name !== tag.name,
+                        ),
+                      );
+                    }}
+                  />
+                </Group>
+              ))}
+              {otherExistingTags.length === 0 && (
+                <span style={{ color: "grey" }}>No more tags to add</span>
+              )}
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
+
+        {/* delete all tags */}
+        <Button
+          color="red"
+          size="xs"
+          style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
+          onClick={() => {
+            if (
+              window.confirm(
+                "Are you sure you want to remove all tags from this mission?",
+              )
+            ) {
+              onDeleteAllTags();
+            }
+          }}
+        >
+          Remove all tags
+        </Button>
+      </Group>
     </Stack>
   );
 };

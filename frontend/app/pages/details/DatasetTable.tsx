@@ -34,7 +34,7 @@ export function ShowDatasets({ data }: { data: DetailViewData }) {
           <Table.Tr>
             <Table.Th>File</Table.Th>
             <Table.Th>Duration</Table.Th>
-            <Table.Th>Size (MB)</Table.Th>
+            <Table.Th>Size</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>

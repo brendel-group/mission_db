@@ -25,7 +25,7 @@ class File(models.Model):
     id = models.AutoField(primary_key=True)
     file_path = models.CharField(max_length=65536)  # absolute path to the file
     robot = models.CharField(max_length=65536, null=True, blank=True)  # can be optional
-    duration = models.BigIntegerField()  # unit: nanoseconds
+    duration = models.BigIntegerField()  # unit: seconds
     size = models.BigIntegerField()  # unit: bytes
 
 

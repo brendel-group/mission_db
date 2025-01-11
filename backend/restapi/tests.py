@@ -493,7 +493,8 @@ class NotFoundErrors(APIAuthTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
-            response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
+            response.data,
+            {"detail": f"Mission with id {self.mission.id + 1} not found"},
         )
 
     def test_create_mission_tag(self):
@@ -504,12 +505,14 @@ class NotFoundErrors(APIAuthTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
-            response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
+            response.data,
+            {"detail": f"Mission with id {self.mission.id + 1} not found"},
         )
 
     def test_get_files_by_nonexistent_mission(self):
         response = self.client.get(
-            reverse("get_files", kwargs={"mission_id": 999}), headers=self.header
+            reverse("get_files_by_mission_id", kwargs={"mission_id": 999}),
+            headers=self.header,
         )  # Nonexistent ID
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"detail": "Mission with ID 999 not found"})
@@ -551,7 +554,7 @@ class MissionFilesTestCase(APIAuthTestCase):
 
     def test_get_files_by_mission(self):
         response = self.client.get(
-            reverse("get_files", kwargs={"mission_id": self.mission.id}),
+            reverse("get_files_by_mission_id", kwargs={"mission_id": self.mission.id}),
             headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)

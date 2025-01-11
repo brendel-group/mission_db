@@ -55,25 +55,7 @@ The `fetchapi.ts` file provides utility functions to interact with the Mission D
 - **Parameters**: `missionId` (number), `tagName` (string)
 - **Returns**: `Promise<{ mission_id: number; tag_name: string }>`
 - **Endpoint**: `POST /restapi/mission-tags/create/`
-
-### removeTagFromMission(missionId, tagName)
-- Removes a tag from a mission.
-- **Parameters**: `missionId` (number), `tagName` (string)
-- **Returns**: `Promise<void>`
-- **Endpoint**: `DELETE /restapi/mission-tags/delete/{missionId}/{tagName}`
-
-### changeTagColor(tagName, newColor)
-- Changes the color of a tag.
-- **Parameters**: `tagName` (string), `newColor` (string)
-- **Returns**: `Promise<Tag>`
-- **Endpoint**: `PUT /restapi/tags/{tagName}`
-
-### createTag(tagName, color)
-- Creates a new tag.
-- **Parameters**: `tagName` (string), `color` (optional string, default: `#FFFFFF`)
-- **Returns**: `Promise<Tag>`
-- **Endpoint**: `POST /restapi/tags/create/`
-
+`getFormattedDetails`, `getTotalDuration` and `getTotalSize`
 ### deleteTag(tagName)
 - Deletes a tag by its name.
 - **Parameters**: `tagName` (string)
@@ -91,6 +73,33 @@ The `fetchapi.ts` file provides utility functions to interact with the Mission D
 - **Parameters**: `tagName` (string)
 - **Returns**: `Promise<{ id: number; name: string; location: string }[]>`
 - **Endpoint**: `GET /restapi/tags/missions/{tagName}`
+
+### getDetailsByMission(missionID)
+- Fetches all details associated with a specific mission.
+- **Parameters**: `missionID` (number)
+- **Returns**: `Promise<{ DetailViewData }>`
+- **Endpoint**: `GET /restapi/missions/{missionID}/files/`
+
+### getForamttedDetails(missionID)
+- Fetches all details associated with a specific mission and formats duration and size.
+- Uses getDetailsByMission() to fetch the details.
+- **Parameters**: `missionID` (number)
+- **Returns**: `Promise<{ DetailViewData }> (duration and size formatted)`
+- **Endpoint**: `GET /restapi/missions/{missionID}/files/`
+
+### getTotalDuration(missionID)
+- Fetches total duration associated with a specific mission and formats it.
+- Uses getDetailsByMission() to fetch the details.
+- **Parameters**: `missionID` (number)
+- **Returns**: `Promise<{ string }> (formatted)`
+- **Endpoint**: `GET /restapi/missions/{missionID}/files/`
+
+### getTotalSize(missionID)
+- Fetches total size associated with a specific mission and formats it.
+- Uses getDetailsByMission() to fetch the details.
+- **Parameters**: `missionID` (number)
+- **Returns**: `Promise<{ string }> (formatted)`
+- **Endpoint**: `GET /restapi/missions/{missionID}/files/`
 -------------------------
 ## Configuration
 - **`FETCH_API_BASE_URL`**: The base URL for API requests, defined in `config.tsx`. Set to: `http://127.0.0.1:8000/restapi`
