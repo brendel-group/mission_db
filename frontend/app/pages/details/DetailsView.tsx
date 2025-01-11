@@ -4,7 +4,7 @@ import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
 import { RenderedMission, DetailViewData } from "~/data";
 import AbstractPage from "../AbstractPage";
-import { getDetailsByMission } from "../../utilities/fetchapi";
+import { getFormattedDetails, getTotalSize, getTotalDuration } from "../../utilities/fetchapi";
 import { ShowInformationView } from "./InformationView";
 
 interface DetailsViewProps {
@@ -16,12 +16,21 @@ const DetailsView: React.FC<DetailsViewProps> = ({
 }) => {
   const [detailViewData, setDetailViewData] = useState<DetailViewData>();
   const [location, setLocation] = useState<string>(selectedRow.location);
+  const [totalSize, setTotalSize] = useState<string>(selectedRow.totalSize);
+  const [totalDuration, setTotalDuration] = useState<string>(selectedRow.totalDuration);
   useEffect(() => {
     const fetchDetailViewData = async () => {
       if (selectedRow) {
         try {
-          const fetchedData = await getDetailsByMission(selectedRow.id);
+          // data for the detail view
+          const fetchedData = await getFormattedDetails(selectedRow.id);
           setDetailViewData(fetchedData);
+          // data for the information view (size)
+          const fetchedTotalSize = await getTotalSize(selectedRow.id);
+          setTotalSize(fetchedTotalSize);
+          // data for the information view (duration)
+          const fetchedTotalDuration = await getTotalDuration(selectedRow.id);
+          setTotalDuration(fetchedTotalDuration);
         } catch (error) {
           console.error("Error fetching detail view data:", error);
         }
@@ -63,6 +72,8 @@ const DetailsView: React.FC<DetailsViewProps> = ({
           <ShowInformationView
             missionData={selectedRow}
             setLocation_={setLocation}
+            totalSize = {totalSize}
+            totalDuration = {totalDuration}
           />
         </Grid.Col>
       </Grid>
