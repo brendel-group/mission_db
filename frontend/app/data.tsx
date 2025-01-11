@@ -41,6 +41,9 @@ export interface User {
   id: number;
   username: string;
   password: string;
+
+  //Backend part
+  backendCookie?: string[];
 }
 
 //Converts a rendered mission to mission data

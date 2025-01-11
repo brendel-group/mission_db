@@ -4,6 +4,8 @@ import { User } from "~/data";
 
 import { createCookieSessionStorage } from "@remix-run/node";
 import { MAX_SESSION_AGES } from "~/config";
+import { attemptLogin, attemptLogout } from "./fetchapi";
+import { createCookie } from "@remix-run/node";
 
 // export the whole sessionStorage object
 export const sessionStorage = createCookieSessionStorage({
@@ -18,6 +20,7 @@ export const sessionStorage = createCookieSessionStorage({
   },
 });
 
+
 // you can also export the methods individually for your own usage
 export const { getSession, commitSession, destroySession } = sessionStorage;
 
@@ -25,7 +28,7 @@ export let authenticator = new Authenticator<User>();
 
 // Tell the Authenticator to use the form strategy
 authenticator.use(
-  new FormStrategy(async ({ form }) => {
+  new FormStrategy(async ({ form, request }) => {
     const name = form.get("username")?.toString() ?? "";
     const password = form.get("password")?.toString() ?? "";
     // the type of this user must match the type you pass to the Authenticator
@@ -39,9 +42,29 @@ authenticator.use(
       password: password,
     };
 
-    // Example login data, no backend is connected.
-    if (!(user.username === "admin" && user.password === "admin"))
-      throw new Error("Invalid username or password");
+    // get token from a previous session
+    const cookieHeader = request.headers.get("cookie");
+
+    const cookies = Object.fromEntries(
+      cookieHeader
+        ?.split(";")
+        .map((cookie) => cookie.trim().split("=")) || []
+    );
+    
+    const csrfToken = cookies["csrftoken"];
+    const sessionId = cookies["sessionid"];
+
+    if (csrfToken != null && sessionId != null) {      
+      try {
+        await attemptLogout(csrfToken, sessionId);
+      } catch (e) {} //Django session is already expired, old csrfToken has no meaning anymore.
+    }
+
+    const loginResult = await attemptLogin(user.username, user.password);
+
+    if (!loginResult.success) throw new Error("Invalid username or password");
+
+    if (loginResult.cookies) user.backendCookie = loginResult.cookies;
 
     return user;
   }),
