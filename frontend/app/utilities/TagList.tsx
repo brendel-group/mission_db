@@ -5,6 +5,7 @@ import { TagPicker, isValidHexColor } from "./TagPicker";
 
 import {
   addTagToMission,
+  changeTagName,
   changeTagColor,
   createTag,
   deleteTag,
@@ -72,6 +73,26 @@ export function RenderTagsDetailView({
               }
               // update tags in frontend
               setTags(tags.filter((tag) => tag.name !== tagName));
+            }}
+            onChangeTagName={async (oldTagName, newTagName) => {
+              // update tag name in backend
+              await changeTagName(oldTagName, newTagName);
+
+              // update tags in frontend
+              setTags((prev) =>
+                prev.map((tag) =>
+                  tag.name === oldTagName
+                    ? { name: newTagName, color: tag.color }
+                    : tag,
+                ),
+              );
+              setAllTags((prev) =>
+                prev.map((tag) =>
+                  tag.name === oldTagName
+                    ? { name: newTagName, color: tag.color }
+                    : tag,
+                ),
+              );
             }}
             onChangeTagColor={async (tagName, newColor) => {
               // update tag color in backend

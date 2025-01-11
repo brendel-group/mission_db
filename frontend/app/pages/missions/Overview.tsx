@@ -24,6 +24,7 @@ import classes from "./Overview.module.css";
 import { MissionData, RenderedMission, Tag } from "~/data";
 import {
   addTagToMission,
+  changeTagName,
   changeTagColor,
   removeTagFromMission,
   createTag,
@@ -368,6 +369,25 @@ export function Overview() {
                       : mission;
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
+                }}
+                onChangeTagName={async (oldName, newName) => {
+                  // update tag name in backend
+                  await changeTagName(oldName, newName);
+
+                  // update tag name in frontend
+                  const updateTagName = (mission: RenderedMission) => ({
+                    ...mission,
+                    tags: mission.tags.map((tag) =>
+                      tag.name === oldName ? { ...tag, name: newName } : tag,
+                    ),
+                  });
+                  setAllTags(
+                    allTags.map((tag) =>
+                      tag.name === oldName ? { ...tag, name: newName } : tag,
+                    ),
+                  );
+                  setFetchedData(fetchedData.map(updateTagName));
+                  setRenderedData(renderedData.map(updateTagName));
                 }}
                 onChangeTagColor={async (tagName, newColor) => {
                   // update tag color in backend

@@ -17,6 +17,7 @@ interface TagPickerProps {
   onAddNewTag: (tagName: string, tagColor: string) => void;
   onAddExistingTag: (tagName: string) => void;
   onRemoveTag: (tagName: string) => void;
+  onChangeTagName: (tagName: string, newTagName: string) => void;
   onChangeTagColor: (tagName: string, newColor: string) => void;
   onDeleteAllTags: () => void;
 }
@@ -33,13 +34,18 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   onAddNewTag,
   onAddExistingTag,
   onRemoveTag,
+  onChangeTagName,
   onChangeTagColor,
   onDeleteAllTags,
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const [newColor, setNewColor] = useState(selectedColor);
+  const [changedTagName, setChangedTagName] = useState<string>("");
+  const [newColor, setNewColor] = useState<string>("");
+  const [changeTagNameError, setChangeTagNameError] = useState<string | null>(
+    null,
+  );
   const [changeColorError, setChangeColorError] = useState<string | null>(null);
   const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
   const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
@@ -64,6 +70,29 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         .sort((a, b) => a.name.localeCompare(b.name)),
     );
   }, [tags, allTags]);
+
+  const handleNameChange = (tagName: string, newTagName: string) => {
+    setChangedTagName(newTagName);
+    // check if tag name already exists
+    if (tags.find((tag) => tag.name === newTagName)) {
+      setChangeTagNameError("This tag name is already in use");
+      return;
+    }
+    // check if tag name is too long (max 42 characters)
+    if (newTagName.length > 42) {
+      setChangeTagNameError("This tag name is too long");
+      return;
+    }
+    // check if the new tag name is already in existing tags
+    if (otherExistingTags.find((tag) => tag.name === newTagName)) {
+      setChangeTagNameError(
+        "Please add this tag with the 'Add existing tags' button",
+      );
+      return;
+    }
+    setChangeTagNameError("");
+    onChangeTagName(tagName, newTagName);
+  };
 
   const handleColorChange = (tagName: string, newTagColor: string) => {
     setNewColor(newTagColor);
@@ -164,13 +193,6 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       {/*list of tags*/}
       {tags.map((tag) => (
         <Group key={tag.name} gap="apart">
-          <Badge
-            color={tag.color}
-            variant="light"
-            style={{ textTransform: "none" }}
-          >
-            {tag.name}
-          </Badge>
           <Group gap="xs">
             {/* Button to change tag color */}
             <Popover
@@ -184,21 +206,31 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               width={120}
               withinPortal={false}
               onOpen={() => {
+                setChangedTagName(tag.name);
                 setNewColor(tag.color);
               }}
             >
               <Popover.Target>
-                <Button
-                  size="xs"
-                  color="gray"
-                  variant="subtle"
-                  style={{ padding: 0 }}
+                <Badge
+                  color={tag.color}
+                  variant="light"
+                  style={{ textTransform: "none", cursor: "pointer" }}
                 >
-                  <IconPalette size={16} />
-                </Button>
+                  {tag.name}
+                </Badge>
               </Popover.Target>
               <Popover.Dropdown style={{ padding: 6 }}>
-                <Stack gap={0}>
+                <Stack gap={6}>
+                  <TextInput
+                    size="sm"
+                    value={changedTagName}
+                    onChange={(e) => setChangedTagName(e.target.value)}
+                    onKeyDown={(e) => {
+                      e.key === "Enter" &&
+                        handleNameChange(tag.name, changedTagName);
+                    }}
+                    error={changeTagNameError}
+                  />
                   <ColorInput
                     size="sm"
                     value={newColor}
