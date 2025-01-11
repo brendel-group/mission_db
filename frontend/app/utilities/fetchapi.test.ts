@@ -151,6 +151,7 @@ describe("Fetch API Functions", () => {
       await deleteMission(1);
       expect(fetch).toHaveBeenCalledWith(`${FETCH_API_BASE_URL}/missions/1`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
       });
     });
 
@@ -343,6 +344,7 @@ describe("Fetch API Functions", () => {
         `${FETCH_API_BASE_URL}/mission-tags/delete/1/Important`,
         {
           method: "DELETE",
+          headers: { "Content-Type": "application/json" },
         }
       );
     });

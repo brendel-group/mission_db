@@ -2,17 +2,18 @@ import { Grid } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
-import { RenderedMission, DetailViewData } from "~/data";
+import { RenderedMission, DetailViewData, Tag } from "~/data";
 import AbstractPage from "../AbstractPage";
 import { getFormattedDetails, getTotalSize, getTotalDuration } from "../../utilities/fetchapi";
 import { ShowInformationView } from "./InformationView";
 
 interface DetailsViewProps {
   missionData: RenderedMission;
+  allTags: Tag[];
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({
-  missionData: selectedRow,
+  missionData: selectedRow, allTags
 }) => {
   const [detailViewData, setDetailViewData] = useState<DetailViewData>();
   const [location, setLocation] = useState<string>(selectedRow.location);
@@ -57,6 +58,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({
                 <RenderTagsDetailView
                   tags_={selectedRow.tags}
                   missionId={selectedRow.id}
+                  allTags_={allTags}
                 />
               )}
             </Grid.Col>

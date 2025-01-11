@@ -33,6 +33,7 @@ import {
   getTagsByMission,
   getTotalDuration,
   getTotalSize,
+  getTags,
 } from "~/utilities/fetchapi";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
@@ -70,7 +71,7 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
 function filterData(
   data: RenderedMission[],
   search: string,
-  searchedTags: string[] = []
+  searchedTags: string[] = [],
 ) {
   const query = search.toLowerCase().trim();
   return data.filter((item) => {
@@ -86,7 +87,7 @@ function filterData(
       searchedTags.length === 0 ||
       (item.tags &&
         searchedTags.every((tag) =>
-          item.tags.some((itemTag) => itemTag.name === tag)
+          item.tags.some((itemTag) => itemTag.name === tag),
         ));
 
     return matchesSearch && matchesTags;
@@ -100,7 +101,7 @@ function sortData(
     reversed: boolean;
     search: string;
     searchedTags: string[];
-  }
+  },
 ) {
   const { sortBy, reversed, search, searchedTags } = payload;
 
@@ -146,6 +147,7 @@ export function Overview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchedTags, setSearchedTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -192,6 +194,22 @@ export function Overview() {
       }
     };
 
+    const fetchTags = async () => {
+      try {
+        const tags = await getTags();
+        setAllTags(tags);
+      } catch (e: any) {
+        if (e instanceof Error) {
+          setError(e.message); // Display Error information
+        } else {
+          setError("An unknown error occurred"); // For non-Error types
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTags();
     fetchMissions();
     console.log(JSON.stringify(fetchedData));
   }, []);
@@ -205,7 +223,7 @@ export function Overview() {
     setReverseSortDirection(reversed);
     setSortBy(field);
     setRenderedData(
-      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags })
+      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags }),
     );
   };
 
@@ -218,7 +236,7 @@ export function Overview() {
         reversed: reverseSortDirection,
         search: value,
         searchedTags,
-      })
+      }),
     );
   };
 
@@ -268,7 +286,7 @@ export function Overview() {
                     reversed: reverseSortDirection,
                     search,
                     searchedTags: updatedTags,
-                  })
+                  }),
                 );
               }}
             >
@@ -296,13 +314,37 @@ export function Overview() {
             >
               <TagPicker
                 tags={row.tags}
-                onAddNewTag={(tagName, tagColor) => {
+                allTags={allTags}
+                onAddNewTag={async (tagName, tagColor) => {
                   //update tags in backend
-                  createTag(tagName, tagColor);
-                  addTagToMission(row.id, tagName);
+                  await createTag(tagName, tagColor);
+                  await addTagToMission(row.id, tagName);
+
                   // update tags in frontend
-                  row.tags.push({ name: tagName, color: tagColor });
-                  setRenderedData([...renderedData]);
+                  const newTag = { name: tagName, color: tagColor };
+                  const updateMissionTags = (mission: RenderedMission) =>
+                    mission.id === row.id
+                      ? { ...mission, tags: [...mission.tags, newTag] }
+                      : mission;
+                  setAllTags([...allTags, newTag]);
+                  setFetchedData(fetchedData.map(updateMissionTags));
+                  setRenderedData(renderedData.map(updateMissionTags));
+                }}
+                onAddExistingTag={async (tagName) => {
+                  // update tags in backend
+                  await addTagToMission(row.id, tagName);
+
+                  // update tags in frontend
+                  const tagColor =
+                    allTags.find((tag) => tag.name === tagName)?.color ||
+                    "#000000";
+                  const existingTag = { name: tagName, color: tagColor };
+                  const updateMissionTags = (mission: RenderedMission) =>
+                    mission.id === row.id
+                      ? { ...mission, tags: [...mission.tags, existingTag] }
+                      : mission;
+                  setFetchedData(fetchedData.map(updateMissionTags));
+                  setRenderedData(renderedData.map(updateMissionTags));
                 }}
                 onRemoveTag={async (tagName) => {
                   // update tags in backend
@@ -310,48 +352,64 @@ export function Overview() {
                   const missionsWithTag = await getMissionsByTag(tagName);
                   if (missionsWithTag.length === 0) {
                     // delete tag from database if no missions are using it
-                    deleteTag(tagName);
+                    await deleteTag(tagName);
+                    setAllTags(allTags.filter((tag) => tag.name !== tagName));
                   }
+
                   // update tags in frontend
-                  row.tags = row.tags.filter((tag) => tag.name !== tagName);
-                  setRenderedData([...renderedData]);
+                  const updateMissionTags = (mission: RenderedMission) =>
+                    mission.id === row.id
+                      ? {
+                          ...mission,
+                          tags: mission.tags.filter(
+                            (tag) => tag.name !== tagName,
+                          ),
+                        }
+                      : mission;
+                  setFetchedData(fetchedData.map(updateMissionTags));
+                  setRenderedData(renderedData.map(updateMissionTags));
                 }}
-                onChangeTagColor={(tagName, newColor) => {
+                onChangeTagColor={async (tagName, newColor) => {
                   // update tag color in backend
-                  isValidHexColor(newColor)
-                    ? changeTagColor(tagName, newColor)
-                    : null;
+                  if (!isValidHexColor(newColor)) return;
+                  await changeTagColor(tagName, newColor);
+
+                  // Update tag color in frontend
+                  const updateTagColor = (mission: RenderedMission) => ({
+                    ...mission,
+                    tags: mission.tags.map((tag) =>
+                      tag.name === tagName ? { ...tag, color: newColor } : tag,
+                    ),
+                  });
+                  setAllTags(
+                    allTags.map((tag) =>
+                      tag.name === tagName ? { ...tag, color: newColor } : tag,
+                    ),
+                  );
+                  setFetchedData(fetchedData.map(updateTagColor));
+                  setRenderedData(renderedData.map(updateTagColor));
+                }}
+                onDeleteAllTags={async () => {
+                  // update tags in backend
+                  for (let i = 0; i < row.tags.length; i++) {
+                    await removeTagFromMission(row.id, row.tags[i].name);
+                    const missionsWithTag = await getMissionsByTag(
+                      row.tags[i].name,
+                    );
+                    if (missionsWithTag.length === 0) {
+                      // delete tag from database if no missions are using it
+                      await deleteTag(row.tags[i].name);
+                      setAllTags(
+                        allTags.filter((tag) => tag.name !== row.tags[i].name),
+                      );
+                    }
+                  }
 
                   // update tags in frontend
-                  const updatedRenderedData = renderedData.map((missionRow) => {
-                    // Find the tag in each row and update its color if found
-                    const updatedTags = missionRow.tags.map((tag) => {
-                      if (tag.name === tagName) {
-                        return { ...tag, color: newColor }; // update the color of the matching tag
-                      }
-                      return tag;
-                    });
-
-                    // Return the updated row with the updated tags
-                    return { ...missionRow, tags: updatedTags };
-                  });
-
-                  const updatedFetchedData = fetchedData.map((missionRow) => {
-                    // Find the tag in each row and update its color if found
-                    const updatedTags = missionRow.tags.map((tag) => {
-                      if (tag.name === tagName) {
-                        return { ...tag, color: newColor }; // update the color of the matching tag
-                      }
-                      return tag;
-                    });
-
-                    // Return the updated row with the updated tags
-                    return { ...missionRow, tags: updatedTags };
-                  });
-
-                  // Set the updated state with the updated array
-                  setRenderedData(updatedRenderedData);
-                  setFetchedData(updatedFetchedData);
+                  const clearTags = (mission: RenderedMission) =>
+                    mission.id === row.id ? { ...mission, tags: [] } : mission;
+                  setFetchedData(fetchedData.map(clearTags));
+                  setRenderedData(renderedData.map(clearTags));
                 }}
               />
             </Popover.Dropdown>

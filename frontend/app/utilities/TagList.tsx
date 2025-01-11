@@ -15,12 +15,15 @@ import { useState } from "react";
 
 export function RenderTagsDetailView({
   tags_,
+  allTags_,
   missionId,
 }: {
   tags_: Tag[];
+  allTags_: Tag[];
   missionId: number;
 }) {
   const [tags, setTags] = useState<Tag[]>(tags_);
+  const [allTags, setAllTags] = useState<Tag[]>(allTags_);
 
   return (
     <Group gap="xs">
@@ -37,12 +40,26 @@ export function RenderTagsDetailView({
         >
           <TagPicker
             tags={tags}
-            onAddNewTag={(tagName, tagColor) => {
+            allTags={allTags}
+            onAddNewTag={async (tagName, tagColor) => {
               //update tags in backend
-              createTag(tagName, tagColor);
-              addTagToMission(missionId, tagName);
+              await createTag(tagName, tagColor);
+              await addTagToMission(missionId, tagName);
+
               // update tags in frontend
-              setTags([...tags, { name: tagName, color: tagColor }]);
+              const newTag = { name: tagName, color: tagColor };
+              setTags([...tags, newTag]);
+              setAllTags([...allTags, newTag]);
+            }}
+            onAddExistingTag={async (tagName) => {
+              // update tags in backend
+              await addTagToMission(missionId, tagName);
+
+              // update tags in frontend
+              const tagColor =
+                allTags.find((tag) => tag.name === tagName)?.color || "#000000";
+              const existingTag = { name: tagName, color: tagColor };
+              setTags([...tags, existingTag]);
             }}
             onRemoveTag={async (tagName) => {
               // update tags in backend
@@ -50,26 +67,49 @@ export function RenderTagsDetailView({
               const missionsWithTag = await getMissionsByTag(tagName);
               if (missionsWithTag.length === 0) {
                 // delete tag from database if no missions are using it
-                deleteTag(tagName);
+                await deleteTag(tagName);
+                setAllTags(allTags.filter((tag) => tag.name !== tagName));
               }
               // update tags in frontend
               setTags(tags.filter((tag) => tag.name !== tagName));
             }}
-            onChangeTagColor={(tagName, newColor) => {
+            onChangeTagColor={async (tagName, newColor) => {
               // update tag color in backend
-              isValidHexColor(newColor)
-                ? changeTagColor(tagName, newColor)
-                : null;
+              if (!isValidHexColor(newColor)) return;
+              await changeTagColor(tagName, newColor);
 
               // update tags in frontend
               setTags((prev) =>
-                prev.map((tag) => {
-                  if (tag.name === tagName) {
-                    return { ...tag, color: newColor };
-                  }
-                  return tag;
-                })
+                prev.map((tag) =>
+                  tag.name === tagName
+                    ? { name: tagName, color: newColor }
+                    : tag,
+                ),
               );
+              setAllTags((prev) =>
+                prev.map((tag) =>
+                  tag.name === tagName
+                    ? { name: tagName, color: newColor }
+                    : tag,
+                ),
+              );
+            }}
+            onDeleteAllTags={async () => {
+              // update tags in backend
+              for (let i = 0; i < tags.length; i++) {
+                await removeTagFromMission(missionId, tags[i].name);
+                const missionsWithTag = await getMissionsByTag(tags[i].name);
+                if (missionsWithTag.length === 0) {
+                  // delete tag from database if no missions are using it
+                  await deleteTag(tags[i].name);
+                  setAllTags(
+                    allTags.filter((tag) => tag.name !== tags[i].name),
+                  );
+                }
+              }
+
+              // update tags in frontend
+              setTags([]);
             }}
           />
         </Popover.Dropdown>
