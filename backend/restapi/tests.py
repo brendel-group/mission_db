@@ -493,7 +493,8 @@ class NotFoundErrors(APIAuthTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
-            response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
+            response.data,
+            {"detail": f"Mission with id {self.mission.id + 1} not found"},
         )
 
     def test_create_mission_tag(self):
@@ -504,7 +505,8 @@ class NotFoundErrors(APIAuthTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
-            response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
+            response.data,
+            {"detail": f"Mission with id {self.mission.id + 1} not found"},
         )
 
     def test_get_files_by_nonexistent_mission(self):
