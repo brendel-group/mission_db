@@ -261,19 +261,54 @@ export const getDetailsByMission = async (missionId: number): Promise<DetailView
     }
     
     const data = await response.json();
-    
+
     const files: string[] = [];
-    const rawDurations: string[] = [];
-    const rawSizes: string[] = [];
+    const durations: string[] = [];
+    const sizes: string[] = [];
 
     for (const d in data) {
         files.push(data[d].file.file_path);
-        rawDurations.push(data[d].file.duration);
-        rawSizes.push(data[d].file.size);
+        durations.push(data[d].file.duration);
+        sizes.push(data[d].file.size);
     }
-
-    const durations = transformDurations(rawDurations);
-    const sizes = transformSizes(rawSizes);
 
     return { files, durations, sizes }
 };
+
+// Get details by mission in correct format
+export const getFormattedDetails = async (missionId: number): Promise<DetailViewData> => {
+    const details = await getDetailsByMission(missionId);
+
+    const files = details.files;
+    // transform durations and sizes to correct form
+    const durations = transformDurations(details.durations);
+    const sizes = transformSizes(details.sizes);
+
+    return { files, durations, sizes }
+}
+
+// Get total duration of all files in a mission by ID
+export const getTotalDuration = async (missionId: number): Promise<string> => {
+    const details = await getDetailsByMission(missionId);
+
+    let total = 0;
+    for (const duration in details.durations) {
+        total += parseInt(details.durations[duration], 10);
+    }
+    const stringTotal = [`${total}`];
+
+    return transformDurations(stringTotal)[0];
+}
+
+// Get total duration of all files in a mission by ID
+export const getTotalSize = async (missionId: number): Promise<string> => {
+    const details = await getDetailsByMission(missionId);
+    
+    let total = 0;
+    for (const size in details.sizes) {
+        total += parseInt(details.sizes[size], 10);
+    }
+    const stringTotal = [`${total}`];
+
+    return transformSizes(stringTotal)[0];
+}
