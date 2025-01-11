@@ -31,6 +31,8 @@ import {
   deleteTag,
   getMissions,
   getTagsByMission,
+  getTotalDuration,
+  getTotalSize,
 } from "~/utilities/fetchapi";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
@@ -153,16 +155,21 @@ export function Overview() {
         // Map BackendMissionData missions to MissionData
         let renderedMissions: RenderedMission[] = [];
         for (let i = 0; i < missions.length; i++) {
+          // Fetch tags for each mission
           const tags: Tag[] = await getTagsByMission(missions[i].id);
           tags.sort((a, b) => a.name.localeCompare(b.name));
+          // Fetch total duration for each mission
+          const totalDuration: string = await getTotalDuration(missions[i].id);
+          // Fetch total size for each mission
+          const totalSize: string = await getTotalSize(missions[i].id);
           renderedMissions.push({
             id: missions[i].id,
             name: missions[i].name,
             location: missions[i].location,
             date: missions[i].date,
             notes: missions[i].notes,
-            totalDuration: "00:00:00", // this fields need to be overriden in the future
-            totalSize: "0",
+            totalDuration: totalDuration,
+            totalSize: totalSize,
             robot: "Vader",
             tags: tags || [],
           });
@@ -358,7 +365,7 @@ export function Overview() {
     { key: "name", label: "Name" },
     { key: "location", label: "Location" },
     { key: "totalDuration", label: "Duration" },
-    { key: "totalSize", label: "Size (MB)" },
+    { key: "totalSize", label: "Size" },
     { key: "robot", label: "Robot" },
     { key: "date", label: "Date" },
     { key: "notes", label: "Notes" },

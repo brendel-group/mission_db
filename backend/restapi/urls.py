@@ -36,6 +36,10 @@ urlpatterns = [
         delete_mission_tag,
         name="delete_mission_tag",
     ),
-    path("missions/<int:mission_id>/files/", get_files_by_mission_id, name="get_files"),
+    path(
+        "missions/<int:mission_id>/files/",
+        get_files_by_mission_id,
+        name="get_files_by_mission_id",
+    ),
     path("auth/", include("dj_rest_auth.urls")),
 ]

@@ -1,20 +1,24 @@
 import {
-  getMissions,
-  createMission,
-  getMission,
-  updateMission,
-  deleteMission,
-  getTags,
-  addTagToMission,
-  removeTagFromMission,
-  changeTagColor,
-  createTag,
-  deleteTag,
-  getTagsByMission,
-  getMissionsByTag,
-} from "./fetchapi";
-import { FETCH_API_BASE_URL } from "~/config";
-import { MissionData, Tag } from "~/data";
+    getMissions,
+    createMission,
+    getMission,
+    updateMission,
+    deleteMission,
+    getTags,
+    addTagToMission,
+    removeTagFromMission,
+    changeTagColor,
+    createTag,
+    deleteTag,
+    getTagsByMission,
+    getMissionsByTag,
+    getDetailsByMission,
+    getFormattedDetails,
+    getTotalDuration,
+    getTotalSize,
+} from './fetchapi';
+import { FETCH_API_BASE_URL } from '~/config';
+import { MissionData, Tag, DetailViewData } from '~/data';
 
 /*
 How to run the tests:
@@ -138,6 +142,7 @@ describe("Fetch API Functions", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedMission),
       });
+      
     });
 
     test("deleteMission should delete a mission by ID", async () => {
@@ -148,8 +153,148 @@ describe("Fetch API Functions", () => {
         method: "DELETE",
       });
     });
-  });
 
+    test('getDetailsByMission should fetch details of a mission', async () => {
+      const mockResponse = [
+          {
+              file: {
+                  file_path: 'file1.mcap',
+                  duration: '60000',
+                  size: '1024',
+              }
+          },
+          {
+              file: {
+                  file_path: 'file2.mcap',
+                  duration: '1200',
+                  size: '2621440',
+              }
+          }
+      ];
+
+      const expectedResponse: DetailViewData = {
+              files: ['file1.mcap', 'file2.mcap'],
+              durations: ['60000', '1200'],
+              sizes: ['1024', '2621440'],
+          };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: jest.fn().mockResolvedValueOnce(mockResponse),
+      });
+
+      const details = await getDetailsByMission(1);
+      expect(details).toEqual(expectedResponse);
+      expect(fetch).toHaveBeenCalledWith(`${FETCH_API_BASE_URL}/missions/1/files/`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    test('getFormattedDetails should fetch details of a mission and format them', async () => {
+      const mockResponse = [
+          {
+              file: {
+                  file_path: 'file1.mcap',
+                  duration: '60000',
+                  size: '1024',
+              }
+          },
+          {
+              file: {
+                  file_path: 'file2.mcap',
+                  duration: '1200',
+                  size: '2621440',
+              }
+          }
+      ];
+
+      const expectedResponse: DetailViewData = {
+              files: ['file1.mcap', 'file2.mcap'],
+              durations: ['16:40:00', '00:20:00'],
+              sizes: ['1.00 KB', '2.50 MB'],
+          };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: jest.fn().mockResolvedValueOnce(mockResponse),
+      });
+
+      const details = await getFormattedDetails(1);
+      expect(details).toEqual(expectedResponse);
+      expect(fetch).toHaveBeenCalledWith(`${FETCH_API_BASE_URL}/missions/1/files/`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    test('getTotalDuration should fetch total duration of all files of a mission and format them', async () => {
+      const mockResponse = [
+          {
+              file: {
+                  file_path: 'file1.mcap',
+                  duration: '60000',
+                  size: '1024',
+              }
+          },
+          {
+              file: {
+                  file_path: 'file2.mcap',
+                  duration: '1200',
+                  size: '2621440',
+              }
+          }
+      ];
+
+      const expectedResponse: string = '17:00:00';
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: jest.fn().mockResolvedValueOnce(mockResponse),
+      });
+
+      const details = await getTotalDuration(1);
+      expect(details).toEqual(expectedResponse);
+      expect(fetch).toHaveBeenCalledWith(`${FETCH_API_BASE_URL}/missions/1/files/`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    test('getTotalSize should fetch total size of all files of a mission and format them', async () => {
+      const mockResponse = [
+          {
+              file: {
+                  file_path: 'file1.mcap',
+                  duration: '60000',
+                  size: '1024',
+              }
+          },
+          {
+              file: {
+                  file_path: 'file2.mcap',
+                  duration: '1200',
+                  size: '2621440',
+              }
+          }
+      ];
+
+      const expectedResponse: string = '2.50 MB';
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: jest.fn().mockResolvedValueOnce(mockResponse),
+      });
+
+      const details = await getTotalSize(1);
+      expect(details).toEqual(expectedResponse);
+      expect(fetch).toHaveBeenCalledWith(`${FETCH_API_BASE_URL}/missions/1/files/`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+      });
+    });
+  });
+  
   // Tag-related Functions
   describe("Tag Management", () => {
     test("getTags should fetch all tags", async () => {

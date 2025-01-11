@@ -79,11 +79,15 @@ const EditableField: React.FC<EditableFieldProps> = ({
 interface ShowInformationViewProps {
   missionData: RenderedMission;
   setLocation_: (loc: string) => void;
+  totalSize: string;
+  totalDuration: string;
 }
 
 export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
   missionData,
   setLocation_,
+  totalSize,
+  totalDuration,
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
   const [notes, setNotes] = useState<string>(missionData.notes);
@@ -94,8 +98,8 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         Information
       </Text>
       <Text>Date: {missionData.date}</Text>
-      <Text>Total Duration: {missionData.totalDuration}</Text>
-      <Text>Total Size: {missionData.totalSize} GB</Text>
+      <Text>Total Duration: {totalDuration}</Text>
+      <Text>Total Size: {totalSize}</Text>
 
       <EditableField
         fieldName="Location"
