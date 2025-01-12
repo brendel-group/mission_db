@@ -74,43 +74,23 @@ export function RenderTagsDetailView({
               // update tags in frontend
               setTags(tags.filter((tag) => tag.name !== tagName));
             }}
-            onChangeTagName={async (oldTagName, newTagName) => {
-              // update tag name in backend
-              await changeTagName(oldTagName, newTagName);
-
-              // update tags in frontend
-              setTags((prev) =>
-                prev.map((tag) =>
-                  tag.name === oldTagName
-                    ? { name: newTagName, color: tag.color }
-                    : tag,
-                ),
-              );
-              setAllTags((prev) =>
-                prev.map((tag) =>
-                  tag.name === oldTagName
-                    ? { name: newTagName, color: tag.color }
-                    : tag,
-                ),
-              );
-            }}
-            onChangeTagColor={async (tagName, newColor) => {
-              // update tag color in backend
-              if (!isValidHexColor(newColor)) return;
-              await changeTagColor(tagName, newColor);
+            onEditTag={async (tagName, newName, newColor) => {
+              // update tag in backend
+              await changeTagName(tagName, newName);
+              await changeTagColor(newName, newColor);
 
               // update tags in frontend
               setTags((prev) =>
                 prev.map((tag) =>
                   tag.name === tagName
-                    ? { name: tagName, color: newColor }
+                    ? { name: newName, color: newColor }
                     : tag,
                 ),
               );
               setAllTags((prev) =>
                 prev.map((tag) =>
                   tag.name === tagName
-                    ? { name: tagName, color: newColor }
+                    ? { name: newName, color: newColor }
                     : tag,
                 ),
               );

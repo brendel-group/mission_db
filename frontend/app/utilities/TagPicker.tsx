@@ -17,8 +17,7 @@ interface TagPickerProps {
   onAddNewTag: (tagName: string, tagColor: string) => void;
   onAddExistingTag: (tagName: string) => void;
   onRemoveTag: (tagName: string) => void;
-  onChangeTagName: (tagName: string, newTagName: string) => void;
-  onChangeTagColor: (tagName: string, newColor: string) => void;
+  onEditTag: (tagName: string, newTagName: string, newTagColor: string) => void;
   onDeleteAllTags: () => void;
 }
 
@@ -34,8 +33,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   onAddNewTag,
   onAddExistingTag,
   onRemoveTag,
-  onChangeTagName,
-  onChangeTagColor,
+  onEditTag,
   onDeleteAllTags,
 }) => {
   const [newTagName, setNewTagName] = useState("");
@@ -71,18 +69,23 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     );
   }, [tags, allTags]);
 
-  const handleNameChange = (tagName: string, newTagName: string) => {
-    setChangedTagName(newTagName);
+  const handleTagEdit = (
+    tagName: string,
+    newTagName: string,
+    newTagColor: string,
+  ) => {
     // check if tag name already exists
     if (tags.find((tag) => tag.name === newTagName) && tagName !== newTagName) {
       setChangeTagNameError("This tag name is already in use");
       return;
     }
+
     // check if tag name is too long (max 42 characters)
     if (newTagName.length > 42) {
       setChangeTagNameError("This tag name is too long");
       return;
     }
+
     // check if the new tag name is already in existing tags
     if (otherExistingTags.find((tag) => tag.name === newTagName)) {
       setChangeTagNameError(
@@ -90,25 +93,17 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       );
       return;
     }
-    setChangeTagNameError("");
-    onChangeTagName(tagName, newTagName);
-  };
 
-  const handleColorChange = (tagName: string, newTagColor: string) => {
-    setNewColor(newTagColor);
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
+    // check if color is valid
+    if (!isValidHexColor(newTagColor)) {
+      setChangeColorError("Invalid color");
+      return;
     }
 
-    debounceRef.current = setTimeout(() => {
-      if (isValidHexColor(newTagColor)) {
-        onChangeTagColor(tagName, newTagColor);
-        setChangeColorError("");
-      } else {
-        setChangeColorError("Invalid color");
-      }
-    }, 1); // This delay is needed because without delay it is not possible to edit the color input field anymore
+    // reset errors and update tag
+    setChangeTagNameError("");
+    setChangeColorError("");
+    onEditTag(tagName, newTagName, newTagColor);
   };
 
   const handleAddTag = () => {
@@ -242,7 +237,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                     )}
                     onKeyDown={(e) => {
                       e.key === "Enter" &&
-                        handleNameChange(tag.name, changedTagName);
+                        handleTagEdit(tag.name, changedTagName, newColor);
                     }}
                     error={changeTagNameError}
                   />
@@ -251,7 +246,12 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                     size="sm"
                     value={newColor}
                     onChange={(color) => {
-                      handleColorChange(tag.name, color);
+                      setNewColor(color);
+                      setChangeColorError("");
+                    }}
+                    onKeyDown={(e) => {
+                      e.key === "Enter" &&
+                        handleTagEdit(tag.name, changedTagName, newColor);
                     }}
                     popoverProps={{ withinPortal: false }}
                     swatches={swatches}

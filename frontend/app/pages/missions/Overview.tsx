@@ -370,44 +370,31 @@ export function Overview() {
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
                 }}
-                onChangeTagName={async (oldName, newName) => {
+                onEditTag={async (tagName, newName, newColor) => {
                   // update tag name in backend
-                  await changeTagName(oldName, newName);
-
-                  // update tag name in frontend
-                  const updateTagName = (mission: RenderedMission) => ({
-                    ...mission,
-                    tags: mission.tags.map((tag) =>
-                      tag.name === oldName ? { ...tag, name: newName } : tag,
-                    ),
-                  });
-                  setAllTags(
-                    allTags.map((tag) =>
-                      tag.name === oldName ? { ...tag, name: newName } : tag,
-                    ),
-                  );
-                  setFetchedData(fetchedData.map(updateTagName));
-                  setRenderedData(renderedData.map(updateTagName));
-                }}
-                onChangeTagColor={async (tagName, newColor) => {
+                  await changeTagName(tagName, newName);
                   // update tag color in backend
                   if (!isValidHexColor(newColor)) return;
-                  await changeTagColor(tagName, newColor);
+                  await changeTagColor(newName, newColor);
 
-                  // Update tag color in frontend
-                  const updateTagColor = (mission: RenderedMission) => ({
+                  // update tag in frontend
+                  const updateTag = (mission: RenderedMission) => ({
                     ...mission,
                     tags: mission.tags.map((tag) =>
-                      tag.name === tagName ? { ...tag, color: newColor } : tag,
+                      tag.name === tagName
+                        ? { name: newName, color: newColor }
+                        : tag,
                     ),
                   });
                   setAllTags(
                     allTags.map((tag) =>
-                      tag.name === tagName ? { ...tag, color: newColor } : tag,
+                      tag.name === tagName
+                        ? { name: newName, color: newColor }
+                        : tag,
                     ),
                   );
-                  setFetchedData(fetchedData.map(updateTagColor));
-                  setRenderedData(renderedData.map(updateTagColor));
+                  setFetchedData(fetchedData.map(updateTag));
+                  setRenderedData(renderedData.map(updateTag));
                 }}
                 onDeleteAllTags={async () => {
                   // update tags in backend
