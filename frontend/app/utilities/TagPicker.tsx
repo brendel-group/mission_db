@@ -230,7 +230,9 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 </Badge>
               </Popover.Target>
               <Popover.Dropdown style={{ padding: 6 }}>
+                {/* edit tag menu */}
                 <Stack gap={6}>
+                  {/* name change */}
                   <TextInput
                     size="sm"
                     value={changedTagName}
@@ -244,6 +246,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                     }}
                     error={changeTagNameError}
                   />
+                  {/* color change */}
                   <ColorInput
                     size="sm"
                     value={newColor}
