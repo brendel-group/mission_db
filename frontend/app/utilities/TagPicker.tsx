@@ -262,6 +262,19 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                     withEyeDropper={false}
                     error={changeColorError}
                   />
+                  {/* save button */}
+                  <Button
+                    size="xs"
+                    color="blue"
+                    onClick={() =>
+                      handleTagEdit(tag.name, changedTagName, newColor)
+                    }
+                    disabled={
+                      tag.name === changedTagName && tag.color === newColor
+                    }
+                  >
+                    Save
+                  </Button>
                 </Stack>
               </Popover.Dropdown>
             </Popover>
@@ -287,7 +300,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         <Popover withArrow withinPortal={false}>
           <Popover.Target>
             <Button
-              color="#228be6"
+              color="blue"
               size="xs"
               style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
             >
