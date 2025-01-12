@@ -88,14 +88,6 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       return;
     }
 
-    // check if the new tag name is already in existing tags
-    if (otherExistingTags.find((tag) => tag.name === newTagName)) {
-      setChangeTagNameError(
-        "Please add this tag with the 'Add existing tags' button",
-      );
-      return;
-    }
-
     // check if color is valid
     if (!isValidHexColor(newTagColor)) {
       setChangeColorError("Invalid color");
