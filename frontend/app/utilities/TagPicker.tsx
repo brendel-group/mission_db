@@ -74,7 +74,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const handleNameChange = (tagName: string, newTagName: string) => {
     setChangedTagName(newTagName);
     // check if tag name already exists
-    if (tags.find((tag) => tag.name === newTagName)) {
+    if (tags.find((tag) => tag.name === newTagName) && tagName !== newTagName) {
       setChangeTagNameError("This tag name is already in use");
       return;
     }
@@ -153,7 +153,10 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         {/*input for new tag name*/}
         <TextInput
           value={newTagName}
-          onChange={(e) => setNewTagName(e.target.value)}
+          onChange={(e) => {
+            setNewTagName(e.target.value);
+            setNewTagNameError("");
+          }}
           placeholder="Add a new tag"
           error={newTagNameError}
           onKeyDown={(e) => {
@@ -176,7 +179,10 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       <ColorInput
         placeholder="#ffffff"
         value={selectedColor}
-        onChange={setSelectedColor}
+        onChange={(color) => {
+          setSelectedColor(color);
+          setNewTagColorError("");
+        }}
         style={{ marginTop: 3 }}
         onKeyDown={(e) => {
           e.key === "Enter" && handleAddTag();
@@ -209,6 +215,10 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 setChangedTagName(tag.name);
                 setNewColor(tag.color);
               }}
+              onClose={() => {
+                setChangeTagNameError("");
+                setChangeColorError("");
+              }}
             >
               <Popover.Target>
                 <Badge
@@ -224,7 +234,10 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                   <TextInput
                     size="sm"
                     value={changedTagName}
-                    onChange={(e) => setChangedTagName(e.target.value)}
+                    onChange={(e) => (
+                      setChangedTagName(e.target.value),
+                      setChangeTagNameError("")
+                    )}
                     onKeyDown={(e) => {
                       e.key === "Enter" &&
                         handleNameChange(tag.name, changedTagName);
