@@ -194,7 +194,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       {tags.map((tag) => (
         <Group key={tag.name} gap="apart">
           <Group gap="xs">
-            {/* Button to change tag color */}
+            {/* popover for tag edit */}
             <Popover
               withArrow
               shadow="md"
