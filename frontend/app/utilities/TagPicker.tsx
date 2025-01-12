@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { IconTrash, IconPlus, IconPalette } from "@tabler/icons-react";
 import { Tag } from "~/data";
+import { useClickOutside } from "@mantine/hooks";
 
 interface TagPickerProps {
   tags: Tag[];
@@ -48,6 +49,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
   const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
   const [otherExistingTags, setOtherExistingTags] = useState<Tag[]>([]);
+  const [editedTagName, setEditedTagName] = useState<string>("");
+  const ref = useClickOutside(() => setEditedTagName(""));
   const swatches = [
     "#ff5400",
     "#ffbd00",
@@ -103,6 +106,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     // reset errors and update tag
     setChangeTagNameError("");
     setChangeColorError("");
+    setEditedTagName("");
     onEditTag(tagName, newTagName, newTagColor);
   };
 
@@ -206,25 +210,23 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               }}
               width={120}
               withinPortal={false}
-              onOpen={() => {
-                setChangedTagName(tag.name);
-                setNewColor(tag.color);
-              }}
-              onClose={() => {
-                setChangeTagNameError("");
-                setChangeColorError("");
-              }}
+              opened={editedTagName === tag.name}
             >
               <Popover.Target>
                 <Badge
                   color={tag.color}
                   variant="light"
                   style={{ textTransform: "none", cursor: "pointer" }}
+                  onClick={() => {
+                    setEditedTagName(tag.name);
+                    setChangedTagName(tag.name);
+                    setNewColor(tag.color);
+                  }}
                 >
                   {tag.name}
                 </Badge>
               </Popover.Target>
-              <Popover.Dropdown style={{ padding: 6 }}>
+              <Popover.Dropdown style={{ padding: 6 }} ref={ref}>
                 {/* edit tag menu */}
                 <Stack gap={6}>
                   {/* name change */}
@@ -250,8 +252,9 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                       setChangeColorError("");
                     }}
                     onKeyDown={(e) => {
-                      e.key === "Enter" &&
+                      if (e.key === "Enter") {
                         handleTagEdit(tag.name, changedTagName, newColor);
+                      }
                     }}
                     popoverProps={{ withinPortal: false }}
                     swatches={swatches}
