@@ -24,6 +24,7 @@ import classes from "./Overview.module.css";
 import { MissionData, RenderedMission, Tag } from "~/data";
 import {
   addTagToMission,
+  changeTagName,
   changeTagColor,
   removeTagFromMission,
   createTag,
@@ -369,25 +370,31 @@ export function Overview() {
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
                 }}
-                onChangeTagColor={async (tagName, newColor) => {
+                onEditTag={async (tagName, newName, newColor) => {
+                  // update tag name in backend
+                  await changeTagName(tagName, newName);
                   // update tag color in backend
                   if (!isValidHexColor(newColor)) return;
-                  await changeTagColor(tagName, newColor);
+                  await changeTagColor(newName, newColor);
 
-                  // Update tag color in frontend
-                  const updateTagColor = (mission: RenderedMission) => ({
+                  // update tag in frontend
+                  const updateTag = (mission: RenderedMission) => ({
                     ...mission,
                     tags: mission.tags.map((tag) =>
-                      tag.name === tagName ? { ...tag, color: newColor } : tag,
+                      tag.name === tagName
+                        ? { name: newName, color: newColor }
+                        : tag,
                     ),
                   });
                   setAllTags(
                     allTags.map((tag) =>
-                      tag.name === tagName ? { ...tag, color: newColor } : tag,
+                      tag.name === tagName
+                        ? { name: newName, color: newColor }
+                        : tag,
                     ),
                   );
-                  setFetchedData(fetchedData.map(updateTagColor));
-                  setRenderedData(renderedData.map(updateTagColor));
+                  setFetchedData(fetchedData.map(updateTag));
+                  setRenderedData(renderedData.map(updateTag));
                 }}
                 onDeleteAllTags={async () => {
                   // update tags in backend

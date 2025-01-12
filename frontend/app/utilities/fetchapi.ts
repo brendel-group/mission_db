@@ -146,6 +146,28 @@ export const removeTagFromMission = async (
   }
 };
 
+// change the name of a tag
+export const changeTagName = async (tagName: string, newName: string): Promise<Tag> => {
+    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify({ name: newName }),
+    });
+    if (!response.ok) {
+        if (response.status === 400) {
+            throw new Error('Invalid data. Ensure the tag name is correct.');
+        } else if (response.status === 404) {
+            throw new Error(`Tag with name "${tagName}" not found.`);
+        }
+        throw new Error('Failed to change tag name');
+    }
+    const data = await response.json();
+    return {
+        name: data.name,
+        color: data.color,
+    }
+};
+
 // Change the color of a tag
 export const changeTagColor = async (
   tagName: string,

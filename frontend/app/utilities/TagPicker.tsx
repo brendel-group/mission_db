@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Badge,
   Button,
@@ -8,8 +8,9 @@ import {
   ColorInput,
   Popover,
 } from "@mantine/core";
-import { IconTrash, IconPlus, IconPalette } from "@tabler/icons-react";
+import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { Tag } from "~/data";
+import { useClickOutside } from "@mantine/hooks";
 
 interface TagPickerProps {
   tags: Tag[];
@@ -17,7 +18,7 @@ interface TagPickerProps {
   onAddNewTag: (tagName: string, tagColor: string) => void;
   onAddExistingTag: (tagName: string) => void;
   onRemoveTag: (tagName: string) => void;
-  onChangeTagColor: (tagName: string, newColor: string) => void;
+  onEditTag: (tagName: string, newTagName: string, newTagColor: string) => void;
   onDeleteAllTags: () => void;
 }
 
@@ -33,17 +34,22 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   onAddNewTag,
   onAddExistingTag,
   onRemoveTag,
-  onChangeTagColor,
+  onEditTag,
   onDeleteAllTags,
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const [newColor, setNewColor] = useState(selectedColor);
+  const [changedTagName, setChangedTagName] = useState<string>("");
+  const [newColor, setNewColor] = useState<string>("");
+  const [changeTagNameError, setChangeTagNameError] = useState<string | null>(
+    null,
+  );
   const [changeColorError, setChangeColorError] = useState<string | null>(null);
   const [newTagNameError, setNewTagNameError] = useState<string | null>(null);
   const [newTagColorError, setNewTagColorError] = useState<string | null>(null);
   const [otherExistingTags, setOtherExistingTags] = useState<Tag[]>([]);
+  const [editedTagName, setEditedTagName] = useState<string>("");
+  const ref = useClickOutside(() => setEditedTagName(""));
   const swatches = [
     "#ff5400",
     "#ffbd00",
@@ -65,21 +71,34 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     );
   }, [tags, allTags]);
 
-  const handleColorChange = (tagName: string, newTagColor: string) => {
-    setNewColor(newTagColor);
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
+  const handleTagEdit = (
+    tagName: string,
+    newTagName: string,
+    newTagColor: string,
+  ) => {
+    // check if tag name already exists
+    if (tags.find((tag) => tag.name === newTagName) && tagName !== newTagName) {
+      setChangeTagNameError("This tag name is already in use");
+      return;
     }
 
-    debounceRef.current = setTimeout(() => {
-      if (isValidHexColor(newTagColor)) {
-        onChangeTagColor(tagName, newTagColor);
-        setChangeColorError("");
-      } else {
-        setChangeColorError("Invalid color");
-      }
-    }, 1); // This delay is needed because without delay it is not possible to edit the color input field anymore
+    // check if tag name is too long (max 42 characters)
+    if (newTagName.length > 42) {
+      setChangeTagNameError("This tag name is too long");
+      return;
+    }
+
+    // check if color is valid
+    if (!isValidHexColor(newTagColor)) {
+      setChangeColorError("Invalid color");
+      return;
+    }
+
+    // reset errors and update tag
+    setChangeTagNameError("");
+    setChangeColorError("");
+    setEditedTagName("");
+    onEditTag(tagName, newTagName, newTagColor);
   };
 
   const handleAddTag = () => {
@@ -124,7 +143,10 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         {/*input for new tag name*/}
         <TextInput
           value={newTagName}
-          onChange={(e) => setNewTagName(e.target.value)}
+          onChange={(e) => {
+            setNewTagName(e.target.value);
+            setNewTagNameError("");
+          }}
           placeholder="Add a new tag"
           error={newTagNameError}
           onKeyDown={(e) => {
@@ -147,7 +169,10 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       <ColorInput
         placeholder="#ffffff"
         value={selectedColor}
-        onChange={setSelectedColor}
+        onChange={(color) => {
+          setSelectedColor(color);
+          setNewTagColorError("");
+        }}
         style={{ marginTop: 3 }}
         onKeyDown={(e) => {
           e.key === "Enter" && handleAddTag();
@@ -164,15 +189,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
       {/*list of tags*/}
       {tags.map((tag) => (
         <Group key={tag.name} gap="apart">
-          <Badge
-            color={tag.color}
-            variant="light"
-            style={{ textTransform: "none" }}
-          >
-            {tag.name}
-          </Badge>
           <Group gap="xs">
-            {/* Button to change tag color */}
+            {/* popover for tag edit */}
             <Popover
               withArrow
               shadow="md"
@@ -183,27 +201,51 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               }}
               width={120}
               withinPortal={false}
-              onOpen={() => {
-                setNewColor(tag.color);
-              }}
+              opened={editedTagName === tag.name}
             >
               <Popover.Target>
-                <Button
-                  size="xs"
-                  color="gray"
-                  variant="subtle"
-                  style={{ padding: 0 }}
+                <Badge
+                  color={tag.color}
+                  variant="light"
+                  style={{ textTransform: "none", cursor: "pointer" }}
+                  onClick={() => {
+                    setEditedTagName(tag.name);
+                    setChangedTagName(tag.name);
+                    setNewColor(tag.color);
+                  }}
                 >
-                  <IconPalette size={16} />
-                </Button>
+                  {tag.name}
+                </Badge>
               </Popover.Target>
-              <Popover.Dropdown style={{ padding: 6 }}>
-                <Stack gap={0}>
+              <Popover.Dropdown style={{ padding: 6 }} ref={ref}>
+                {/* edit tag menu */}
+                <Stack gap={6}>
+                  {/* name change */}
+                  <TextInput
+                    size="sm"
+                    value={changedTagName}
+                    onChange={(e) => (
+                      setChangedTagName(e.target.value),
+                      setChangeTagNameError("")
+                    )}
+                    onKeyDown={(e) => {
+                      e.key === "Enter" &&
+                        handleTagEdit(tag.name, changedTagName, newColor);
+                    }}
+                    error={changeTagNameError}
+                  />
+                  {/* color change */}
                   <ColorInput
                     size="sm"
                     value={newColor}
                     onChange={(color) => {
-                      handleColorChange(tag.name, color);
+                      setNewColor(color);
+                      setChangeColorError("");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleTagEdit(tag.name, changedTagName, newColor);
+                      }
                     }}
                     popoverProps={{ withinPortal: false }}
                     swatches={swatches}
@@ -211,6 +253,19 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                     withEyeDropper={false}
                     error={changeColorError}
                   />
+                  {/* save button */}
+                  <Button
+                    size="xs"
+                    color="blue"
+                    onClick={() =>
+                      handleTagEdit(tag.name, changedTagName, newColor)
+                    }
+                    disabled={
+                      tag.name === changedTagName && tag.color === newColor
+                    }
+                  >
+                    Save
+                  </Button>
                 </Stack>
               </Popover.Dropdown>
             </Popover>
@@ -236,9 +291,10 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         <Popover withArrow withinPortal={false}>
           <Popover.Target>
             <Button
-              color="#228be6"
+              color="blue"
               size="xs"
-              style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
+              style={{ textTransform: "none", width: "48%" }}
+              disabled={otherExistingTags.length === 0}
             >
               Add existing tags
             </Button>
@@ -286,7 +342,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         <Button
           color="red"
           size="xs"
-          style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
+          style={{ textTransform: "none", width: "48%" }}
+          disabled={tags.length === 0}
           onClick={() => {
             if (
               window.confirm(

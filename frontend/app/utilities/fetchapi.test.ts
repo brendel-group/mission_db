@@ -7,6 +7,7 @@ import {
     getTags,
     addTagToMission,
     removeTagFromMission,
+    changeTagName,
     changeTagColor,
     createTag,
     deleteTag,
@@ -345,6 +346,31 @@ describe("Fetch API Functions", () => {
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
+        }
+      );
+    });
+
+    test("changeTagName should change the name of a tag by name", async () => {
+      const mockResponse: Tag = {
+        name: "ImportantTag",
+        color: "#FF0000",
+      };
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce({
+          //id: 1,
+          name: "ImportantTag",
+          color: "#FF0000",
+        }),
+      });
+      const result = await changeTagName("ImportantTag", "NewTag");
+      expect(result).toEqual(mockResponse);
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/tags/ImportantTag`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: "NewTag" }),
         }
       );
     });
