@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Badge,
   Button,
@@ -8,7 +8,7 @@ import {
   ColorInput,
   Popover,
 } from "@mantine/core";
-import { IconTrash, IconPlus, IconPalette } from "@tabler/icons-react";
+import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { Tag } from "~/data";
 import { useClickOutside } from "@mantine/hooks";
 
@@ -39,7 +39,6 @@ export const TagPicker: React.FC<TagPickerProps> = ({
 }) => {
   const [newTagName, setNewTagName] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const [changedTagName, setChangedTagName] = useState<string>("");
   const [newColor, setNewColor] = useState<string>("");
   const [changeTagNameError, setChangeTagNameError] = useState<string | null>(
@@ -302,7 +301,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
             <Button
               color="blue"
               size="xs"
-              style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
+              style={{ textTransform: "none", width: "48%" }}
+              disabled={otherExistingTags.length === 0}
             >
               Add existing tags
             </Button>
@@ -350,7 +350,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         <Button
           color="red"
           size="xs"
-          style={{ textTransform: "none", cursor: "pointer", width: "48%" }}
+          style={{ textTransform: "none", width: "48%" }}
+          disabled={tags.length === 0}
           onClick={() => {
             if (
               window.confirm(
