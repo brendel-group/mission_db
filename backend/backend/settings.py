@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework_api_key",
     "restapi",
     "corsheaders",
     "dj_rest_auth",
