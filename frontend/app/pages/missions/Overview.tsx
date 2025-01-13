@@ -212,7 +212,7 @@ export function Overview() {
 
     fetchTags();
     fetchMissions();
-    console.log(JSON.stringify(fetchedData));
+    //console.log(JSON.stringify(fetchedData));
   }, []);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;

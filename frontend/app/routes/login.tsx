@@ -21,6 +21,7 @@ export async function action({ request }: ActionFunctionArgs) {
   try {
     user = await authenticator.authenticate("user-pass", request);
   } catch (error) {
+    console.error(error);
     return "Invalid username or password"; //This message is rendered on the front end
   }
 

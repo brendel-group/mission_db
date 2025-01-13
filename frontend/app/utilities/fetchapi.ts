@@ -3,16 +3,11 @@ import { FETCH_API_BASE_URL } from "~/config";
 
 const headers: {
   "Content-Type": string;
-  Authorization?: string;
   "X-CSRFToken"?: string;
   Cookie?: string;
 } = {
   "Content-Type": "application/json",
 };
-
-if ("VITE_BACKEND_API_KEY" in import.meta.env) {
-  headers["Authorization"] = "Api-Key " + import.meta.env.VITE_BACKEND_API_KEY;
-}
 
 // Function to fetch all missions
 export const getMissions = async (): Promise<MissionData[]> => {
@@ -76,6 +71,7 @@ export const updateMission = async (
 export const deleteMission = async (id: number): Promise<void> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/missions/${id}`, {
     method: "DELETE",
+    credentials: "include",
     headers: headers,
   });
   if (!response.ok) {
@@ -87,6 +83,7 @@ export const deleteMission = async (id: number): Promise<void> => {
 export const getTags = async (): Promise<Tag[]> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/tags/`, {
     method: "GET",
+    credentials: "include",
     headers: headers,
   });
   if (!response.ok) {
@@ -107,6 +104,7 @@ export const addTagToMission = async (
 ): Promise<{ mission_id: number; tag_name: string }> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/create/`, {
     method: "POST",
+    credentials: "include",
     headers: headers,
     body: JSON.stringify({ mission_id: missionId, tag_name: tagName }),
   });
@@ -135,6 +133,7 @@ export const removeTagFromMission = async (
     )}`,
     {
       method: "DELETE",
+      credentials: "include",
       headers: headers,
     }
   );
@@ -148,24 +147,25 @@ export const removeTagFromMission = async (
 
 // change the name of a tag
 export const changeTagName = async (tagName: string, newName: string): Promise<Tag> => {
-    const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
-        method: 'PUT',
-        headers: headers,
-        body: JSON.stringify({ name: newName }),
-    });
-    if (!response.ok) {
-        if (response.status === 400) {
-            throw new Error('Invalid data. Ensure the tag name is correct.');
-        } else if (response.status === 404) {
-            throw new Error(`Tag with name "${tagName}" not found.`);
-        }
-        throw new Error('Failed to change tag name');
+  const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
+    method: 'PUT',
+    credentials: "include",
+    headers: headers,
+    body: JSON.stringify({ name: newName }),
+  });
+  if (!response.ok) {
+    if (response.status === 400) {
+      throw new Error('Invalid data. Ensure the tag name is correct.');
+    } else if (response.status === 404) {
+      throw new Error(`Tag with name "${tagName}" not found.`);
     }
-    const data = await response.json();
-    return {
-        name: data.name,
-        color: data.color,
-    }
+    throw new Error('Failed to change tag name');
+  }
+  const data = await response.json();
+  return {
+    name: data.name,
+    color: data.color,
+  }
 };
 
 // Change the color of a tag
@@ -179,6 +179,7 @@ export const changeTagColor = async (
     )}`,
     {
       method: "PUT",
+      credentials: "include",
       headers: headers,
       body: JSON.stringify({ name: tagName, color: newColor }),
     }
@@ -207,6 +208,7 @@ export const createTag = async (
 ): Promise<Tag> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/tags/create/`, {
     method: "POST",
+    credentials: "include",
     headers: headers,
     body: JSON.stringify({ name: tagName, color: color || "#FFFFFF" }),
   });
@@ -231,6 +233,7 @@ export const deleteTag = async (tagName: string): Promise<void> => {
     )}`,
     {
       method: "DELETE",
+      credentials: "include",
       headers: headers,
     }
   );
@@ -248,6 +251,7 @@ export const getTagsByMission = async (missionId: number): Promise<Tag[]> => {
     `${FETCH_API_BASE_URL}/missions/tags/${missionId}`,
     {
       method: "GET",
+      credentials: "include",
       headers: headers,
     }
   );
@@ -275,6 +279,7 @@ export const getMissionsByTag = async (
     )}`,
     {
       method: "GET",
+      credentials: "include",
       headers: headers,
     }
   );
@@ -294,6 +299,7 @@ export const attemptLogin = async (
 ): Promise<{ success: boolean; cookies?: string[] }> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/auth/login/`, {
     method: "POST",
+    credentials: "include",
     headers: headers,
     body: JSON.stringify({ username, password }),
   });
@@ -317,6 +323,7 @@ export const attemptLogout = async (
 
   const response = await fetch(`${FETCH_API_BASE_URL}/auth/logout/`, {
     method: "POST",
+    credentials: "include",
     headers: headers,
   });
 
@@ -372,6 +379,7 @@ export const getDetailsByMission = async (
     `${FETCH_API_BASE_URL}/missions/${missionId}/files/`,
     {
       method: "GET",
+      credentials: "include",
       headers: headers,
     }
   );

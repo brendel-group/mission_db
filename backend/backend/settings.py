@@ -34,6 +34,17 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev"]
 CSRF_TRUSTED_ORIGINS = ["https://*.fly.dev"]
 
+CSRF_COOKIE_HTTPONLY = False
+
+SESSION_COOKIE_HTTPONLY = False
+
+SESSION_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_SECURE = not DEBUG
+
+SESSION_COOKIE_SAMESITE = "Lax"
+
+CSRF_COOKIE_SAMESITE = "Lax"
 
 # Application definition
 
