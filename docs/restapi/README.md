@@ -12,6 +12,8 @@ To use the REST API you first need to login at the API ENDPOINT at `/restapi/aut
 These cookies are `csrftoken` and `sessionid`.\
 The `sessionid` is used to authenticate the user and allows you to make other requests.
 
+It is possible to set the cookie domain with the environmental variable `COOKIE_DOMAIN`
+
 To logout use the API ENDPOINT at `/restapi/auth/logout` (only make a post request without any data) which will delete the `sessionid` cookie and the session stored in the backend. \
 The respone will be
 ```json
