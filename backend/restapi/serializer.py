@@ -14,9 +14,11 @@ class MissionSerializer(serializers.ModelSerializer):
 
 
 class FileSerializer(serializers.ModelSerializer):
+    file_path = serializers.CharField(source="file.file", initial=None)
+
     class Meta:
         model = File
-        fields = "__all__"
+        fields = ["id", "file_path", "video", "robot", "duration", "size"]
 
 
 class MissionFileSerializer(serializers.ModelSerializer):
