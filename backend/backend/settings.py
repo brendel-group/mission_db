@@ -34,6 +34,8 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev"]
 CSRF_TRUSTED_ORIGINS = ["https://*.fly.dev"]
 
+MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
+
 
 # Application definition
 
