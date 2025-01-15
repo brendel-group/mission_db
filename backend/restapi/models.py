@@ -23,7 +23,8 @@ class File(models.Model):
     """The files table"""
 
     id = models.AutoField(primary_key=True)
-    file_path = models.CharField(max_length=65536)  # absolute path to the file
+    file = models.FileField()
+    video = models.FileField()
     robot = models.CharField(max_length=65536, null=True, blank=True)  # can be optional
     duration = models.BigIntegerField()  # unit: seconds
     size = models.BigIntegerField()  # unit: bytes
@@ -56,6 +57,26 @@ class Mission_tags(models.Model):
 
     class Meta:
         unique_together = ["mission", "tag"]
+
+
+class Allowed_topic_types(models.Model):
+    """A table to limit the allowed topic types"""
+
+    topic = models.CharField(primary_key=True, max_length=64)
+
+
+class Topic(models.Model):
+    """The topic table"""
+
+    id = models.AutoField(primary_key=True)
+    file = models.ForeignKey(File, on_delete=models.CASCADE)
+    type = models.ForeignKey(Allowed_topic_types, on_delete=models.CASCADE)
+    name = models.CharField(max_length=64)
+    message_count = models.IntegerField()
+    frequency = models.FloatField()
+
+    class Meta:
+        unique_together = ["file", "type", "name"]
 
 
 """
