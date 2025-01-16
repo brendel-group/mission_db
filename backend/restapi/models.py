@@ -23,7 +23,7 @@ class File(models.Model):
     """The files table"""
 
     id = models.AutoField(primary_key=True)
-    file = models.FileField(blank=True, null=True, max_length=65536)
+    file = models.FileField(max_length=65536)
     video = models.FileField(blank=True, null=True, max_length=65536)
     robot = models.CharField(max_length=65536, null=True, blank=True)  # can be optional
     duration = models.BigIntegerField()  # unit: seconds
