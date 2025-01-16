@@ -5,6 +5,8 @@ from rest_framework_api_key.models import APIKey
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from django.core.files.storage.memory import InMemoryStorage
+from django.core.files.base import ContentFile
 from .models import Tag, Mission, Mission_tags, File, Mission_files
 import logging
 import urllib.parse
@@ -520,6 +522,17 @@ class NotFoundErrors(APIAuthTestCase):
 
 class MissionFilesTestCase(APIAuthTestCase):
     def setUp(self):
+        # fake storage
+        self._field = File.file.field
+        self._default_storage = self._field.storage
+        test_storage = InMemoryStorage()
+        self._field.storage = test_storage
+
+        # create files
+        file_content = ContentFile("")
+        test_storage.save("path/to/file1", file_content)
+        test_storage.save("path/to/file2", file_content)
+
         super().setUp()
         # Create a mission
         self.mission = Mission.objects.create(
@@ -532,14 +545,14 @@ class MissionFilesTestCase(APIAuthTestCase):
         # Create files
         self.file1 = File.objects.create(
             id=0,
-            file_path="path/to/file1",
+            file="path/to/file1",
             robot="TestRobot1",
             duration=12000,
             size=1024,
         )
         self.file2 = File.objects.create(
             id=1,
-            file_path="path/to/file2",
+            file="path/to/file2",
             robot="TestRobot2",
             duration=24000,
             size=2048,
@@ -551,6 +564,7 @@ class MissionFilesTestCase(APIAuthTestCase):
 
     def tearDown(self):
         super().tearDown()
+        self._field.storage = self._default_storage
 
     def test_get_files_by_mission(self):
         response = self.client.get(
