@@ -1,8 +1,9 @@
 argcomplete
-django
+django>=4.2
 django-colorfield
 django-cors-headers
 django-environ
+django-storages[s3]==1.*
 djangorestframework
 gunicorn
 pre-commit
@@ -11,3 +12,5 @@ pyreadline3; platform_system == 'Windows'
 ruff
 whitenoise
 dj-rest-auth==7.*
+boto3==1.*
+cryptography

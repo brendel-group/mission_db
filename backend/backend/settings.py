@@ -56,9 +56,6 @@ SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
 
 CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
 
-MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -73,6 +70,7 @@ INSTALLED_APPS = [
     "restapi",
     "corsheaders",
     "dj_rest_auth",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -148,16 +146,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -176,3 +164,41 @@ if not DEBUG:
 REST_AUTH = {
     "TOKEN_MODEL": None,
 }
+
+USE_S3 = env("USE_S3", bool, False)
+
+if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
+                "custom_domain": f"{env("AWS_STORAGE_BUCKET_NAME")}.s3.eu-central-1.amazonaws.com",
+                "object_parameters": {"CacheControl": "max-age=86400"},
+                "cloudfront_key": open(env("AWS_CLOUDFRONT_KEY_FILE")).read(),
+                "cloudfront_key_id": env("AWS_CLOUDFRONT_KEY_ID"),
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        },
+    }
+    MEDIA_LOCATION = "media"
+    MEDIA_URL = (
+        f"https://{STORAGES["default"]["OPTIONS"]["custom_domain"]}/{MEDIA_LOCATION}/"
+    )
+
+    STATIC_URL = "static/"
+
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+else:
+    MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
+
+    # Static files (CSS, JavaScript, Images)
+    # https://docs.djangoproject.com/en/5.1/howto/static-files/
+
+    STATIC_URL = "static/"
+
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
