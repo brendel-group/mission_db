@@ -22,6 +22,6 @@ from .views import download, stream
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("restapi/", include("restapi.urls")),
-    path("file/download/", download, name="download"),
+    path("file/download/<path:file_path>", download, name="download"),
     path("file/stream.mcap", stream, name="stream"),
 ]

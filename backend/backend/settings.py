@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import environ
+from corsheaders.defaults import default_headers
 
 env = environ.Env(DEBUG=(bool, False), SECRET_KEY=(str, "unsafe-secret-key"))
 # reading .env file
@@ -88,6 +89,13 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
+
+
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+    "accept-ranges",
+    "range",
+)
 
 ROOT_URLCONF = "backend.urls"
 
