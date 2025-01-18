@@ -158,13 +158,11 @@ Arguments:
 adds all missions from a folder not currently in the database and deletes all missions from the database that are not in the folder
 
 Arguments:
-- `--path` path to mission folder containing the missionfolders 
-- `--location` (optional) the location where the mission took place
-- `--notes` (optional) additional information
+- `--path` path to mission folder containing the missionfolders
 
 Example:
 ```
-./cli.py syncfolder --path "your/path/name" --location "location(optional)" --notes "notes(optional)"
+./cli.py syncfolder --path "your/path/name"
 ```
 
 ### `cli.py tag`
