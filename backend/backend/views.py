@@ -1,4 +1,6 @@
-from django.http import StreamingHttpResponse, HttpResponse, HttpRequest
+from functools import reduce
+from typing import Iterable
+from django.http import StreamingHttpResponse, HttpResponse, HttpRequest, FileResponse
 from restapi.models import File as FileModel
 from django.core.files import File
 from django.core.files.storage import Storage
@@ -14,13 +16,13 @@ def download(request: HttpRequest, file_path: str):
     storage: Storage = FileModel.file.field.storage
     try:
         file = storage.open(file_path)
-    except FileNotFoundError:
-        return HttpResponse(status=404)
+    except (FileNotFoundError, IsADirectoryError):
+        return HttpResponse(f"File not {file_path}", status=404)
 
     if "range" in request.headers:
         return _range_download(request, file)
 
-    response = StreamingHttpResponse(streaming_content=file.chunks())
+    response = FileResponse(file)
     response["Content-Disposition"] = (
         f'attachement; filename="{os.path.basename(file.name)}"'
     )
@@ -39,6 +41,19 @@ def _extract_ranges(range_header: str):
     return new_ranges
 
 
+def _gcd_below_max(integers: list[int], max_value: int) -> int:
+    # calculate greatest common divisor
+    gcd = reduce(math.gcd, integers)
+
+    if gcd <= max_value:
+        return gcd
+
+    # find common divisor that is smaller than max_value
+    for i in range(max_value, 0, -1):
+        if gcd % i == 0:
+            return i
+
+
 def _range_download(request: HttpRequest, file: File):
     if "bytes" in request.headers["range"]:
         range_header: str = (
@@ -49,50 +64,53 @@ def _range_download(request: HttpRequest, file: File):
 
     multipart_ranges: list[range] = _extract_ranges(range_header)
 
-    range_sizes = [len(r) for r in multipart_ranges]
+    range_sizes: list[int] = [len(r) for r in multipart_ranges]
 
     content_length = sum(range_sizes)
 
-    chunk_size = range_sizes[0]
-    for size in range_sizes:
-        chunk_size = math.gcd(chunk_size, size)
+    chunk_size = _gcd_below_max(range_sizes, File.DEFAULT_CHUNK_SIZE)
 
-    chunk_ranges = map(
-        lambda r: range(int(r.start / chunk_size), int(r.stop / chunk_size)),
-        multipart_ranges,
-    )
+    range_sizes = map(lambda size: int(size / chunk_size), range_sizes)
 
-    chunks: list[iter[bytes]] = []
+    chunks: list[Iterable[bytes]] = []
 
     boundary = "".join(random.choices(string.ascii_lowercase + string.digits, k=13))
 
-    for r in chunk_ranges:
+    for size, r in zip(range_sizes, multipart_ranges):
         chunks.append(
-            (
+            [
                 f"\r\n--{boundary}\r\n",
-                f"Content-Range: bytes {r.start*chunk_size}-{r.stop*chunk_size}/{file.size}\r\n",
-            )
+                "Content-Type: application/octet-stream\r\n",
+                f"Content-Range: bytes {r.start}-{r.stop}/{file.size}\r\n",
+            ]
         )
         content_length += sum([len(c) for c in chunks[-1]])
-        file.seek(r.start * chunk_size)
-        chunks.append(itertools.islice(file.chunks(chunk_size), len(r)))
+        file.seek(r.start)
+        chunks.append(itertools.islice(file.chunks(chunk_size), size))
 
-    chunks.append((f"\r\n--{boundary}--\r\n"))
+    chunks.append([f"\r\n--{boundary}--\r\n"])
     content_length += sum([len(c) for c in chunks[-1]])
 
-    chunks_iter: iter[bytes] = iter([])
-    for chunk in chunks:
-        chunks_iter = itertools.chain(chunks_iter, chunk)
-
-    response = StreamingHttpResponse(streaming_content=chunks_iter, status=206)
+    response = StreamingHttpResponse(
+        streaming_content=_chunk_generator(file, chunks), status=206
+    )
     response["Content-Disposition"] = (
         f'attachement; filename="{os.path.basename(file.name)}"'
     )
     response["Accept-Ranges"] = "bytes"
 
-    response["Content-Type"] = f"multipart/byteranges, boundary={boundary}"
+    response["Content-Type"] = f"multipart/byteranges; boundary={boundary}"
     response["Content-Length"] = content_length
     return response
+
+
+def _chunk_generator(file: File, chunks: list[Iterable[bytes]]):
+    try:
+        for chunk in chunks:
+            for c in chunk:
+                yield c
+    finally:
+        file.close()
 
 
 def stream(request):
