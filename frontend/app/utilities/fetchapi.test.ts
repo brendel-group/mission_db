@@ -163,6 +163,7 @@ describe("Fetch API Functions", () => {
                   file_path: 'file1.mcap',
                   duration: '60000',
                   size: '1024',
+                  robot: 'hihi',
               }
           },
           {
@@ -170,6 +171,7 @@ describe("Fetch API Functions", () => {
                   file_path: 'file2.mcap',
                   duration: '1200',
                   size: '2621440',
+                  robot: 'haha',
               }
           }
       ];
@@ -178,6 +180,7 @@ describe("Fetch API Functions", () => {
               files: ['file1.mcap', 'file2.mcap'],
               durations: ['60000', '1200'],
               sizes: ['1024', '2621440'],
+              robots: ['hihi', 'haha'],
           };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -200,6 +203,7 @@ describe("Fetch API Functions", () => {
                   file_path: 'file1.mcap',
                   duration: '60000',
                   size: '1024',
+                  robot: 'hihi',
               }
           },
           {
@@ -207,6 +211,7 @@ describe("Fetch API Functions", () => {
                   file_path: 'file2.mcap',
                   duration: '1200',
                   size: '2621440',
+                  robot: 'haha',
               }
           }
       ];
@@ -215,6 +220,7 @@ describe("Fetch API Functions", () => {
               files: ['file1.mcap', 'file2.mcap'],
               durations: ['16:40:00', '00:20:00'],
               sizes: ['1.00 KB', '2.50 MB'],
+              robots: ['hihi', 'haha'],
           };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
