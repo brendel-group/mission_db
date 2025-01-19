@@ -62,38 +62,47 @@ def _range_download(request: HttpRequest, file: File):
     else:
         return HttpResponse(status=400)
 
-    multipart_ranges: list[range] = _extract_ranges(range_header)
+    ranges: list[range] = _extract_ranges(range_header)
 
-    range_sizes: list[int] = [len(r) for r in multipart_ranges]
+    range_sizes: list[int] = [len(r) for r in ranges]
 
-    content_length = sum(range_sizes)
+    content_length: int = sum(range_sizes)
 
-    chunk_size = _gcd_below_max(range_sizes, File.DEFAULT_CHUNK_SIZE)
+    chunk_size: int = _gcd_below_max(range_sizes, File.DEFAULT_CHUNK_SIZE)
 
-    range_sizes = map(lambda size: int(size / chunk_size), range_sizes)
+    range_sizes: list[int] = [int(size / chunk_size) for size in range_sizes]
 
-    chunks: list[Iterable[bytes]] = []
+    body: list[Iterable[bytes]] = []
 
-    boundary = "".join(random.choices(string.ascii_lowercase + string.digits, k=13))
+    # generate random 13 digit string of letters and digits
+    boundary: str = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=13)
+    )
 
-    for size, r in zip(range_sizes, multipart_ranges):
-        chunks.append(
+    for size, r in zip(range_sizes, ranges):
+        # add header for multipart body
+        body.append(
             [
                 f"\r\n--{boundary}\r\n",
                 "Content-Type: application/octet-stream\r\n",
                 f"Content-Range: bytes {r.start}-{r.stop}/{file.size}\r\n",
             ]
         )
-        content_length += sum([len(c) for c in chunks[-1]])
-        file.seek(r.start)
-        chunks.append(itertools.islice(file.chunks(chunk_size), size))
+        content_length += sum([len(c) for c in body[-1]])
 
-    chunks.append([f"\r\n--{boundary}--\r\n"])
-    content_length += sum([len(c) for c in chunks[-1]])
+        # add content
+        file.seek(r.start)
+        body.append(itertools.islice(file.chunks(chunk_size), size))
+
+    # add indicator for end
+    body.append([f"\r\n--{boundary}--\r\n"])
+    content_length += sum([len(c) for c in body[-1]])
 
     response = StreamingHttpResponse(
-        streaming_content=_chunk_generator(file, chunks), status=206
+        streaming_content=_body_generator(file, body), status=206
     )
+
+    # set required headers
     response["Content-Disposition"] = (
         f'attachement; filename="{os.path.basename(file.name)}"'
     )
@@ -104,11 +113,11 @@ def _range_download(request: HttpRequest, file: File):
     return response
 
 
-def _chunk_generator(file: File, chunks: list[Iterable[bytes]]):
+def _body_generator(file: File, body: list[Iterable[bytes]]):
     try:
-        for chunk in chunks:
-            for c in chunk:
-                yield c
+        for iterable in body:
+            for chunk in iterable:
+                yield chunk
     finally:
         file.close()
 
