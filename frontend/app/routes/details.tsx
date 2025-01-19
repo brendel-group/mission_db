@@ -7,10 +7,17 @@ import {
   useSearchParams,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { MissionData, RenderedMission, Tag } from "~/data";
+import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
-import { getMission, getTagsByMission, getTags } from "~/utilities/fetchapi";
+import {
+  getMission,
+  getTagsByMission,
+  getTags,
+  getFormattedDetails,
+  getTotalSize,
+  getTotalDuration,
+} from "~/utilities/fetchapi";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -34,8 +41,19 @@ function Detail() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Mission
   const [missionData, setMissionData] = useState<any | null>(null);
+
+  // Tags
   const [allTags, setAllTags] = useState<any | null>(null);
+
+  // Detail View data
+  const [detailViewData, setDetailViewData] = useState<DetailViewData>();
+  const [totalSize, setTotalSize] = useState<string>(missionData.totalSize);
+  const [totalDuration, setTotalDuration] = useState<string>(
+    missionData.totalDuration
+  );
 
   const numberId = Number(id);
 
@@ -65,10 +83,8 @@ function Detail() {
         if (e instanceof Error) {
           setError(e.message);
         } else {
-          setError("An unknown error occurred");
+          setError("An unknown error occurred during mission fetching");
         }
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -80,23 +96,57 @@ function Detail() {
         if (e instanceof Error) {
           setError(e.message); // Display Error information
         } else {
-          setError("An unknown error occurred"); // For non-Error types
+          setError("An unknown error occurred during tag fetching"); // For non-Error types
         }
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchTags();
-    fetchMission();
+    const fetchDetailViewData = async () => {
+      if (missionData) {
+        try {
+          // data for the detail view
+          const fetchedData = await getFormattedDetails(missionData.id);
+          setDetailViewData(fetchedData);
+          // data for the information view (size)
+          const fetchedTotalSize = await getTotalSize(missionData.id);
+          setTotalSize(fetchedTotalSize);
+          // data for the information view (duration)
+          const fetchedTotalDuration = await getTotalDuration(missionData.id);
+          setTotalDuration(fetchedTotalDuration);
+        } catch (e: any) {
+          if (e instanceof Error) {
+            setError(e.message); // Display Error information
+          } else {
+            setError(
+              "An unknown error occurred during detail view data fetching"
+            ); // For non-Error types
+          }
+        }
+      }
+    };
+
+    //Need to wait for all data to be fetched before setting loading to false
+    const fetchAllData = async () => {
+      setLoading(true);
+      await Promise.all([fetchMission(), fetchTags(), fetchDetailViewData()]);
+      setLoading(false);
+    };
+
+    fetchAllData();
   }, [id]);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
-  if (!missionData) return <p>No data available</p>;
+  if (!missionData || !detailViewData) return <p>No data available</p>;
 
   return (
-    <DetailsView missionData={missionData} allTags={allTags}></DetailsView>
+    <DetailsView
+      missionData={missionData}
+      detailViewData={detailViewData}
+      totalSize={totalSize}
+      totalDuration={totalDuration}
+      allTags={allTags}
+    ></DetailsView>
   );
 }
 

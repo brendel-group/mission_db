@@ -1,50 +1,32 @@
 import { Grid } from "@mantine/core";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
-import { RenderedMission, DetailViewData, Tag } from "~/data";
+import { DetailViewData, RenderedMission, Tag } from "~/data";
 import AbstractPage from "../AbstractPage";
-import { getFormattedDetails, getTotalSize, getTotalDuration } from "../../utilities/fetchapi";
 import { ShowInformationView } from "./InformationView";
 
 interface DetailsViewProps {
   missionData: RenderedMission;
+  detailViewData: DetailViewData;
+  totalSize: string;
+  totalDuration: string;
   allTags: Tag[];
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({
-  missionData: selectedRow, allTags
+  missionData,
+  detailViewData,
+  totalSize,
+  totalDuration,
+  allTags,
 }) => {
-  const [detailViewData, setDetailViewData] = useState<DetailViewData>();
-  const [location, setLocation] = useState<string>(selectedRow.location);
-  const [totalSize, setTotalSize] = useState<string>(selectedRow.totalSize);
-  const [totalDuration, setTotalDuration] = useState<string>(selectedRow.totalDuration);
-  useEffect(() => {
-    const fetchDetailViewData = async () => {
-      if (selectedRow) {
-        try {
-          // data for the detail view
-          const fetchedData = await getFormattedDetails(selectedRow.id);
-          setDetailViewData(fetchedData);
-          // data for the information view (size)
-          const fetchedTotalSize = await getTotalSize(selectedRow.id);
-          setTotalSize(fetchedTotalSize);
-          // data for the information view (duration)
-          const fetchedTotalDuration = await getTotalDuration(selectedRow.id);
-          setTotalDuration(fetchedTotalDuration);
-        } catch (error) {
-          console.error("Error fetching detail view data:", error);
-        }
-      }
-    };
-  
-    fetchDetailViewData();
-  }, [selectedRow]);
+  const [location, setLocation] = useState<string>(missionData.location);
 
   return (
     <AbstractPage
-      headline={`${selectedRow.name}${location ? `, ${location}` : ""}${
-        selectedRow.robot ? ` with ${selectedRow.robot}` : ""
+      headline={`${missionData.name}${location ? `, ${location}` : ""}${
+        missionData.robot ? ` with ${missionData.robot}` : ""
       }`}
     >
       {/* Main content */}
@@ -54,10 +36,10 @@ const DetailsView: React.FC<DetailsViewProps> = ({
           <Grid gutter="md">
             {/* Tags */}
             <Grid.Col span={12}>
-              {selectedRow && (
+              {missionData && (
                 <RenderTagsDetailView
-                  tags_={selectedRow.tags}
-                  missionId={selectedRow.id}
+                  tags_={missionData.tags}
+                  missionId={missionData.id}
                   allTags_={allTags}
                 />
               )}
@@ -72,10 +54,10 @@ const DetailsView: React.FC<DetailsViewProps> = ({
         {/* Stats */}
         <Grid.Col span={3}>
           <ShowInformationView
-            missionData={selectedRow}
+            missionData={missionData}
             setLocation_={setLocation}
-            totalSize = {totalSize}
-            totalDuration = {totalDuration}
+            totalSize={totalSize}
+            totalDuration={totalDuration}
           />
         </Grid.Col>
       </Grid>
