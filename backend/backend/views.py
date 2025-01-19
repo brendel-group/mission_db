@@ -1,3 +1,4 @@
+from functools import reduce
 from typing import Iterable
 from django.http import StreamingHttpResponse, HttpResponse, HttpRequest, FileResponse
 from restapi.models import File as FileModel
@@ -44,12 +45,9 @@ def _extract_ranges(range_header: str, file_size: int):
     return new_ranges
 
 
-def _gcd_below_max(ranges: list[range], max_value: int) -> int:
+def _gcd_below_max(integers: list[int], max_value: int) -> int:
     # calculate greatest common divisor
-    gcd = ranges[0].start
-    for r in ranges:
-        gcd = math.gcd(gcd, r.start)
-        gcd = math.gcd(gcd, r.stop)
+    gcd = reduce(math.gcd, integers)
 
     if gcd <= max_value:
         return gcd
@@ -76,6 +74,8 @@ def _range_download(request: HttpRequest, file: File):
 
     range_sizes: list[int] = [len(r) for r in ranges]
 
+    chunk_size = _gcd_below_max(range_sizes, File.DEFAULT_CHUNK_SIZE)
+
     content_length: int = sum(range_sizes)
 
     body: list[Iterable[bytes]] = []
@@ -87,26 +87,25 @@ def _range_download(request: HttpRequest, file: File):
 
     for r in ranges:
         # add header for multipart body
-        body.extend(
+        body.append(
             [
                 f"\r\n--{boundary}\r\n",
                 "Content-Type: application/octet-stream\r\n",
                 f"Content-Range: bytes {r.start}-{r.stop-1}/{file.size}\r\n",
             ]
         )
-        content_length += sum([len(c) for c in body[-3:]])
+        content_length += sum([len(c) for c in body[-1]])
 
         # add content
-        file.seek(r.start)
-        body.append(file.read(len(r)))
-
-    file.close()
+        body.append(_chunk_generator(file, chunk_size, r))
 
     # add indicator for end
-    body.append(f"\r\n--{boundary}--\r\n")
-    content_length += len(body[-1])
+    body.append([f"\r\n--{boundary}--\r\n"])
+    content_length += sum([len(c) for c in body[-1]])
 
-    response = StreamingHttpResponse(streaming_content=body, status=206)
+    response = StreamingHttpResponse(
+        streaming_content=_body_generator(file, body, boundary), status=206
+    )
 
     # set required headers
     response["Content-Disposition"] = (
@@ -117,6 +116,20 @@ def _range_download(request: HttpRequest, file: File):
     response["Content-Type"] = f"multipart/byteranges; boundary={boundary}"
     response["Content-Length"] = content_length
     return response
+
+
+def _chunk_generator(file: File, chunk_size: int, r: range):
+    file.seek(r.start)
+    for i in range(int(len(r) / chunk_size)):
+        yield file.read(chunk_size)
+
+
+def _body_generator(file: File, body: list[Iterable[bytes]], boundary: str):
+    for chunks in body:
+        for chunk in chunks:
+            if chunk == f"\r\n--{boundary}--\r\n":
+                file.close()
+            yield chunk
 
 
 def stream(request):
