@@ -1,4 +1,3 @@
-from functools import reduce
 from typing import Iterable
 from django.http import StreamingHttpResponse, HttpResponse, HttpRequest, FileResponse
 from restapi.models import File as FileModel
@@ -6,7 +5,6 @@ from django.core.files import File
 from django.core.files.storage import Storage
 import os
 import math
-import itertools
 import random
 import string
 
@@ -31,19 +29,27 @@ def download(request: HttpRequest, file_path: str):
     return response
 
 
-def _extract_ranges(range_header: str):
+def _extract_ranges(range_header: str, file_size: int):
     ranges = range_header.split(",")
     new_ranges = []
     for r in ranges:
         r = r.split("-")
-        r = range(int(r[0]), int(r[1]))
+        if r[0] and r[1]:
+            r = range(int(r[0]), int(r[1]) + 1)
+        elif r[0]:
+            r = range(int(r[0]), file_size)
+        elif r[1]:
+            r = range(file_size - int(r[1]), file_size)
         new_ranges.append(r)
     return new_ranges
 
 
-def _gcd_below_max(integers: list[int], max_value: int) -> int:
+def _gcd_below_max(ranges: list[range], max_value: int) -> int:
     # calculate greatest common divisor
-    gcd = reduce(math.gcd, integers)
+    gcd = ranges[0].start
+    for r in ranges:
+        gcd = math.gcd(gcd, r.start)
+        gcd = math.gcd(gcd, r.stop)
 
     if gcd <= max_value:
         return gcd
@@ -62,15 +68,15 @@ def _range_download(request: HttpRequest, file: File):
     else:
         return HttpResponse(status=400)
 
-    ranges: list[range] = _extract_ranges(range_header)
+    ranges: list[range] = _extract_ranges(range_header, file.size)
+
+    for r in ranges:
+        if r.start < 0 or r.stop > file.size:
+            return HttpResponse(status=416)
 
     range_sizes: list[int] = [len(r) for r in ranges]
 
     content_length: int = sum(range_sizes)
-
-    chunk_size: int = _gcd_below_max(range_sizes, File.DEFAULT_CHUNK_SIZE)
-
-    range_sizes: list[int] = [int(size / chunk_size) for size in range_sizes]
 
     body: list[Iterable[bytes]] = []
 
@@ -79,28 +85,28 @@ def _range_download(request: HttpRequest, file: File):
         random.choices(string.ascii_lowercase + string.digits, k=13)
     )
 
-    for size, r in zip(range_sizes, ranges):
+    for r in ranges:
         # add header for multipart body
-        body.append(
+        body.extend(
             [
                 f"\r\n--{boundary}\r\n",
                 "Content-Type: application/octet-stream\r\n",
-                f"Content-Range: bytes {r.start}-{r.stop}/{file.size}\r\n",
+                f"Content-Range: bytes {r.start}-{r.stop-1}/{file.size}\r\n",
             ]
         )
-        content_length += sum([len(c) for c in body[-1]])
+        content_length += sum([len(c) for c in body[-3:]])
 
         # add content
         file.seek(r.start)
-        body.append(itertools.islice(file.chunks(chunk_size), size))
+        body.append(file.read(len(r)))
+
+    file.close()
 
     # add indicator for end
-    body.append([f"\r\n--{boundary}--\r\n"])
-    content_length += sum([len(c) for c in body[-1]])
+    body.append(f"\r\n--{boundary}--\r\n")
+    content_length += len(body[-1])
 
-    response = StreamingHttpResponse(
-        streaming_content=_body_generator(file, body), status=206
-    )
+    response = StreamingHttpResponse(streaming_content=body, status=206)
 
     # set required headers
     response["Content-Disposition"] = (
@@ -111,15 +117,6 @@ def _range_download(request: HttpRequest, file: File):
     response["Content-Type"] = f"multipart/byteranges; boundary={boundary}"
     response["Content-Length"] = content_length
     return response
-
-
-def _body_generator(file: File, body: list[Iterable[bytes]]):
-    try:
-        for iterable in body:
-            for chunk in iterable:
-                yield chunk
-    finally:
-        file.close()
 
 
 def stream(request):
