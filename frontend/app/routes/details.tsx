@@ -50,9 +50,9 @@ function Detail() {
 
   // Detail View data
   const [detailViewData, setDetailViewData] = useState<DetailViewData>();
-  const [totalSize, setTotalSize] = useState<string>(missionData.totalSize);
+  const [totalSize, setTotalSize] = useState<string>("0 GB");
   const [totalDuration, setTotalDuration] = useState<string>(
-    missionData.totalDuration
+    "00:00:00"
   );
 
   const numberId = Number(id);
@@ -60,7 +60,7 @@ function Detail() {
   if (isNaN(numberId)) return <h1>Invalid URL</h1>;
 
   useEffect(() => {
-    const fetchMission = async () => {
+    const fetchData = async () => {
       try {
         const mission: MissionData = await getMission(numberId); // Fetch the mission using the REST API
         const tags: Tag[] = await getTagsByMission(numberId); //Fetch the tags for the mission
@@ -79,65 +79,34 @@ function Detail() {
         };
 
         setMissionData(transformedMission);
+        setAllTags(tags);
+        
+        // data for the detail view
+        setDetailViewData(await getFormattedDetails(mission.id));
+        
+        // data for the information view (size)
+        setTotalSize(await getTotalSize(mission.id));
+
+        // data for the information view (duration)
+        setTotalDuration(await getTotalDuration(mission.id));
+
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);
         } else {
           setError("An unknown error occurred during mission fetching");
         }
+      } finally {
+        setLoading(false);
       }
     };
 
-    const fetchTags = async () => {
-      try {
-        const tags = await getTags();
-        setAllTags(tags);
-      } catch (e: any) {
-        if (e instanceof Error) {
-          setError(e.message); // Display Error information
-        } else {
-          setError("An unknown error occurred during tag fetching"); // For non-Error types
-        }
-      }
-    };
-
-    const fetchDetailViewData = async () => {
-      if (missionData) {
-        try {
-          // data for the detail view
-          const fetchedData = await getFormattedDetails(missionData.id);
-          setDetailViewData(fetchedData);
-          // data for the information view (size)
-          const fetchedTotalSize = await getTotalSize(missionData.id);
-          setTotalSize(fetchedTotalSize);
-          // data for the information view (duration)
-          const fetchedTotalDuration = await getTotalDuration(missionData.id);
-          setTotalDuration(fetchedTotalDuration);
-        } catch (e: any) {
-          if (e instanceof Error) {
-            setError(e.message); // Display Error information
-          } else {
-            setError(
-              "An unknown error occurred during detail view data fetching"
-            ); // For non-Error types
-          }
-        }
-      }
-    };
-
-    //Need to wait for all data to be fetched before setting loading to false
-    const fetchAllData = async () => {
-      setLoading(true);
-      await Promise.all([fetchMission(), fetchTags(), fetchDetailViewData()]);
-      setLoading(false);
-    };
-
-    fetchAllData();
+    fetchData();
   }, [id]);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
-  if (!missionData || !detailViewData) return <p>No data available</p>;
+  if (!missionData) return <p>No data available</p>;
 
   return (
     <DetailsView

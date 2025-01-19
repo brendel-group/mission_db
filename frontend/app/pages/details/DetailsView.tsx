@@ -6,9 +6,38 @@ import { DetailViewData, RenderedMission, Tag } from "~/data";
 import AbstractPage from "../AbstractPage";
 import { ShowInformationView } from "./InformationView";
 
+// This functions returns the robot names in the format x, y and z.
+// For duplicate robot names, only the first occurance is used, e.g. x, y, x -> x and y and the camel case is ignored,
+// meaning x, y, X -> x and y.
+function formatRobotNames(robotNames: string[] | undefined | null): string {
+  if (!robotNames) {
+    return "";
+  }
+
+  // Create a Set to track normalized names and filter duplicates
+  const seen = new Set<string>();
+  const uniqueRobots = robotNames.filter((name) => {
+    const normalizedName = name.toLowerCase();
+    if (seen.has(normalizedName)) {
+      return false;
+    }
+    seen.add(normalizedName);
+    return true;
+  });
+
+  if (uniqueRobots.length === 0) {
+    return "";
+  } else if (uniqueRobots.length === 1) {
+    return uniqueRobots[0];
+  } else {
+    const lastRobot = uniqueRobots.pop();
+    return `${uniqueRobots.join(", ")} and ${lastRobot}`;
+  }
+}
+
 interface DetailsViewProps {
   missionData: RenderedMission;
-  detailViewData: DetailViewData;
+  detailViewData: DetailViewData | undefined;
   totalSize: string;
   totalDuration: string;
   allTags: Tag[];
@@ -26,7 +55,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({
   return (
     <AbstractPage
       headline={`${missionData.name}${location ? `, ${location}` : ""}${
-        missionData.robot ? ` with ${missionData.robot}` : ""
+        detailViewData?.robots ? ` with ${formatRobotNames(detailViewData.robots)}` : ""
       }`}
     >
       {/* Main content */}
