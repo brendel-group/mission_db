@@ -8,6 +8,7 @@ export interface DetailViewData {
   files: string[];
   durations: string[];
   sizes: string[];
+  robots: string[];
 }
 
 //Represents a mission in the backend
