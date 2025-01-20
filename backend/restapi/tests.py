@@ -1,27 +1,29 @@
 from django.test import TestCase
 from rest_framework.test import APITestCase
 from rest_framework import status
-from rest_framework_api_key.models import APIKey
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from django.contrib.auth.models import User
 from .models import Tag, Mission, Mission_tags, File, Mission_files
 import logging
 import urllib.parse
 
+# user without password for tests
+user: User = User(username="test")
+
 
 class APIAuthTestCase(APITestCase):
     def setUp(self):
-        super().setUp()
-        _, key = APIKey.objects.create_key(name="key_for_tests")
-        self.header = {
-            "Authorization": f"Api-Key {key}",
-        }
+        global user
+        if not User.objects.filter(username=user.username).exists():
+            user.save()
+
+        # login the user even without password (faster, because skips hashing)
+        self.client.force_login(user=user)
 
     def tearDown(self):
-        super().tearDown()
-        key = APIKey.objects.get(name="key_for_tests")
-        key.delete()
+        self.client.logout()
 
 
 class RestApiPostMissionTestCase(APIAuthTestCase):
@@ -45,7 +47,8 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
 
     def test_get_missions(self):
         response = self.client.get(
-            reverse("get_missions"), format="json", headers=self.header
+            reverse("get_missions"),
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
@@ -74,7 +77,6 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
         response = self.client.get(
             reverse("mission_detail", kwargs={"pk": self.firstMission.id}),
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -98,7 +100,6 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "notes": "TestOther",
             },
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -115,7 +116,6 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
     def test_delete_by_id(self):
         response = self.client.delete(
             reverse("mission_detail", kwargs={"pk": self.secondMission.id}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(Mission.objects.filter(id=self.secondMission.id)), 0)
@@ -177,7 +177,8 @@ class RestAPITagTestCase(APIAuthTestCase):
 
     def test_get_tags(self):
         response = self.client.get(
-            reverse("get_tags"), format="json", headers=self.header
+            reverse("get_tags"),
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 5)
@@ -217,7 +218,6 @@ class RestAPITagTestCase(APIAuthTestCase):
             reverse("create_tag"),
             {"name": "test_create_tag"},
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(response.data), 3)
@@ -235,7 +235,6 @@ class RestAPITagTestCase(APIAuthTestCase):
             reverse("create_tag"),
             {"name": "test_create_tag2", "color": "#00FF00"},
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(response.data), 3)
@@ -254,7 +253,6 @@ class RestAPITagTestCase(APIAuthTestCase):
             reverse("create_tag"),
             {"name": existing_name},
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -265,7 +263,6 @@ class RestAPITagTestCase(APIAuthTestCase):
         response = self.client.get(
             reverse("tag_detail", kwargs={"name": self.test_names[0]}),
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -282,7 +279,6 @@ class RestAPITagTestCase(APIAuthTestCase):
             reverse("tag_detail", kwargs={"name": self.test_names[0]}),
             {"name": "test_detail_put"},
             format="json",
-            headers=self.header,
         )
         self.test_names[0] = "test_detail_put"
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -298,7 +294,6 @@ class RestAPITagTestCase(APIAuthTestCase):
     def test_tag_detail_delete(self):
         response = self.client.delete(
             reverse("tag_detail", kwargs={"name": self.test_names[0]}),
-            headers=self.header,
         )
         del self.test_names[0]
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -331,7 +326,9 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
         # Add a new tag to a mission using the API
         data = {"mission_id": self.mission.id, "tag_name": "TestTag4"}
         response = self.client.post(
-            reverse("add_tag_to_mission"), data, format="json", headers=self.header
+            reverse("add_tag_to_mission"),
+            data,
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -344,7 +341,9 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
         # Add an exsiting tag to confirm different status code
         data = {"mission_id": self.mission.id, "tag_name": "TestTag1"}
         response = self.client.post(
-            reverse("add_tag_to_mission"), data, format="json", headers=self.header
+            reverse("add_tag_to_mission"),
+            data,
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -356,7 +355,6 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
                 "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id, "tag_name": self.tags[0].name},
             ),
-            headers=self.header,
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -369,7 +367,6 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
         # Check missions related to a specific tag
         response = self.client.get(
             reverse("get_missions_by_tag", kwargs={"name": "TestTag0"}),
-            headers=self.header,
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -380,7 +377,6 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
         # Check tags associated with a mission
         response = self.client.get(
             reverse("get_tags_by_mission_id", kwargs={"id": self.mission.id}),
-            headers=self.header,
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -440,7 +436,7 @@ class NotFoundErrors(APIAuthTestCase):
 
     def test_tag_detail_not_found(self):
         response = self.client.get(
-            reverse("tag_detail", kwargs={"name": "notfound"}), headers=self.header
+            reverse("tag_detail", kwargs={"name": "notfound"}),
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -451,7 +447,6 @@ class NotFoundErrors(APIAuthTestCase):
                 "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id, "tag_name": "notfound"},
             ),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"error": "Tag not found."})
@@ -462,7 +457,6 @@ class NotFoundErrors(APIAuthTestCase):
                 "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id + 1, "tag_name": "test tag"},
             ),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"error": "Mission not found."})
@@ -473,7 +467,6 @@ class NotFoundErrors(APIAuthTestCase):
                 "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id, "tag_name": "test tag"},
             ),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"error": "Mission_tags entry not found."})
@@ -481,7 +474,6 @@ class NotFoundErrors(APIAuthTestCase):
     def test_get_missions_by_tag(self):
         response = self.client.get(
             reverse("get_missions_by_tag", kwargs={"name": "notfound"}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"detail": "Tag with name notfound not found"})
@@ -489,7 +481,6 @@ class NotFoundErrors(APIAuthTestCase):
     def test_get_tags_by_mission(self):
         response = self.client.get(
             reverse("get_tags_by_mission_id", kwargs={"id": self.mission.id + 1}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
@@ -501,7 +492,6 @@ class NotFoundErrors(APIAuthTestCase):
         response = self.client.post(
             reverse("add_tag_to_mission"),
             {"mission_id": self.mission.id + 1, "tag_name": "test tag"},
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
@@ -512,7 +502,6 @@ class NotFoundErrors(APIAuthTestCase):
     def test_get_files_by_nonexistent_mission(self):
         response = self.client.get(
             reverse("get_files_by_mission_id", kwargs={"mission_id": 999}),
-            headers=self.header,
         )  # Nonexistent ID
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"detail": "Mission with ID 999 not found"})
@@ -555,7 +544,6 @@ class MissionFilesTestCase(APIAuthTestCase):
     def test_get_files_by_mission(self):
         response = self.client.get(
             reverse("get_files_by_mission_id", kwargs={"mission_id": self.mission.id}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
@@ -579,7 +567,8 @@ class SpecialTagNameTest(APIAuthTestCase):
 
     def test_create_other_tag(self):
         response = self.client.post(
-            reverse("create_tag"), {"name": "test"}, headers=self.header
+            reverse("create_tag"),
+            {"name": "test"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Tag.objects.filter(name="test").exists())
@@ -589,7 +578,6 @@ class SpecialTagNameTest(APIAuthTestCase):
             reverse("tag_detail", kwargs={"name": self.encoded_name}),
             {"name": "create/", "color": "#ff0000"},
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.tag.refresh_from_db()
@@ -598,7 +586,6 @@ class SpecialTagNameTest(APIAuthTestCase):
     def test_delete_tag(self):
         response = self.client.delete(
             reverse("tag_detail", kwargs={"name": self.encoded_name}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Tag.objects.filter(name="create/").exists())

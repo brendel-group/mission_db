@@ -5,19 +5,24 @@ The request functions are located in the backend/restapi/views.py. The @api_view
 
 To test the API, one can use the django webserver. The backend/restapi/urls.py file defines the URL needed to visit, in order to test the function.
 
-## authorization
-When the server is started with `DEBUG=False` (default is `False` can be set in `.env` file) authorization is required.\
-This means that every request has to be sent together with an API KEY in the Authorization header. It must be formatted as:
-```
-Authorization: Api-Key <API_KEY>
-```
-without this every request will have a HTTP 403 response.\
-For information on how to get an API KEY refer to the [cli documentation](https://github.com/brendel-group/mission_db/blob/main/docs/cli/README.md) for the `api-key` command.
+## Authentication
 
-## how to test using the webserver
-### starting the webserver
-- cd into the backend dir
-- run `python manage.py runserver`
+Session Authentication is used to authenticate a user.\
+To use the REST API you first need to login at the API ENDPOINT at `/restapi/auth/login` which will have a HTTP 204 response and sets 2 cookies in the browser if the login was successfull.\
+These cookies are `csrftoken` and `sessionid`.\
+The `sessionid` is used to authenticate the user and allows you to make other requests.
+
+It is possible to set the cookie domain with the environmental variable `COOKIE_DOMAIN`
+
+To logout use the API ENDPOINT at `/restapi/auth/logout` (only make a post request without any data) which will delete the `sessionid` cookie and the session stored in the backend. \
+The respone will be
+```json
+{
+    "detail": "Successfully logged out."
+}
+```
+even if the user is already logged out.\
+Without logout the cookie will be stored and keeps you logged in until the expiration date (currently 2 weeks).
 
 ## authentication for the frontend
 Available URLs are:
@@ -30,6 +35,11 @@ Available URLs are:
 
 This should only be a short overview about what is suported.\
 For more details about how to use the endpoints refer to the [dj-rest-auth documentation](https://dj-rest-auth.readthedocs.io/en/latest/api_endpoints.html).
+
+## how to test using the webserver
+### starting the webserver
+- cd into the backend dir
+- run `python manage.py runserver`
 
 ## using the webserver
 - GET Requests for missions

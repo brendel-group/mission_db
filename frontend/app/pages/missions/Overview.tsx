@@ -187,7 +187,6 @@ export function Overview() {
 
         const tags = await getTags();
         setAllTags(tags);
-
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message); // Display Error information
@@ -200,7 +199,7 @@ export function Overview() {
     };
 
     fetchData();
-    console.log(JSON.stringify(fetchedData));
+    //console.log(JSON.stringify(fetchedData));
   }, []);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
