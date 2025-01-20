@@ -16,7 +16,7 @@ def download(request: HttpRequest, file_path: str):
     try:
         file = storage.open(file_path)
     except (FileNotFoundError, IsADirectoryError):
-        return HttpResponse(f"File not {file_path}", status=404)
+        return HttpResponse(f"File not found: {file_path}", status=404)
 
     if "range" in request.headers:
         return _range_download(request, file)
