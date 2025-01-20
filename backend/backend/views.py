@@ -68,10 +68,39 @@ def _range_download(request: HttpRequest, file: File):
 
     ranges: list[range] = _extract_ranges(range_header, file.size)
 
+    if not ranges:
+        return HttpResponse(status=400)
+
     for r in ranges:
         if r.start < 0 or r.stop > file.size:
             return HttpResponse(status=416)
 
+    if len(ranges) > 1:
+        return _multipart_range_download(ranges, file)
+
+    # continue with single part range
+
+    requested_range = ranges[0]
+
+    range_size = len(requested_range)
+
+    chunk_size = _gcd_below_max([range_size], File.DEFAULT_CHUNK_SIZE)
+
+    response = StreamingHttpResponse(
+        streaming_content=_chunk_generator(file, chunk_size, requested_range, True),
+        status=206,
+    )
+
+    response["content-type"] = "Content-Type: application/octet-stream"
+    response["content-length"] = range_size
+    response["content-range"] = (
+        f"bytes {requested_range.start}-{requested_range.stop-1}/{file.size}"
+    )
+
+    return response
+
+
+def _multipart_range_download(ranges: list[range], file: File):
     range_sizes: list[int] = [len(r) for r in ranges]
 
     chunk_size = _gcd_below_max(range_sizes, File.DEFAULT_CHUNK_SIZE)
@@ -118,10 +147,12 @@ def _range_download(request: HttpRequest, file: File):
     return response
 
 
-def _chunk_generator(file: File, chunk_size: int, r: range):
+def _chunk_generator(file: File, chunk_size: int, r: range, close: bool = False):
     file.seek(r.start)
     for i in range(int(len(r) / chunk_size)):
         yield file.read(chunk_size)
+    if close:
+        file.close()
 
 
 def _body_generator(file: File, body: list[Iterable[bytes]], boundary: str):
