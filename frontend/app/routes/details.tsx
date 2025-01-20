@@ -7,10 +7,17 @@ import {
   useSearchParams,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { MissionData, RenderedMission, Tag } from "~/data";
+import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
-import { getMission, getTagsByMission, getTags } from "~/utilities/fetchapi";
+import {
+  getMission,
+  getTagsByMission,
+  getTags,
+  getFormattedDetails,
+  getTotalSize,
+  getTotalDuration,
+} from "~/utilities/fetchapi";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -34,15 +41,26 @@ function Detail() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Mission
   const [missionData, setMissionData] = useState<any | null>(null);
+
+  // Tags
   const [allTags, setAllTags] = useState<any | null>(null);
+
+  // Detail View data
+  const [detailViewData, setDetailViewData] = useState<DetailViewData>();
+  const [totalSize, setTotalSize] = useState<string>("0 GB");
+  const [totalDuration, setTotalDuration] = useState<string>(
+    "00:00:00"
+  );
 
   const numberId = Number(id);
 
   if (isNaN(numberId)) return <h1>Invalid URL</h1>;
 
   useEffect(() => {
-    const fetchMission = async () => {
+    const fetchData = async () => {
       try {
         const mission: MissionData = await getMission(numberId); // Fetch the mission using the REST API
         const tags: Tag[] = await getTagsByMission(numberId); //Fetch the tags for the mission
@@ -61,34 +79,29 @@ function Detail() {
         };
 
         setMissionData(transformedMission);
+        setAllTags(tags);
+        
+        // data for the detail view
+        setDetailViewData(await getFormattedDetails(mission.id));
+        
+        // data for the information view (size)
+        setTotalSize(await getTotalSize(mission.id));
+
+        // data for the information view (duration)
+        setTotalDuration(await getTotalDuration(mission.id));
+
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);
         } else {
-          setError("An unknown error occurred");
+          setError("An unknown error occurred during mission fetching");
         }
       } finally {
         setLoading(false);
       }
     };
 
-    const fetchTags = async () => {
-      try {
-        const tags = await getTags();
-        setAllTags(tags);
-      } catch (e: any) {
-        if (e instanceof Error) {
-          setError(e.message); // Display Error information
-        } else {
-          setError("An unknown error occurred"); // For non-Error types
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTags();
-    fetchMission();
+    fetchData();
   }, [id]);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
@@ -96,7 +109,13 @@ function Detail() {
   if (!missionData) return <p>No data available</p>;
 
   return (
-    <DetailsView missionData={missionData} allTags={allTags}></DetailsView>
+    <DetailsView
+      missionData={missionData}
+      detailViewData={detailViewData}
+      totalSize={totalSize}
+      totalDuration={totalDuration}
+      allTags={allTags}
+    ></DetailsView>
   );
 }
 
