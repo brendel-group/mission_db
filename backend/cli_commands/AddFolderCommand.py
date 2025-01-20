@@ -48,10 +48,6 @@ def get_mcap_duration_from_yaml(metadata):
     return nanoseconds / 1e9
 
 
-def get_filsize(path):
-    return os.path.getsize(path)
-
-
 def check_mission(name, date):
     """
     Checks if Mission with the same name and date exists
@@ -77,18 +73,6 @@ def extract_info_from_folder(folder_name):
             f"Folder name '{folder_name}' does not match the expected format (YYYY.MM.DD_missionname)."
         )
         return None, None
-
-
-def get_id(name, date):
-    try:
-        mission = Mission.objects.get(name=name, date=date)
-        return mission
-    except Mission.DoesNotExist:
-        print(f"No mission found with name '{name}' and date '{date}'.")
-        return None
-    except Mission.MultipleObjectsReturned:
-        print(f"Multiple missions found with name '{name}' and date '{date}'.")
-        return None
 
 
 def get_details_id(path):
@@ -120,11 +104,7 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
                 mission.save()
                 logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
                 robot = None
-                print("A")
-                id = get_id(name, mission_date)
-
-                logging.debug("id: {id}")
-                add_details(folder_path, robot, id)
+                add_details(folder_path, robot, mission)
             except Exception as e:
                 logging.error(f"Error adding mission: {e}")
         else:
@@ -134,33 +114,33 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
 
 
 def add_details(mission_path, robot, id):
+    """
+    iterates through the folders and subfolders to find the mcap files and metadata files
+    this information is then stored in the database
+    """
+    mcap_path, metadata = None, None
     for folder in os.listdir(mission_path):
         folder_path = os.path.join(mission_path, folder)
-        typ = None
-        if os.path.basename(folder_path) == "test":
-            typ = "test"
-        elif os.path.basename(folder_path) == "train":
-            typ = "train"
+        typ = os.path.basename(folder_path)
 
-        if os.path.isdir(folder_path):
-            for subfolder in os.listdir(folder_path):
-                subfolder_path = os.path.join(folder_path, subfolder)
-                if os.path.isdir(subfolder_path):
-                    for item in os.listdir(subfolder_path):
-                        if os.path.join(subfolder_path, item).endswith(".mcap"):
-                            mcap_path = os.path.join(subfolder_path, item)
-                            logging.debug("path: {item_path}")
-                            metadata = os.path.join(
-                                os.path.join(
-                                    subfolder_path, os.listdir(subfolder_path)[1]
-                                )
-                            )
-                            size = get_filsize(mcap_path)
-                            duration = get_duration(metadata)
-                            logging.debug("working fine till here")
-                            save_Details(mcap_path, size, duration, robot)
-                            details_id = get_details_id(mcap_path)
-                            save_missionfiles(id, details_id, typ)
+        if not os.path.isdir(folder_path):
+            continue
+        for subfolder in os.listdir(folder_path):
+            subfolder_path = os.path.join(folder_path, subfolder)
+
+            if not os.path.isdir(subfolder_path):
+                continue
+            for item in os.listdir(subfolder_path):
+                if os.path.join(subfolder_path, item).endswith(".mcap"):
+                    mcap_path = os.path.join(subfolder_path, item)
+                if os.path.join(subfolder_path, item).endswith(".yaml"):
+                    metadata = os.path.join(subfolder_path, item)
+            if mcap_path and metadata:
+                size = os.path.getsize(mcap_path)
+                duration = get_duration(metadata)
+                save_Details(mcap_path, size, duration, robot)
+                details_id = get_details_id(mcap_path)
+                save_missionfiles(id, details_id, typ)
 
 
 def save_missionfiles(mission_id, details_id, typ):
@@ -180,8 +160,3 @@ def save_Details(path, size, duration, robot):
             logging.error(f"Error Adding Details: {e}")
     else:
         logging.warning("Skipping due to issues with the metadata")
-
-
-def remove_Details(id):
-    details = File.objects.get(id=id)
-    details.delete()
