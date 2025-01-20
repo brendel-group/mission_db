@@ -1,5 +1,5 @@
 import logging
-from restapi.models import Mission, Tag, Mission_tags
+from restapi.models import Mission, Tag, Mission_tags, File, Mission_files
 from restapi.serializer import MissionSerializer, TagSerializer
 from .Command import Command
 from datetime import datetime
@@ -146,6 +146,10 @@ def remove_mission(mission_id):
     try:
         # Attempt to find the mission by ID
         mission = Mission.objects.get(id=mission_id)
+        files = Mission_files.objects.filter(mission_id=mission_id)
+        for entry in files:
+            detail = File.objects.filter(id=entry.file_id)
+            detail.delete()
         mission.delete()  # Delete the found mission
         print(f"Mission with ID {mission_id} has been removed.")
     except Mission.DoesNotExist:

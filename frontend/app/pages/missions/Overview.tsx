@@ -151,7 +151,7 @@ export function Overview() {
   const [allTags, setAllTags] = useState<Tag[]>([]);
 
   useEffect(() => {
-    const fetchMissions = async () => {
+    const fetchData = async () => {
       try {
         const missions: MissionData[] = await getMissions(); // Fetch the missions using the REST API
 
@@ -184,19 +184,7 @@ export function Overview() {
 
         setFetchedData(renderedMissions);
         setRenderedData(renderedMissions);
-      } catch (e: any) {
-        if (e instanceof Error) {
-          setError(e.message); // Display Error information
-        } else {
-          setError("An unknown error occurred"); // For non-Error types
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    const fetchTags = async () => {
-      try {
         const tags = await getTags();
         setAllTags(tags);
       } catch (e: any) {
@@ -210,9 +198,8 @@ export function Overview() {
       }
     };
 
-    fetchTags();
-    fetchMissions();
-    console.log(JSON.stringify(fetchedData));
+    fetchData();
+    //console.log(JSON.stringify(fetchedData));
   }, []);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;

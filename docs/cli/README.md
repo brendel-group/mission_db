@@ -155,16 +155,14 @@ Arguments:
 - `--notes` (optional) additional information
 
 ### `cli.py syncfolder`
-adds all missions from a folder not currently in the database
+adds all missions from a folder not currently in the database and deletes all missions from the database that are not in the folder
 
 Arguments:
-- `--path` path to mission folder containing the missionfolders 
-- `--location` (optional) the location where the mission took place
-- `--notes` (optional) additional information
+- `--path` path to mission folder containing the missionfolders
 
 Example:
 ```
-./cli.py syncfolder --path "your/path/name" --location "location(optional)" --notes "notes(optional)"
+./cli.py syncfolder --path "your/path/name"
 ```
 
 ### `cli.py tag`
@@ -236,34 +234,6 @@ Example:
 ```bash
 ./cli.py tag mission list --id 1
 ```
-
-### `cli.py api-key`
-command to make changes to API KEYs
-
-### `cli.py api-key add`
-Create a new API KEY\
-This is the only time the key itself is visible.
-
-Argumemts:
-- `--name` Name of the API KEY
-- `--expiry-date` (optional) Expiration Date of the API KEY\
-format: `YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]`
-
-### `cli.py api-key remove`
-Remove an API KEY\
-The API KEY can be selected using the name or prefix.\
-The prefix can be found when listing all keys.\
-If the name is used and there are multiple keys with that name, all of them will be removed.
-
-Arguments:
-- `--name` (optional) Name of the API KEY
-- `--prefix` (optional) Prefix of an API KEY
-
-### `cli.py api-key list`
-List all API KEYs\
-This will not display the keys itself.\
-It will display all information as stored in the database.\
-The keys itself are stored as hash values.
 
 ### `cli.py user`
 Make changes to Users
