@@ -86,11 +86,11 @@ removes a Mission from the Database
 #### Attention: doesn't ask for confirmation
 
 Arguments:
-- `--id` delete mission using the id
+- `id` delete mission using the id
 
 Example:
 ```
-./cli.py mission remove --id 1
+./cli.py mission remove 1
 ```
 
 ### `cli.py mission list`
@@ -109,11 +109,11 @@ List all Tags of one Mission in a table\
 Sorted ascending by id
 
 Arguments:
-- `--id` Mission id
+- `id` Mission id
 
 Example:
 ```bash
-./cli.py mission tag list --id 1
+./cli.py mission tag list 1
 ```
 
 ### `cli.py mission tag add`
@@ -122,27 +122,31 @@ A Tag can be added using the id or the name.\
 If the name is used and there is no Tag with that name a new Tag is created.
 
 Arguments:
-- `--id` Mission id
+- `id` Mission id
 - `--tag-id` (optional) Tag id
 - `--tag-name` (optional) Tag name
 
+`--tag-id` and `--tag-name` are mutually exclusive, so at least one is required but both are not allowed.
+
 Example:
 ```bash
-./cli.py mission tag add --id 1 --name "TestTag"
+./cli.py mission tag add 1 --name "TestTag"
 ```
 
 ### `cli.py mission tag remove`
 Remove Tag from Mission.\
-A Tag can be removed using the id or the name, but at least one of them must be used.
+A Tag can be removed using the id or the name.
 
 Arguments:
-- `--id` Mission id
+- `id` Mission id
 - `--tag-id` (optional) Tag id
 - `--tag-name` (optional) Tag name
 
+`--tag-id` and `--tag-name` are mutually exclusive, so at least one is required but both are not allowed.
+
 Example:
 ```bash
-./cli.py mission tag remove --id 1 --name "TestTag"
+./cli.py mission tag remove 1 --name "TestTag"
 ```
 
 
@@ -181,7 +185,7 @@ Arguments:
 - `--id` remove tag by id
 - `--name` remove tag by name
 
-Either `--id` or `--name` must be given. If both are given the id will be used and the name is ignored. \
+`--id` and `--name` are mutually exclusive, so at least one is required but both are not allowed.
 
 Example
 ```bash
@@ -222,6 +226,8 @@ Sorted ascending by id
 Arguments:
 - `--id` (optional) Tag id
 - `--name` (optional) Tag name
+
+`--id` and `--name` are mutually exclusive, so at least one is required but both are not allowed.
 
 Example:
 ```bash

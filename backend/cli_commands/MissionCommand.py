@@ -30,7 +30,7 @@ class MissionCommand(Command):
 
         # Remove command
         remove_parser = mission_subparser.add_parser("remove", help="Remove mission")
-        remove_parser.add_argument("--id", required=True, help="ID")
+        remove_parser.add_argument("id", help="ID")
 
         # List command
         _ = mission_subparser.add_parser("list", help="List all missions")
@@ -45,29 +45,25 @@ class MissionCommand(Command):
         list_tag_parser = tag_subparser.add_parser(
             "list", help="List tags of one mission"
         )
-        list_tag_parser.add_argument("--id", required=True, help="Select mission by id")
+        list_tag_parser.add_argument("id", help="Select mission by id")
 
         # tag add
         tag_add_parser = tag_subparser.add_parser("add", help="Add tag to mission")
-        tag_add_parser.add_argument("--id", required=True, help="Select mission by id")
-        tag_add_parser.add_argument(
+        tag_add_parser.add_argument("id", help="Select mission by id")
+        group = tag_add_parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
             "--tag-name", required=False, help="Add or create tag by name"
         )
-        tag_add_parser.add_argument("--tag-id", required=False, help="Add tag by id")
+        group.add_argument("--tag-id", required=False, help="Add tag by id")
 
         # tag remove
         tag_remove_parser = tag_subparser.add_parser(
             "remove", help="Remove tag from mission"
         )
-        tag_remove_parser.add_argument(
-            "--id", required=True, help="Select mission by id"
-        )
-        tag_remove_parser.add_argument(
-            "--tag-name", required=False, help="Remove tag by name"
-        )
-        tag_remove_parser.add_argument(
-            "--tag-id", required=False, help="Remove tag by id"
-        )
+        tag_remove_parser.add_argument("id", help="Select mission by id")
+        group = tag_remove_parser.add_mutually_exclusive_group(required=True)
+        group.add_argument("--tag-name", required=False, help="Remove tag by name")
+        group.add_argument("--tag-id", required=False, help="Remove tag by id")
 
     def command(self, args):
         match args.mission:
