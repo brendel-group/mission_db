@@ -1,11 +1,9 @@
-from functools import reduce
 from typing import Iterable
 from django.http import StreamingHttpResponse, HttpResponse, HttpRequest, FileResponse
 from restapi.models import File as FileModel
 from django.core.files import File
 from django.core.files.storage import Storage
 import os
-import math
 import random
 import string
 
@@ -45,19 +43,6 @@ def _extract_ranges(range_header: str, file_size: int):
     return new_ranges
 
 
-def _gcd_below_max(integers: list[int], max_value: int) -> int:
-    # calculate greatest common divisor
-    gcd = reduce(math.gcd, integers)
-
-    if gcd <= max_value:
-        return gcd
-
-    # find common divisor that is smaller than max_value
-    for i in range(max_value, 0, -1):
-        if gcd % i == 0:
-            return i
-
-
 def _range_download(request: HttpRequest, file: File):
     if "bytes" in request.headers["range"]:
         range_header: str = (
@@ -84,10 +69,8 @@ def _range_download(request: HttpRequest, file: File):
 
     range_size = len(requested_range)
 
-    chunk_size = _gcd_below_max([range_size], File.DEFAULT_CHUNK_SIZE)
-
     response = StreamingHttpResponse(
-        streaming_content=_chunk_generator(file, chunk_size, requested_range, True),
+        streaming_content=_chunk_generator(file, requested_range, close=True),
         status=206,
     )
 
@@ -102,8 +85,6 @@ def _range_download(request: HttpRequest, file: File):
 
 def _multipart_range_download(ranges: list[range], file: File):
     range_sizes: list[int] = [len(r) for r in ranges]
-
-    chunk_size = _gcd_below_max(range_sizes, File.DEFAULT_CHUNK_SIZE)
 
     content_length: int = sum(range_sizes)
 
@@ -126,7 +107,7 @@ def _multipart_range_download(ranges: list[range], file: File):
         content_length += sum([len(c) for c in body[-1]])
 
         # add content
-        body.append(_chunk_generator(file, chunk_size, r))
+        body.append(_chunk_generator(file, r))
 
     # add indicator for end
     body.append([f"\r\n--{boundary}--\r\n"])
@@ -147,10 +128,18 @@ def _multipart_range_download(ranges: list[range], file: File):
     return response
 
 
-def _chunk_generator(file: File, chunk_size: int, r: range, close: bool = False):
+def _chunk_generator(
+    file: File, r: range, chunk_size: int = File.DEFAULT_CHUNK_SIZE, close: bool = False
+):
     file.seek(r.start)
     for i in range(int(len(r) / chunk_size)):
         yield file.read(chunk_size)
+
+    # last chunk may be smaller than chunk_size
+    last_chunk = r.stop - file.tell()
+    if last_chunk > 0:
+        yield file.read(last_chunk)
+
     if close:
         file.close()
 
