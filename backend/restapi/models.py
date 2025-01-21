@@ -59,10 +59,10 @@ class Mission_tags(models.Model):
         unique_together = ["mission", "tag"]
 
 
-class Allowed_topic_types(models.Model):
+class Allowed_topic_names(models.Model):
     """A table to limit the allowed topic types"""
 
-    type = models.CharField(primary_key=True, max_length=64)
+    name = models.CharField(primary_key=True)
 
 
 class Topic(models.Model):
@@ -70,8 +70,8 @@ class Topic(models.Model):
 
     id = models.AutoField(primary_key=True)
     file = models.ForeignKey(File, on_delete=models.CASCADE)
-    type = models.ForeignKey(Allowed_topic_types, on_delete=models.CASCADE)
-    name = models.CharField(max_length=64)
+    name = models.ForeignKey(Allowed_topic_names, on_delete=models.CASCADE)
+    type = models.CharField()
     message_count = models.IntegerField()
     frequency = models.FloatField()
 
