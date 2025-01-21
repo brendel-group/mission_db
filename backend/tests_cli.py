@@ -165,15 +165,17 @@ class FakeFileSystemTests(TestCase):
         empty_file = ContentFile("")
         self.test_storage.save("2024.12.02_test/some_file", empty_file)
 
-    def _delete_recursively(self, path: str):
+    def _delete_recursive(self, path: str):
         dirs, files = self.test_storage.listdir(path)
         for dir in dirs:
-            self._delete_recursively(os.path.join(path, dir))
+            self._delete_recursive(os.path.join(path, dir))
         for file in files:
             self.test_storage.delete(os.path.join(path, file))
+        if path:
+            self.test_storage.delete(path)
 
     def tearDown(self):
-        self._delete_recursively("")
+        self._delete_recursive("")
 
     def test_addfolder(self):
         args = ["addfolder", "--path", "2024.12.02_test"]

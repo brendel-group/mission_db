@@ -31,17 +31,19 @@ class SyncFolderArgumentTests(TestCase):
         # Start patching
         self.mock_add_mission_from_folder = self.patcher_add_mission_from_folder.start()
 
-    def _delete_recursively(self, path: str):
+    def _delete_recursive(self, path: str):
         dirs, files = self.test_storage.listdir(path)
         for dir in dirs:
-            self._delete_recursively(os.path.join(path, dir))
+            self._delete_recursive(os.path.join(path, dir))
         for file in files:
             self.test_storage.delete(os.path.join(path, file))
+        if path:
+            self.test_storage.delete(path)
 
     def tearDown(self):
         # Stop all the patchers
         self.patcher_add_mission_from_folder.stop()
-        self._delete_recursively("")
+        self._delete_recursive("")
 
     def test_sync_folder_calls_add_mission_from_folder_with_correct_arguments(self):
         """
