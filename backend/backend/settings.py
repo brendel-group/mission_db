@@ -52,6 +52,9 @@ SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
 
 CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
 
+MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
+
+
 # Application definition
 
 INSTALLED_APPS = [
