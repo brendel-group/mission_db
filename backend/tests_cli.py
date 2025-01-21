@@ -3,11 +3,14 @@ from datetime import date
 from restapi.models import Mission, Tag
 from restapi.serializer import MissionSerializer
 from cli_commands.Command import Command
+import cli_commands.AddFolderCommand as AddFolderCommand
 import cli
 from io import StringIO
 import sys
 import os
 from unittest.mock import patch
+from django.core.files.base import ContentFile
+from django.core.files.storage.memory import InMemoryStorage
 
 
 class MainFunctionTests(TestCase):
@@ -72,7 +75,7 @@ class MainFunctionTests(TestCase):
             self.assertEqual(log.output, ["INFO:root:'Test' added."])
 
     def test_mission_remove(self):
-        args = ["mission", "remove", "--id", str(self.mission.id)]
+        args = ["mission", "remove", str(self.mission.id)]
         cli.main(args)
         sys.stdout.flush()
         self.assertFalse(Mission.objects.filter(id=self.mission.id).exists())
@@ -106,18 +109,6 @@ class MainFunctionTests(TestCase):
 
         # Compare output of main with output of print_table(missions)
         self.assertEqual(self.captured_output.getvalue().strip(), table)
-
-    def test_addfolder(self):
-        args = ["addfolder", "--path", "2024.12.02_test"]
-        with self.assertLogs(level="INFO") as log:
-            cli.main(args)
-            self.assertTrue(
-                Mission.objects.filter(name="test", date="2024-12-02").exists()
-            )
-            self.assertEqual(
-                log.output,
-                ["INFO:root:Mission 'test' from folder '2024.12.02_test' added."],
-            )
 
     def test_add_tag_command(self):
         args = ["tag", "add", "--name", "CLI_Tag", "--color", "#123123"]
@@ -163,3 +154,35 @@ class MainFunctionTests(TestCase):
             self.assertEqual(updated_tag.name, "Changed")
             self.assertEqual(updated_tag.color, "#FFFFFF")
             self.assertEqual(log.output, [f"INFO:root:Tag changed to '{updated_tag}'"])
+
+
+class FakeFileSystemTests(TestCase):
+    def setUp(self):
+        AddFolderCommand.storage = InMemoryStorage()
+        self.test_storage = AddFolderCommand.storage
+
+        # create fake files
+        empty_file = ContentFile("")
+        self.test_storage.save("2024.12.02_test/some_file", empty_file)
+
+    def _delete_recursively(self, path: str):
+        dirs, files = self.test_storage.listdir(path)
+        for dir in dirs:
+            self._delete_recursively(os.path.join(path, dir))
+        for file in files:
+            self.test_storage.delete(os.path.join(path, file))
+
+    def tearDown(self):
+        self._delete_recursively("")
+
+    def test_addfolder(self):
+        args = ["addfolder", "--path", "2024.12.02_test"]
+        with self.assertLogs(level="INFO") as log:
+            cli.main(args)
+            self.assertTrue(
+                Mission.objects.filter(name="test", date="2024-12-02").exists()
+            )
+            self.assertEqual(
+                log.output,
+                ["INFO:root:Mission 'test' from folder '2024.12.02_test' added."],
+            )
