@@ -104,7 +104,7 @@ class AddDetailsTests(TestCase):
 
     def test_add_details(self):
         add_mission_from_folder("2024.12.02_mission1")
-        file = File.objects.filter(file_path="2024.12.02_mission1/test/bag/bag.mcap")
+        file = File.objects.filter(file="2024.12.02_mission1/test/bag/bag.mcap")
         self.assertTrue(file.exists())
         self.assertEqual(len(file), 1)
         self.assertEqual(file.first().size, 3)
