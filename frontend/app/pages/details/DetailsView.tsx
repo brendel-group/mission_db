@@ -17,6 +17,9 @@ function formatRobotNames(robotNames: string[] | undefined | null): string {
   // Create a Set to track normalized names and filter duplicates
   const seen = new Set<string>();
   const uniqueRobots = robotNames.filter((name) => {
+    if (!name) {
+      return false;
+    }
     const normalizedName = name.toLowerCase();
     if (seen.has(normalizedName)) {
       return false;
@@ -55,7 +58,9 @@ const DetailsView: React.FC<DetailsViewProps> = ({
   return (
     <AbstractPage
       headline={`${missionData.name}${location ? `, ${location}` : ""}${
-        detailViewData?.robots ? ` with ${formatRobotNames(detailViewData.robots)}` : ""
+        detailViewData?.robots
+          ? ` with ${formatRobotNames(detailViewData.robots)}`
+          : ""
       }`}
     >
       {/* Main content */}
