@@ -3,6 +3,7 @@ import logging
 import yaml
 from datetime import datetime
 from .Command import Command
+from django.core.files.storage import DefaultStorage
 from restapi.models import Mission, File, Mission_files
 
 
@@ -26,6 +27,9 @@ class AddFolderCommand(Command):
         add_mission_from_folder(args.path, args.location, args.notes)
 
 
+storage = DefaultStorage()
+
+
 def get_duration(path):
     metadata = load_yaml_metadata(path)
     duration = get_mcap_duration_from_yaml(metadata)
@@ -34,7 +38,7 @@ def get_duration(path):
 
 def load_yaml_metadata(yaml_filepath):
     """Load YAML metadata."""
-    with open(yaml_filepath, "r") as file:
+    with storage.open(yaml_filepath, "r") as file:
         return yaml.safe_load(file)
 
 
@@ -77,8 +81,8 @@ def extract_info_from_folder(folder_name):
 
 def get_details_id(path):
     try:
-        mission = File.objects.get(file_path=path)
-        return mission
+        file = File.objects.get(file_path=path)
+        return file
     except File.DoesNotExist:
         print(f"No Details found for file '{path}'")
         return None
@@ -119,24 +123,23 @@ def add_details(mission_path, robot, id):
     this information is then stored in the database
     """
     mcap_path, metadata = None, None
-    for folder in os.listdir(mission_path):
+
+    # storage.listdir returns a tuple where the first element is a list of all directories
+    # and the second element a list of all files
+    for folder in storage.listdir(mission_path)[0]:
         folder_path = os.path.join(mission_path, folder)
         typ = os.path.basename(folder_path)
 
-        if not os.path.isdir(folder_path):
-            continue
-        for subfolder in os.listdir(folder_path):
+        for subfolder in storage.listdir(folder_path)[0]:
             subfolder_path = os.path.join(folder_path, subfolder)
 
-            if not os.path.isdir(subfolder_path):
-                continue
-            for item in os.listdir(subfolder_path):
+            for item in storage.listdir(subfolder_path)[1]:
                 if os.path.join(subfolder_path, item).endswith(".mcap"):
                     mcap_path = os.path.join(subfolder_path, item)
                 if os.path.join(subfolder_path, item).endswith(".yaml"):
                     metadata = os.path.join(subfolder_path, item)
             if mcap_path and metadata:
-                size = os.path.getsize(mcap_path)
+                size = storage.size(mcap_path)
                 duration = get_duration(metadata)
                 save_Details(mcap_path, size, duration, robot)
                 details_id = get_details_id(mcap_path)

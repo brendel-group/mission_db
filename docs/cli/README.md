@@ -86,11 +86,11 @@ removes a Mission from the Database
 #### Attention: doesn't ask for confirmation
 
 Arguments:
-- `--id` delete mission using the id
+- `id` delete mission using the id
 
 Example:
 ```
-./cli.py mission remove --id 1
+./cli.py mission remove 1
 ```
 
 ### `cli.py mission list`
@@ -109,11 +109,11 @@ List all Tags of one Mission in a table\
 Sorted ascending by id
 
 Arguments:
-- `--id` Mission id
+- `id` Mission id
 
 Example:
 ```bash
-./cli.py mission tag list --id 1
+./cli.py mission tag list 1
 ```
 
 ### `cli.py mission tag add`
@@ -126,6 +126,8 @@ Arguments:
 - `--tag-id` (optional) Tag id
 - `--tag-name` (optional) Tag name
 
+`--tag-id` and `--tag-name` are mutually exclusive, so at least one is required but both are not allowed.
+
 Example:
 ```bash
 ./cli.py mission tag add --id 1 --name "TestTag"
@@ -133,12 +135,14 @@ Example:
 
 ### `cli.py mission tag remove`
 Remove Tag from Mission.\
-A Tag can be removed using the id or the name, but at least one of them must be used.
+A Tag can be removed using the id or the name.
 
 Arguments:
 - `--id` Mission id
 - `--tag-id` (optional) Tag id
 - `--tag-name` (optional) Tag name
+
+`--tag-id` and `--tag-name` are mutually exclusive, so at least one is required but both are not allowed.
 
 Example:
 ```bash
@@ -154,16 +158,9 @@ Arguments:
 - `--location` (optional) the location where the mission took place
 - `--notes` (optional) additional information
 
-### `cli.py syncfolder`
-adds all missions from a folder not currently in the database and deletes all missions from the database that are not in the folder
-
-Arguments:
-- `--path` path to mission folder containing the missionfolders
-
-Example:
-```
-./cli.py syncfolder --path "your/path/name"
-```
+### `cli.py sync`
+adds all missions from a folder not currently in the database and deletes all missions from the database that are not in the folder\
+The folder that is searched for mission folders is the root of the Default Storage as configured in [settings.py](../../backend/backend/settings.py)
 
 ### `cli.py tag`
 command to make changes to tags
@@ -188,7 +185,7 @@ Arguments:
 - `--id` remove tag by id
 - `--name` remove tag by name
 
-Either `--id` or `--name` must be given. If both are given the id will be used and the name is ignored. \
+`--id` and `--name` are mutually exclusive, so at least one is required but both are not allowed.
 
 Example
 ```bash
@@ -229,6 +226,8 @@ Sorted ascending by id
 Arguments:
 - `--id` (optional) Tag id
 - `--name` (optional) Tag name
+
+`--id` and `--name` are mutually exclusive, so at least one is required but both are not allowed.
 
 Example:
 ```bash
