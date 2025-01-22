@@ -122,7 +122,7 @@ A Tag can be added using the id or the name.\
 If the name is used and there is no Tag with that name a new Tag is created.
 
 Arguments:
-- `id` Mission id
+- `--id` Mission id
 - `--tag-id` (optional) Tag id
 - `--tag-name` (optional) Tag name
 
@@ -130,7 +130,7 @@ Arguments:
 
 Example:
 ```bash
-./cli.py mission tag add 1 --name "TestTag"
+./cli.py mission tag add --id 1 --name "TestTag"
 ```
 
 ### `cli.py mission tag remove`
@@ -138,7 +138,7 @@ Remove Tag from Mission.\
 A Tag can be removed using the id or the name.
 
 Arguments:
-- `id` Mission id
+- `--id` Mission id
 - `--tag-id` (optional) Tag id
 - `--tag-name` (optional) Tag name
 
@@ -146,7 +146,7 @@ Arguments:
 
 Example:
 ```bash
-./cli.py mission tag remove 1 --name "TestTag"
+./cli.py mission tag remove --id 1 --name "TestTag"
 ```
 
 

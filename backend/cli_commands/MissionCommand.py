@@ -49,7 +49,7 @@ class MissionCommand(Command):
 
         # tag add
         tag_add_parser = tag_subparser.add_parser("add", help="Add tag to mission")
-        tag_add_parser.add_argument("id", help="Select mission by id")
+        tag_add_parser.add_argument("--id", required=True, help="Select mission by id")
         group = tag_add_parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
             "--tag-name", required=False, help="Add or create tag by name"
@@ -60,7 +60,9 @@ class MissionCommand(Command):
         tag_remove_parser = tag_subparser.add_parser(
             "remove", help="Remove tag from mission"
         )
-        tag_remove_parser.add_argument("id", help="Select mission by id")
+        tag_remove_parser.add_argument(
+            "--id", required=True, help="Select mission by id"
+        )
         group = tag_remove_parser.add_mutually_exclusive_group(required=True)
         group.add_argument("--tag-name", required=False, help="Remove tag by name")
         group.add_argument("--tag-id", required=False, help="Remove tag by id")
