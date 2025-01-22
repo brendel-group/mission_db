@@ -1,20 +1,49 @@
 import { MissionData, Tag, DetailViewData } from "~/data";
 import { FETCH_API_BASE_URL } from "~/config";
 
-const headers: {
+function getHeaders(): {
   "Content-Type": string;
   "X-CSRFToken"?: string;
   Cookie?: string;
-} = {
-  "Content-Type": "application/json",
-};
+} {
+  let csrftoken = "";
+
+  // get csrftoken from cookie storage
+  try {
+    let match_array = document.cookie.match(/csrftoken=[^;]*;/);
+    if (match_array && match_array.length > 0) {
+      csrftoken = match_array[0].replace("csrftoken=", "").replace(";", "").trim();
+    }
+  } catch (e) {
+    if (!(e instanceof ReferenceError)) {
+      // rethrow error if not of expected type
+      throw (e)
+    }
+    /*
+     ignore ReferenceError because document.cookie may not be defined (when executed on server)
+     which will cause a ReferenceError 
+     in that case the csrftoken is already passed as argument
+    */
+  }
+
+  let headers: {
+    "Content-Type": string;
+    "X-CSRFToken"?: string;
+  } = {
+    "Content-Type": "application/json",
+  }
+  if (csrftoken.length > 0) {
+    headers["X-CSRFToken"] = csrftoken
+  }
+  return headers
+}
 
 // Function to fetch all missions
 export const getMissions = async (): Promise<MissionData[]> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/missions/`, {
     method: "GET",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
   });
   if (!response.ok) {
     throw new Error("Failed to fetch missions");
@@ -29,7 +58,7 @@ export const createMission = async (
   const response = await fetch(`${FETCH_API_BASE_URL}/missions/create`, {
     method: "POST",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
     body: JSON.stringify(mission),
   });
   if (!response.ok) {
@@ -43,7 +72,7 @@ export const getMission = async (id: number): Promise<MissionData> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/missions/${id}`, {
     method: "GET",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
   });
   if (!response.ok) {
     throw new Error(`Failed to fetch mission with id ${id}`);
@@ -58,7 +87,7 @@ export const updateMission = async (
   const response = await fetch(`${FETCH_API_BASE_URL}/missions/${mission.id}`, {
     method: "PUT",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
     body: JSON.stringify(mission),
   });
   if (!response.ok) {
@@ -72,7 +101,7 @@ export const deleteMission = async (id: number): Promise<void> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/missions/${id}`, {
     method: "DELETE",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
   });
   if (!response.ok) {
     throw new Error(`Failed to delete mission with id ${id}`);
@@ -84,7 +113,7 @@ export const getTags = async (): Promise<Tag[]> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/tags/`, {
     method: "GET",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
   });
   if (!response.ok) {
     throw new Error("Failed to fetch tags");
@@ -105,7 +134,7 @@ export const addTagToMission = async (
   const response = await fetch(`${FETCH_API_BASE_URL}/mission-tags/create/`, {
     method: "POST",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
     body: JSON.stringify({ mission_id: missionId, tag_name: tagName }),
   });
   if (!response.ok) {
@@ -134,7 +163,7 @@ export const removeTagFromMission = async (
     {
       method: "DELETE",
       credentials: "include",
-      headers: headers,
+      headers: getHeaders(),
     }
   );
   if (!response.ok) {
@@ -150,8 +179,9 @@ export const changeTagName = async (tagName: string, newName: string): Promise<T
   const response = await fetch(`${FETCH_API_BASE_URL}/tags/${encodeURIComponent(encodeURIComponent(tagName))}`, {
     method: "PUT",
     credentials: "include",
-    headers: headers,
-    body: JSON.stringify({ name: newName }),}
+    headers: getHeaders(),
+    body: JSON.stringify({ name: newName }),
+  }
   );
   if (!response.ok) {
     if (response.status === 400) {
@@ -180,7 +210,7 @@ export const changeTagColor = async (
     {
       method: "PUT",
       credentials: "include",
-      headers: headers,
+      headers: getHeaders(),
       body: JSON.stringify({ name: tagName, color: newColor }),
     }
   );
@@ -209,7 +239,7 @@ export const createTag = async (
   const response = await fetch(`${FETCH_API_BASE_URL}/tags/create/`, {
     method: "POST",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
     body: JSON.stringify({ name: tagName, color: color || "#FFFFFF" }),
   });
   if (!response.ok) {
@@ -234,7 +264,7 @@ export const deleteTag = async (tagName: string): Promise<void> => {
     {
       method: "DELETE",
       credentials: "include",
-      headers: headers,
+      headers: getHeaders(),
     }
   );
   if (!response.ok) {
@@ -252,7 +282,7 @@ export const getTagsByMission = async (missionId: number): Promise<Tag[]> => {
     {
       method: "GET",
       credentials: "include",
-      headers: headers,
+      headers: getHeaders(),
     }
   );
   if (!response.ok) {
@@ -280,7 +310,7 @@ export const getMissionsByTag = async (
     {
       method: "GET",
       credentials: "include",
-      headers: headers,
+      headers: getHeaders(),
     }
   );
   if (!response.ok) {
@@ -300,7 +330,7 @@ export const attemptLogin = async (
   const response = await fetch(`${FETCH_API_BASE_URL}/auth/login/`, {
     method: "POST",
     credentials: "include",
-    headers: headers,
+    headers: getHeaders(),
     body: JSON.stringify({ username, password }),
   });
   if (!response.ok) return { success: false };
@@ -318,6 +348,8 @@ export const attemptLogout = async (
   csrfToken: string,
   sessionId: string
 ): Promise<void> => {
+  let headers = getHeaders()
+
   headers["X-CSRFToken"] = csrfToken;
   headers["Cookie"] = "sessionid=" + sessionId + "; csrftoken=" + csrfToken;
 
@@ -380,7 +412,7 @@ export const getDetailsByMission = async (
     {
       method: "GET",
       credentials: "include",
-      headers: headers,
+      headers: getHeaders(),
     }
   );
   if (!response.ok) {
