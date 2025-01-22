@@ -18,10 +18,9 @@ class TagCommand(Command):
 
         # Remove command
         remove_parser = tag_subparser.add_parser("remove", help="Remove Tag")
-        remove_parser.add_argument("--id", required=False, help="id of Tag to remove")
-        remove_parser.add_argument(
-            "--name", required=False, help="name of Tag to remove"
-        )
+        group = remove_parser.add_mutually_exclusive_group(required=True)
+        group.add_argument("--id", required=False, help="id of Tag to remove")
+        group.add_argument("--name", required=False, help="name of Tag to remove")
 
         # List command
         _ = tag_subparser.add_parser("list", help="List all Tags")
@@ -44,12 +43,9 @@ class TagCommand(Command):
         list_mission_parser = mission_subparser.add_parser(
             "list", help="List missions with selected tag"
         )
-        list_mission_parser.add_argument(
-            "--id", required=False, help="Select tag by id"
-        )
-        list_mission_parser.add_argument(
-            "--name", required=False, help="Select tag by name"
-        )
+        group = list_mission_parser.add_mutually_exclusive_group(required=True)
+        group.add_argument("--id", required=False, help="Select tag by id")
+        group.add_argument("--name", required=False, help="Select tag by name")
 
     def command(self, args):
         match args.tag:
