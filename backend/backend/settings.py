@@ -32,7 +32,11 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev"]
-CSRF_TRUSTED_ORIGINS = ["https://*.fly.dev"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.fly.dev",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
 
 CSRF_COOKIE_HTTPONLY = False
 
