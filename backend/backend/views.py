@@ -3,13 +3,36 @@ from django.http import StreamingHttpResponse, HttpResponse, HttpRequest, FileRe
 from restapi.models import File as FileModel
 from django.core.files import File
 from django.core.files.storage import Storage
+from django.contrib.sessions.models import Session
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+from django.conf import settings
 import os
 import random
 import string
 
 
+def authenticate(sessionid: str):
+    try:
+        session = Session.objects.get(session_key=sessionid)
+    except Session.DoesNotExist:
+        raise PermissionDenied
+
+    session_data = session.get_decoded()
+    uid = session_data.get("_auth_user_id")
+    user = User.objects.get(id=uid)
+
+    if not user.is_authenticated:
+        raise PermissionDenied
+
+    return user
+
+
 def download(request: HttpRequest, file_path: str):
-    # file = File.objects.first().file
+    # try to find user by sessionid
+    if not settings.DEBUG:
+        _ = authenticate(request.GET["sessionid"])
+
     storage: Storage = FileModel.file.field.storage
     try:
         file = storage.open(file_path)
@@ -131,17 +154,18 @@ def _multipart_range_download(ranges: list[range], file: File):
 def _chunk_generator(
     file: File, r: range, chunk_size: int = File.DEFAULT_CHUNK_SIZE, close: bool = False
 ):
-    file.seek(r.start)
-    for i in range(int(len(r) / chunk_size)):
-        yield file.read(chunk_size)
+    try:
+        file.seek(r.start)
+        for i in range(int(len(r) / chunk_size)):
+            yield file.read(chunk_size)
 
-    # last chunk may be smaller than chunk_size
-    last_chunk = r.stop - file.tell()
-    if last_chunk > 0:
-        yield file.read(last_chunk)
-
-    if close:
-        file.close()
+        # last chunk may be smaller than chunk_size
+        last_chunk = r.stop - file.tell()
+        if last_chunk > 0:
+            yield file.read(last_chunk)
+    finally:
+        if close:
+            file.close()
 
 
 def _body_generator(file: File, body: list[Iterable[bytes]], boundary: str):
