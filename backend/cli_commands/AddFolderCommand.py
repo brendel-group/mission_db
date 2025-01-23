@@ -81,7 +81,7 @@ def extract_info_from_folder(folder_name):
 
 def get_details_id(path):
     try:
-        file = File.objects.get(file_path=path)
+        file = File.objects.get(file=path)
         return file
     except File.DoesNotExist:
         print(f"No Details found for file '{path}'")
@@ -156,7 +156,7 @@ def save_missionfiles(mission_id, details_id, typ):
 
 def save_Details(path, size, duration, robot):
     if size and duration:
-        file = File(file_path=path, robot=robot, duration=duration, size=size)
+        file = File(file=path, robot=robot, duration=duration, size=size)
         try:
             file.save()
         except Exception as e:
