@@ -143,7 +143,7 @@ export function Overview() {
   const [search, setSearch] = useState("");
   const [fetchedData, setFetchedData] = useState<RenderedMission[]>([]);
   const [renderedData, setRenderedData] = useState<RenderedMission[]>([]);
-  const [sortBy, setSortBy] = useState<keyof RenderedMission | null>(null);
+  const [sortBy, setSortBy] = useState<keyof RenderedMission | null>("name");
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -183,7 +183,14 @@ export function Overview() {
         }
 
         setFetchedData(renderedMissions);
-        setRenderedData(renderedMissions);
+        setRenderedData(
+          sortData(renderedMissions, {
+            sortBy: "name",
+            reversed: false,
+            search,
+            searchedTags,
+          }),
+        );
 
         const tags = await getTags();
         setAllTags(tags);
@@ -199,7 +206,6 @@ export function Overview() {
     };
 
     fetchData();
-    //console.log(JSON.stringify(fetchedData));
   }, []);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
