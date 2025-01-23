@@ -3,7 +3,7 @@ import logging
 from django.core.files.storage import DefaultStorage
 from .Command import Command
 from .AddFolderCommand import add_mission_from_folder
-from restapi.models import Mission
+from restapi.models import Mission, Tag
 
 
 class SyncCommand(Command):
@@ -51,3 +51,6 @@ def sync_folder():
                 )
             except Exception as e:
                 logging.error(f"Error deleting mission '{name}': {e}")
+
+    # find unused tags and delete them
+    Tag.objects.filter(mission_tags=None).delete()
