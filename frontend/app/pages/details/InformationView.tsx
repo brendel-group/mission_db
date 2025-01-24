@@ -1,8 +1,8 @@
 import { Badge, Button, Group, Menu, Text, Textarea } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
-import { convertToMissionData, MissionData, RenderedMission } from "~/data";
-import { updateMission } from "~/utilities/fetchapi";
+import { convertToMissionData, RenderedMission } from "~/data";
+import { updateMission } from "~/fetchapi/missions";
 
 type EditableFieldProps = {
   fieldName: string;

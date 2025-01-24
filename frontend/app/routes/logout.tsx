@@ -1,6 +1,6 @@
 import { sessionStorage } from "~/utilities/LoginHandler";
 import { LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { attemptLogout } from "~/utilities/fetchapi";
+import { attemptLogout } from "~/fetchapi/auth";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("cookie");
