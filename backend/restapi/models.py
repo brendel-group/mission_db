@@ -79,16 +79,6 @@ class Topic(models.Model):
         unique_together = ["file", "type", "name"]
 
 
-class File_topics(models.Model):
-    """The relationship table to connect File and Topic"""
-
-    file = models.ForeignKey(File, on_delete=models.CASCADE)
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ["file", "topic"]
-
-
 """
 update db:
 python manage.py makemigrations

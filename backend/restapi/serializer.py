@@ -81,12 +81,3 @@ class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
         fields = ["id", "name", "type", "message_count", "frequency"]
-        
-
-class FileWithTopicsSerializer(serializers.ModelSerializer):
-    file = FileSerializer(read_only=True)
-    topics = TopicSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = File_topics
-        fields = ["file", "topics"]

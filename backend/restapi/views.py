@@ -3,13 +3,13 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
-from .models import File, File_topics, Tag, Mission, Mission_tags, Mission_files
+from .models import File, Tag, Mission, Mission_tags, Mission_files, Topic
 from .serializer import (
-    FileWithTopicsSerializer,
     TagSerializer,
     MissionSerializer,
     MissionTagSerializer,
     FileWithTypeSerializer,
+    TopicSerializer,
 )
 import urllib.parse
 
@@ -83,8 +83,8 @@ def get_topics_from_files(request, file_path):
     except File.DoesNotExist:
         raise NotFound(f"File with path {file_path} not found")
 
-    file_topics = File_topics.objects.filter(file=file)
-    serializer = FileWithTopicsSerializer(file_topics, many=True)
+    topics = Topic.objects.filter(file=file)
+    serializer = TopicSerializer(topics, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
