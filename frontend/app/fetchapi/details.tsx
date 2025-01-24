@@ -85,3 +85,10 @@ export const getTotalSize = async (missionId: number): Promise<string> => {
 
   return transformSizes(stringTotal)[0];
 };
+
+// Get all robot names of a mission
+export const getRobotNames = async (missionId: number): Promise<string[]> => {
+  const details = await getDetailsByMission(missionId);
+
+  return details.robots;
+};
