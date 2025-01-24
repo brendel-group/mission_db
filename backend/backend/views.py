@@ -100,7 +100,7 @@ def _range_download(request: HttpRequest, file: File):
     response["content-type"] = "Content-Type: application/octet-stream"
     response["content-length"] = range_size
     response["content-range"] = (
-        f"bytes {requested_range.start}-{requested_range.stop-1}/{file.size}"
+        f"bytes {requested_range.start}-{requested_range.stop - 1}/{file.size}"
     )
 
     return response
@@ -124,7 +124,7 @@ def _multipart_range_download(ranges: list[range], file: File):
             [
                 f"\r\n--{boundary}\r\n",
                 "Content-Type: application/octet-stream\r\n",
-                f"Content-Range: bytes {r.start}-{r.stop-1}/{file.size}\r\n",
+                f"Content-Range: bytes {r.start}-{r.stop - 1}/{file.size}\r\n",
             ]
         )
         content_length += sum([len(c) for c in body[-1]])

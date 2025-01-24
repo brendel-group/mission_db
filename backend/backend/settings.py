@@ -181,7 +181,7 @@ if USE_S3:
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
                 "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
-                "custom_domain": f"{env("AWS_STORAGE_BUCKET_NAME")}.s3.eu-central-1.amazonaws.com",
+                "custom_domain": f"{env('AWS_STORAGE_BUCKET_NAME')}.s3.eu-central-1.amazonaws.com",
                 "object_parameters": {"CacheControl": "max-age=86400"},
                 "cloudfront_key": open(env("AWS_CLOUDFRONT_KEY_FILE")).read(),
                 "cloudfront_key_id": env("AWS_CLOUDFRONT_KEY_ID"),
@@ -193,7 +193,7 @@ if USE_S3:
     }
     MEDIA_LOCATION = "media"
     MEDIA_URL = (
-        f"https://{STORAGES["default"]["OPTIONS"]["custom_domain"]}/{MEDIA_LOCATION}/"
+        f"https://{STORAGES['default']['OPTIONS']['custom_domain']}/{MEDIA_LOCATION}/"
     )
 
     STATIC_URL = "static/"
@@ -201,7 +201,7 @@ if USE_S3:
     STATIC_ROOT = BASE_DIR / "staticfiles"
 else:
     MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
-    MEDIA_URL = f"{env("DOMAIN", default="http://localhost:8000")}/file/download/"
+    MEDIA_URL = f"{env('DOMAIN', default='http://localhost:8000')}/file/download/"
 
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/5.1/howto/static-files/
