@@ -51,10 +51,13 @@ def sync_folder():
     for mission in db_missions:
         tags = Tag.objects.filter(mission_tags__mission=mission)
         tag_serializer = TagSerializer(tags, many=True)
+        mission_tags = [
+            {"name": tag["name"], "color": tag["color"]} for tag in tag_serializer.data
+        ]  # remove id field
         metadata = {
             "location": mission.location,
             "notes": mission.notes,
-            "tags": tag_serializer.data,
+            "tags": mission_tags,
         }
         # save metadata to file inside mission folder
         metadata_file = f"{mission.date.strftime('%Y.%m.%d')}_{mission.name}/{mission.name}_metadata.json"
