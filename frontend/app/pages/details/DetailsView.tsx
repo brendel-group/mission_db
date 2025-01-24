@@ -55,8 +55,6 @@ const DetailsView: React.FC<DetailsViewProps> = ({
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
 
-  console.log(detailViewData?.robots, "haha hihi");
-
   return (
     <AbstractPage
       headline={`${missionData.name}${location ? ` in ${location}` : ""}${
