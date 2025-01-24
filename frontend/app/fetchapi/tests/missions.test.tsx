@@ -1,5 +1,5 @@
 import { FETCH_API_BASE_URL } from "~/config";
-import { MissionData, Tag, DetailViewData } from "~/data";
+import { MissionData } from "~/data";
 import {
   createMission,
   deleteMission,

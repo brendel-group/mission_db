@@ -1,5 +1,5 @@
 import { FETCH_API_BASE_URL } from "~/config";
-import { MissionData, Tag, DetailViewData } from "~/data";
+import { DetailViewData } from "~/data";
 import { getDetailsByMission, getFormattedDetails, getTotalDuration, getTotalSize } from "../details";
 
 /*
@@ -25,6 +25,7 @@ describe("Fetch API Functions", () => {
         {
           file: {
             file_path: "file1.mcap",
+            video_path: "file1.mp4",
             duration: "60000",
             size: "1024",
             robot: "hihi",
@@ -33,6 +34,7 @@ describe("Fetch API Functions", () => {
         {
           file: {
             file_path: "file2.mcap",
+            video_path: "file2.mp4",
             duration: "1200",
             size: "2621440",
             robot: "haha",
@@ -42,6 +44,7 @@ describe("Fetch API Functions", () => {
 
       const expectedResponse: DetailViewData = {
         files: ["file1.mcap", "file2.mcap"],
+        videos: ['file1.mp4', 'file2.mp4'],
         durations: ["60000", "1200"],
         sizes: ["1024", "2621440"],
         robots: ["hihi", "haha"],
@@ -69,6 +72,7 @@ describe("Fetch API Functions", () => {
         {
           file: {
             file_path: "file1.mcap",
+            video_path: "file1.mp4",
             duration: "60000",
             size: "1024",
             robot: "hihi",
@@ -77,6 +81,7 @@ describe("Fetch API Functions", () => {
         {
           file: {
             file_path: "file2.mcap",
+            video_path: "file2.mp4",
             duration: "1200",
             size: "2621440",
             robot: "haha",
@@ -86,6 +91,7 @@ describe("Fetch API Functions", () => {
 
       const expectedResponse: DetailViewData = {
         files: ["file1.mcap", "file2.mcap"],
+        videos: ['file1.mp4', 'file2.mp4'],
         durations: ["16:40:00", "00:20:00"],
         sizes: ["1.00 KB", "2.50 MB"],
         robots: ["hihi", "haha"],

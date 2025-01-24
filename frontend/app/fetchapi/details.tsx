@@ -28,18 +28,20 @@ export const getDetailsByMission = async (
   const data = await response.json();
 
   const files: string[] = [];
+  const videos: string[] = [];
   const durations: string[] = [];
   const sizes: string[] = [];
   const robots: string[] = [];
 
   for (const d in data) {
     files.push(data[d].file.file_path);
+    videos.push(data[d].file.video_path);
     durations.push(data[d].file.duration);
     sizes.push(data[d].file.size);
     robots.push(data[d].file.robot);
   }
 
-  return { files, durations, sizes, robots };
+  return { files, videos, durations, sizes, robots };
 };
 
 // Get details by mission in correct format
@@ -49,12 +51,13 @@ export const getFormattedDetails = async (
   const details = await getDetailsByMission(missionId);
 
   const files = details.files;
+  const videos = details.videos;
   // transform durations and sizes to correct form
   const durations = transformDurations(details.durations);
   const sizes = transformSizes(details.sizes);
   const robots = details.robots;
 
-  return { files, durations, sizes, robots };
+  return { files, videos, durations, sizes, robots };
 };
 
 // Get total duration of all files in a mission by ID

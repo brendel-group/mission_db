@@ -57,8 +57,8 @@ const DetailsView: React.FC<DetailsViewProps> = ({
 
   return (
     <AbstractPage
-      headline={`${missionData.name}${location ? `, ${location}` : ""}${
-        detailViewData?.robots
+      headline={`${missionData.name}${location ? ` in ${location}` : ""}${
+        detailViewData?.robots && detailViewData?.robots.length > 0
           ? ` with ${formatRobotNames(detailViewData.robots)}`
           : ""
       }`}
