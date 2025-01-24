@@ -15,7 +15,7 @@ export function DatasetView({ file, duration, size }: DatasetViewProps) {
         <div>
           <Text size="lg">File: {file}</Text>
           <Text size="lg">Duration: {duration}</Text>
-          <Text size="lg">Size: {size} MB</Text>
+          <Text size="lg">Size: {size}</Text>
         </div>
       ) : (
         <Text>No data available</Text>
