@@ -1,9 +1,10 @@
 import logging
 from django.core.files.storage import DefaultStorage
+from restapi.serializer import TagSerializer
 from .Command import Command
 from .AddFolderCommand import add_mission_from_folder
 from .DeleteFolderCommand import delete_mission_from_folder
-from restapi.models import Mission, Mission_tags, Tag
+from restapi.models import Mission, Tag
 import json
 
 
@@ -48,21 +49,17 @@ def sync_folder():
 
     # save metadata for each mission in the filesystem
     for mission in db_missions:
-        tags = Mission_tags.objects.filter(mission=mission)
-        tag_data = []
-        for mission_tag in tags:
-            tag = Tag.objects.get(id=mission_tag.tag_id)
-            tag_data.append({"name": tag.name, "color": tag.color})
+        tags = Tag.objects.filter(mission_tags__mission=mission)
+        tag_serializer = TagSerializer(tags, many=True)
         metadata = {
             "location": mission.location,
             "notes": mission.notes,
-            "tags": tag_data,
+            "tags": tag_serializer.data,
         }
         # save metadata to file inside mission folder
         metadata_file = f"{mission.date.strftime('%Y.%m.%d')}_{mission.name}/{mission.name}_metadata.json"
-        metadata_file_path = storage.path(metadata_file)
-        with open(metadata_file_path, "w") as f:
+        with storage.open(metadata_file, "w") as f:
             json.dump(metadata, f, indent=4)
             logging.info(
-                f"Saved metadata for mission '{mission.name}' to '{metadata_file_path}'"
+                f"Saved metadata for mission '{mission.name}' to the mission folder"
             )
