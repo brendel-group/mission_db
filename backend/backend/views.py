@@ -174,9 +174,3 @@ def _body_generator(file: File, body: list[Iterable[bytes]], boundary: str):
             if chunk == f"\r\n--{boundary}--\r\n":
                 file.close()
             yield chunk
-
-
-def stream(request):
-    file = File.objects.first().file
-    response = StreamingHttpResponse(streaming_content=file.chunks())
-    return response

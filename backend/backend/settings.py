@@ -201,6 +201,7 @@ if USE_S3:
     STATIC_ROOT = BASE_DIR / "staticfiles"
 else:
     MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
+    MEDIA_URL = f"{env("DOMAIN", default="http://localhost:8000")}/file/download/"
 
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/5.1/howto/static-files/
