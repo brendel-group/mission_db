@@ -110,10 +110,10 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
           setLocation(value);
           setLocation_(value);
 
-          const backend_data = convertToMissionData(missionData);
-          backend_data.location = value;
+          missionData.location = value;
+          missionData.notes = notes;
 
-          await updateMission(backend_data);
+          await updateMission(convertToMissionData(missionData));
         }}
       />
 
@@ -125,10 +125,10 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         onValueChange={async (value) => {
           setNotes(value);
 
-          const backend_data = convertToMissionData(missionData);
-          backend_data.notes = value;
+          missionData.location = location;
+          missionData.notes = value;
 
-          await updateMission(backend_data);
+          await updateMission(convertToMissionData(missionData));
         }}
       />
     </div>
