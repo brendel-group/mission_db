@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
-from .models import File_topics, Mission, Topic
+from .models import Mission, Topic
 from .models import File
 from .models import Mission_files
 from .models import Tag
