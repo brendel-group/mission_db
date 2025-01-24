@@ -6,6 +6,7 @@ export interface Tag {
 //Fetch this data by mission_id from MissionTableData
 export interface DetailViewData {
   files: string[];
+  videos: string[];
   durations: string[];
   sizes: string[];
   robots: string[];
