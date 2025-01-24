@@ -181,10 +181,11 @@ if USE_S3:
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
                 "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
-                "custom_domain": f"{env('AWS_STORAGE_BUCKET_NAME')}.s3.eu-central-1.amazonaws.com",
+                # the commented out values need to be uncommented when using S3 presigned urls.
+                # "custom_domain": f"{env('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com",
                 "object_parameters": {"CacheControl": "max-age=86400"},
-                "cloudfront_key": open(env("AWS_CLOUDFRONT_KEY_FILE")).read(),
-                "cloudfront_key_id": env("AWS_CLOUDFRONT_KEY_ID"),
+                # "cloudfront_key": open(env("AWS_CLOUDFRONT_KEY_FILE")).read(),
+                # "cloudfront_key_id": env("AWS_CLOUDFRONT_KEY_ID"),
             },
         },
         "staticfiles": {
@@ -192,9 +193,7 @@ if USE_S3:
         },
     }
     MEDIA_LOCATION = "media"
-    MEDIA_URL = (
-        f"https://{STORAGES['default']['OPTIONS']['custom_domain']}/{MEDIA_LOCATION}/"
-    )
+    MEDIA_URL = f"{env('DOMAIN', default='http://localhost:8000')}/file/download/"
 
     STATIC_URL = "static/"
 

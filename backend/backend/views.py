@@ -1,8 +1,7 @@
 from typing import Iterable
 from django.http import StreamingHttpResponse, HttpResponse, HttpRequest, FileResponse
-from restapi.models import File as FileModel
 from django.core.files import File
-from django.core.files.storage import Storage
+from django.core.files.storage import default_storage as storage
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -33,7 +32,6 @@ def download(request: HttpRequest, file_path: str):
     if not settings.DEBUG:
         _ = authenticate(request.GET["sessionid"])
 
-    storage: Storage = FileModel.file.field.storage
     try:
         file = storage.open(file_path)
     except (FileNotFoundError, IsADirectoryError):
