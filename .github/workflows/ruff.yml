@@ -5,12 +5,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: tj-actions/changed-files@v45
+        name: Get changed files
+        id: changed-files
+        with:
+          files: |
+            **.py
       - uses: astral-sh/ruff-action@v3
         with:
             version: "latest"
             args: "check"
-            changed-files: "true"
+            src: ${{ steps.changed-files.outputs.all_changed_files }}
       - uses: astral-sh/ruff-action@v3
         with:
+            version: "latest"
             args: "format --check"
-            changed-files: "true"
+            src: ${{ steps.changed-files.outputs.all_changed_files }}
