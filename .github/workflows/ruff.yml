@@ -14,12 +14,12 @@ jobs:
       - if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         uses: astral-sh/ruff-action@v3
         with:
-            version: "latest"
+            version: "0.9.3"
             args: "check"
             src: ${{ steps.changed-files.outputs.all_changed_files }}
       - if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         uses: astral-sh/ruff-action@v3
         with:
-            version: "latest"
+            version: "0.9.3"
             args: "format --check"
             src: ${{ steps.changed-files.outputs.all_changed_files }}
