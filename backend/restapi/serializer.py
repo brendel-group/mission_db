@@ -41,7 +41,7 @@ class FileWithTypeSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = "name", "color"
+        fields = "__all__"
 
 
 class MissionTagSerializer(serializers.ModelSerializer):
