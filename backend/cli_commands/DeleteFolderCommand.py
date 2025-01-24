@@ -15,7 +15,11 @@ class DeleteFolderCommand(Command):
         subparser: subparser to which this subcommand belongs to
         """
         folder_parser = subparser.add_parser(
+<<<<<<< HEAD
             self.name, help="deletes mission from database based on folder path"
+=======
+            self.name, help="deletes mission details from folder"
+>>>>>>> 1cfebd2 (delete files on deleteFolder)
         )
         folder_parser.add_argument("--path", required=True, help="Filepath")
 
