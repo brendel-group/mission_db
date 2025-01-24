@@ -8,16 +8,11 @@ import {
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
+import { getFormattedDetails, getTotalDuration, getTotalSize } from "~/fetchapi/details";
+import { getMission } from "~/fetchapi/missions";
+import { getTagsByMission } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
-import {
-  getMission,
-  getTagsByMission,
-  getTags,
-  getFormattedDetails,
-  getTotalSize,
-  getTotalDuration,
-} from "~/utilities/fetchapi";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -62,7 +57,7 @@ function Detail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const mission: MissionData = await getMission(numberId); // Fetch the mission using the REST API
+        const mission: MissionData = await getMission(numberId); // Fetch mission
         const tags: Tag[] = await getTagsByMission(numberId); //Fetch the tags for the mission
         tags.sort((a, b) => a.name.localeCompare(b.name));
 

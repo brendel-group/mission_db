@@ -22,23 +22,12 @@ import {
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
 import { MissionData, RenderedMission, Tag } from "~/data";
-import {
-  addTagToMission,
-  changeTagName,
-  changeTagColor,
-  removeTagFromMission,
-  createTag,
-  getMissionsByTag,
-  deleteTag,
-  getMissions,
-  getTagsByMission,
-  getTotalDuration,
-  getTotalSize,
-  getTags,
-} from "~/utilities/fetchapi";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
+import { getMissions } from "~/fetchapi/missions";
+import { addTagToMission, changeTagColor, changeTagName, createTag, deleteTag, getMissionsByTag, getTags, getTagsByMission, removeTagFromMission } from "~/fetchapi/tags";
+import { getTotalDuration, getTotalSize } from "~/fetchapi/details";
 
 interface ThProps {
   children: React.ReactNode;
