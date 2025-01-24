@@ -1,8 +1,8 @@
-from datetime import datetime
 import logging
 from django.core.files.storage import DefaultStorage
 from .Command import Command
 from .AddFolderCommand import add_mission_from_folder
+from .DeleteFolderCommand import delete_mission_from_folder
 from restapi.models import Mission, Mission_tags, Tag
 import json
 
@@ -40,18 +40,8 @@ def sync_folder():
         add_mission_from_folder(folder, None, None)
 
     # Delete missions from the database not found in the filesystem
-    for mission_str in db_mission_set - fs_mission_set:
-        date_str, name = mission_str.split("_", 1)
-        mission_date = datetime.strptime(date_str, "%Y.%m.%d").date()
-        mission_to_delete = Mission.objects.filter(name=name, date=mission_date)[0]
-        if mission_to_delete:
-            try:
-                mission_to_delete.delete()
-                logging.info(
-                    f"Deleted mission '{name}' from database as it's no longer in the filesystem."
-                )
-            except Exception as e:
-                logging.error(f"Error deleting mission '{name}': {e}")
+    for folder in db_mission_set - fs_mission_set:
+        delete_mission_from_folder(folder)
 
     # find unused tags and delete them
     Tag.objects.filter(mission_tags=None).delete()
