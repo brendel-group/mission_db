@@ -3,8 +3,9 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
-from .models import Tag, Mission, Mission_tags, Mission_files
+from .models import File, File_topics, Tag, Mission, Mission_tags, Mission_files
 from .serializer import (
+    FileWithTopicsSerializer,
     TagSerializer,
     MissionSerializer,
     MissionTagSerializer,
@@ -66,6 +67,24 @@ def get_files_by_mission_id(request, mission_id):
         raise NotFound(f"Mission with ID {mission_id} not found")
     mission_files = Mission_files.objects.filter(mission__id=mission.id)
     serializer = FileWithTypeSerializer(mission_files, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def get_topics_from_files(request, file_path):
+    """
+    List all files with type of a mission by ID
+    ### Returns
+    Response with list of files with type in json format\
+    Or NotFound exception
+    """
+    try:
+        file = File.objects.get(file=file_path)
+    except File.DoesNotExist:
+        raise NotFound(f"File with path {file_path} not found")
+
+    file_topics = File_topics.objects.filter(file=file)
+    serializer = FileWithTopicsSerializer(file_topics, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

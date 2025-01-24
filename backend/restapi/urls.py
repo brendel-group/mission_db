@@ -2,6 +2,7 @@ from django.urls import include, path
 from .views import (
     get_missions,
     create_mission,
+    get_topics_from_files,
     mission_detail,
     get_tags,
     create_tag,
@@ -42,4 +43,9 @@ urlpatterns = [
         name="get_files_by_mission_id",
     ),
     path("auth/", include("dj_rest_auth.urls")),
+    path(
+        "missions/<str:file_path>/files/topics",
+        get_topics_from_files,
+        name="get_topics_from_files",
+    ),
 ]
