@@ -11,12 +11,14 @@ jobs:
         with:
           files: |
             **.py
-      - uses: astral-sh/ruff-action@v3
+      - if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        uses: astral-sh/ruff-action@v3
         with:
             version: "latest"
             args: "check"
             src: ${{ steps.changed-files.outputs.all_changed_files }}
-      - uses: astral-sh/ruff-action@v3
+      - if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        uses: astral-sh/ruff-action@v3
         with:
             version: "latest"
             args: "format --check"
