@@ -27,7 +27,8 @@ import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
 import { getMissions } from "~/fetchapi/missions";
 import { addTagToMission, changeTagColor, changeTagName, createTag, deleteTag, getMissionsByTag, getTags, getTagsByMission, removeTagFromMission } from "~/fetchapi/tags";
-import { getTotalDuration, getTotalSize } from "~/fetchapi/details";
+import { getDetailsByMission, getRobotNames, getTotalDuration, getTotalSize } from "~/fetchapi/details";
+import { formatRobotNames } from "~/utilities/FormatTransformer";
 
 interface ThProps {
   children: React.ReactNode;
@@ -154,6 +155,10 @@ export function Overview() {
           const totalDuration: string = await getTotalDuration(missions[i].id);
           // Fetch total size for each mission
           const totalSize: string = await getTotalSize(missions[i].id);
+
+          // Fetch robot name for each mission
+          const robots_formatted: string = formatRobotNames(await getRobotNames(missions[i].id), false);
+
           renderedMissions.push({
             id: missions[i].id,
             name: missions[i].name,
@@ -162,7 +167,7 @@ export function Overview() {
             notes: missions[i].notes,
             totalDuration: totalDuration,
             totalSize: totalSize,
-            robot: "Vader",
+            robot: robots_formatted || "",
             tags: tags || [],
           });
         }

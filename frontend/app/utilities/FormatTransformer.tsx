@@ -38,3 +38,40 @@ export function transformSizes(sizes: string[]): string[] {
     return `${value.toFixed(2)} ${unit}`;
   });
 }
+
+// This functions returns the robot names in the format x, y and z.
+// For duplicate robot names, only the first occurance is used, e.g. x, y, x -> x and y and the camel case is ignored,
+// meaning x, y, X -> x and y.
+export function formatRobotNames(
+  robotNames: string[] | undefined | null,
+  and_separated: boolean = true
+): string {
+  if (!robotNames) {
+    return "";
+  }
+
+  // Create a Set to track normalized names and filter duplicates
+  const seen = new Set<string>();
+  const uniqueRobots = robotNames.filter((name) => {
+    if (!name) {
+      return false;
+    }
+    const normalizedName = name.toLowerCase();
+    if (seen.has(normalizedName)) {
+      return false;
+    }
+    seen.add(normalizedName);
+    return true;
+  });
+
+  if (uniqueRobots.length === 0) {
+    return "";
+  } else if (uniqueRobots.length === 1) {
+    return uniqueRobots[0];
+  } else if (and_separated) {
+    const lastRobot = uniqueRobots.pop();
+    return `${uniqueRobots.join(", ")} and ${lastRobot}`;
+  } else {
+    return uniqueRobots.join(", ");
+  }
+}
