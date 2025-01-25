@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
-from .models import Mission
+from .models import Allowed_topic_names, Mission, Topic
 from .models import File
 from .models import Mission_files
 from .models import Tag
@@ -75,3 +75,15 @@ class MissionTagSerializer(serializers.ModelSerializer):
         tag, self.tag_created = Tag.objects.get_or_create(name=tag_name)
         mission_tag, _ = Mission_tags.objects.get_or_create(mission=mission, tag=tag)
         return mission_tag
+
+
+class TopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = ["id", "name", "type", "message_count", "frequency"]
+
+
+class AllowedTopicNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Allowed_topic_names
+        fields = ["name"]

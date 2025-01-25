@@ -7,7 +7,15 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.files.storage.memory import InMemoryStorage
 from django.core.files.base import ContentFile
-from .models import Tag, Mission, Mission_tags, File, Mission_files
+from .models import (
+    Allowed_topic_names,
+    Tag,
+    Mission,
+    Mission_tags,
+    File,
+    Mission_files,
+    Topic,
+)
 import logging
 import urllib.parse
 
@@ -603,3 +611,135 @@ class SpecialTagNameTest(APIAuthTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Tag.objects.filter(name="create/").exists())
+
+
+class RestAPIAllowedTopicNamesTestCases(APIAuthTestCase):
+    def setUp(self):
+        super().setUp()
+        Allowed_topic_names.objects.create(name="Car1")
+        Allowed_topic_names.objects.create(name="Car2")
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_get_allowed_topic_names(self):
+        response = self.client.get(
+            reverse("allowed_topic_names"),
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0]["name"], "Car1")
+        self.assertEqual(response.data[1]["name"], "Car2")
+
+    def test_create_allowed_topic_name(self):
+        response = self.client.post(
+            reverse("allowed_topic_names_create"),
+            {"name": "Car3"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["name"], "Car3")
+        self.assertTrue(Allowed_topic_names.objects.filter(name="Car3").exists())
+
+    def test_delete_allowed_topic_name(self):
+        response = self.client.delete(
+            reverse("allowed_topic_names_delete", kwargs={"name": "Car1"}),
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Allowed_topic_names.objects.filter(name="Car1").exists())
+
+
+class RestAPITopicsByFile(APIAuthTestCase):
+    def setUp(self):
+        super().setUp()
+
+        # fake storage
+        self._field = File.file.field
+        self._default_storage = self._field.storage
+        test_storage = InMemoryStorage()
+        self._field.storage = test_storage
+
+        # create files
+        file_content = ContentFile("")
+        test_storage.save("path/to/file1", file_content)
+
+        # Create a mission
+        self.mission = Mission.objects.create(
+            name="TestMission",
+            date=timezone.now(),
+            location="TestLocation",
+            notes="TestOther",
+        )
+
+        # Create file
+        self.file1 = File.objects.create(
+            id=0,
+            file="path/to/file1",
+            robot="TestRobot1",
+            duration=12000,
+            size=1024,
+        )
+
+        # Create allowed topic names
+        car1 = Allowed_topic_names(name="Car1")
+        car1.full_clean()
+        car1.save()
+
+        car2 = Allowed_topic_names(name="Car2")
+        car2.full_clean()
+        car2.save()
+
+        car3 = Allowed_topic_names(name="Car3")
+        car3.full_clean()
+        car3.save()
+
+        # Create topics
+        Topic.objects.create(
+            name=car1,
+            file=self.file1,
+            type="sensor",
+            message_count=124,
+            frequency=6.5,
+        )
+
+        Topic.objects.create(
+            name=car2,
+            file=self.file1,
+            type="camera",
+            message_count=1024,
+            frequency=60,
+        )
+
+        Topic.objects.create(
+            name=car3,
+            file=self.file1,
+            type="imu",
+            message_count=10000,
+            frequency=200,
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        self._field.storage = self._default_storage
+
+    def test_get_topics_by_file(self):
+        response = self.client.get(
+            reverse("get_topics_from_files", kwargs={"file_path": "path/to/file1"}),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]["name"], "Car1")
+        self.assertEqual(response.data[0]["type"], "sensor")
+        self.assertEqual(response.data[0]["message_count"], 124)
+        self.assertEqual(response.data[0]["frequency"], 6.5)
+
+        self.assertEqual(response.data[1]["name"], "Car2")
+        self.assertEqual(response.data[1]["type"], "camera")
+        self.assertEqual(response.data[1]["message_count"], 1024)
+        self.assertEqual(response.data[1]["frequency"], 60)
+
+        self.assertEqual(response.data[2]["name"], "Car3")
+        self.assertEqual(response.data[2]["type"], "imu")
+        self.assertEqual(response.data[2]["message_count"], 10000)
+        self.assertEqual(response.data[2]["frequency"], 200)
