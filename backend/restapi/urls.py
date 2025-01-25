@@ -1,5 +1,8 @@
 from django.urls import include, path
 from .views import (
+    allowed_topic_names,
+    allowed_topic_names_create,
+    allowed_topic_names_delete,
     get_missions,
     create_mission,
     get_topics_from_files,
@@ -47,5 +50,20 @@ urlpatterns = [
         "topics/<path:file_path>",
         get_topics_from_files,
         name="get_topics_from_files",
+    ),
+    path(
+        "topics-names",
+        allowed_topic_names,
+        name="allowed_topic_names",
+    ),
+    path(
+        "topics-names/create/",
+        allowed_topic_names_create,
+        name="allowed_topic_names_create",
+    ),
+    path(
+        "topics-names/<str:name>",
+        allowed_topic_names_delete,
+        name="allowed_topic_names_delete",
     ),
 ]
