@@ -16,7 +16,7 @@ class AddFolderCommand(Command):
         ### Parameters
         subparser: subparser to which this subcommand belongs to
         """
-        folder_parser = subparser.add_parser(self.name, help="adds details from folder")
+        folder_parser = subparser.add_parser(self.name, help="adds mission from folder")
         folder_parser.add_argument("--path", required=True, help="Filepath")
         folder_parser.add_argument("--location", required=False, help="location")
         folder_parser.add_argument(
