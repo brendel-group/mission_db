@@ -28,7 +28,11 @@ function Dataset() {
   const duration = searchParams.get("duration");
   const size = searchParams.get("size");
 
-  if (!fileName || !duration || !size) return <h1>Invalid URL</h1>;
+  if (!fileName || !duration || !size)
+    throw new Response(null, {
+      status: 404,
+      statusText: "Invalid file name, duration or size.",
+    });
 
   return (
     <DatasetView file={fileName} duration={duration} size={size}></DatasetView>
