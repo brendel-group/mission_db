@@ -25,7 +25,7 @@ import { MissionData, RenderedMission, Tag } from "~/data";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
-import { getMissions } from "~/fetchapi/missions";
+import { getMissions, setWasModified } from "~/fetchapi/missions";
 import { addTagToMission, changeTagColor, changeTagName, createTag, deleteTag, getMissionsByTag, getTags, getTagsByMission, removeTagFromMission } from "~/fetchapi/tags";
 import { getDetailsByMission, getRobotNames, getTotalDuration, getTotalSize } from "~/fetchapi/details";
 import { formatRobotNames } from "~/utilities/FormatTransformer";
@@ -317,6 +317,9 @@ export function Overview() {
                   setAllTags([...allTags, newTag]);
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
+
+                  // notify backend that data was modified
+                  await setWasModified(row.id, true);
                 }}
                 onAddExistingTag={async (tagName) => {
                   // update tags in backend
@@ -333,6 +336,9 @@ export function Overview() {
                       : mission;
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
+
+                  // notify backend that data was modified
+                  await setWasModified(row.id, true);
                 }}
                 onRemoveTag={async (tagName) => {
                   // update tags in backend
@@ -356,6 +362,9 @@ export function Overview() {
                       : mission;
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
+
+                  // notify backend that data was modified
+                  await setWasModified(row.id, true);
                 }}
                 onEditTag={async (tagName, newName, newColor) => {
                   // update tag name in backend
@@ -382,6 +391,9 @@ export function Overview() {
                   );
                   setFetchedData(fetchedData.map(updateTag));
                   setRenderedData(renderedData.map(updateTag));
+
+                  // notify backend that data was modified
+                  await setWasModified(row.id, true);
                 }}
                 onDeleteAllTags={async () => {
                   // update tags in backend
@@ -404,6 +416,9 @@ export function Overview() {
                     mission.id === row.id ? { ...mission, tags: [] } : mission;
                   setFetchedData(fetchedData.map(clearTags));
                   setRenderedData(renderedData.map(clearTags));
+
+                  // notify backend that data was modified
+                  await setWasModified(row.id, true);
                 }}
               />
             </Popover.Dropdown>

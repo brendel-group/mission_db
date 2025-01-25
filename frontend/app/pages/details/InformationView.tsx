@@ -2,7 +2,7 @@ import { Badge, Button, Group, Menu, Text, Textarea } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 import { convertToMissionData, RenderedMission } from "~/data";
-import { updateMission } from "~/fetchapi/missions";
+import { setWasModified, updateMission } from "~/fetchapi/missions";
 
 type EditableFieldProps = {
   fieldName: string;
@@ -113,6 +113,7 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
           missionData.location = value;
           missionData.notes = notes;
 
+          await setWasModified(missionData.id, true);
           await updateMission(convertToMissionData(missionData));
         }}
       />
@@ -128,6 +129,7 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
           missionData.location = location;
           missionData.notes = value;
 
+          await setWasModified(missionData.id, true);
           await updateMission(convertToMissionData(missionData));
         }}
       />
