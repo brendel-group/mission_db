@@ -1,6 +1,6 @@
 import classes from "./ErrorPage.module.css";
 import { Button, Container, Group, Text, Title } from "@mantine/core";
-import { MetaFunction, useNavigate } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 
 interface ServerErrorProps {
   statusCode: string;
@@ -8,8 +8,6 @@ interface ServerErrorProps {
 }
 
 export function ServerError({ statusCode, errorMessage }: ServerErrorProps) {
-  const navigate = useNavigate();
-
   return (
     <Container className={classes.root}>
       <div className={classes.code}>{statusCode}</div>
@@ -23,9 +21,10 @@ export function ServerError({ statusCode, errorMessage }: ServerErrorProps) {
           variant="gradient"
           gradient={{ from: "yellow", to: "orange", deg: 269 }}
           size="md"
-          onClick={() => navigate("/")}
+          component="a"
+          href="/"
         >
-          Take me back to main page
+          Take me to the main page
         </Button>
       </Group>
     </Container>

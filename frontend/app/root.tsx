@@ -24,25 +24,7 @@ export function ErrorBoundary() {
     ? error.message
     : "Unknown Error";
 
-  return (
-    <html lang="en">
-      <head>
-        <title>Something went wrong :/</title>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-        <ColorSchemeScript />
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-      </head>
-      <body>
-        <MantineProvider>
-          <ServerError statusCode={statusCode} errorMessage={errorMessage} />
-        </MantineProvider>
-        <Scripts />
-      </body>
-    </html>
-  );
+  return <ServerError statusCode={statusCode} errorMessage={errorMessage} />;
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {

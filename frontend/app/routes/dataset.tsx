@@ -3,6 +3,7 @@ import {
   data,
   MetaFunction,
   redirect,
+  useLoaderData,
   useSearchParams,
 } from "@remix-run/react";
 import { CreateAppShell } from "~/layout/AppShell";
@@ -19,20 +20,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (!user) throw redirect("/login");
 
-  return data(null);
-}
-
-function Dataset() {
-  const [searchParams] = useSearchParams();
-  const fileName = searchParams.get("fileName");
-  const duration = searchParams.get("duration");
-  const size = searchParams.get("size");
+  let url = new URL(request.url);
+  const fileName = url.searchParams.get("fileName");
+  const duration = url.searchParams.get("duration");
+  const size = url.searchParams.get("size");
 
   if (!fileName || !duration || !size)
     throw new Response(null, {
-      status: 404,
-      statusText: "Invalid file name, duration or size.",
+      status: 400,
+      statusText: "Invalid URL",
     });
+
+  return {
+    fileName,
+    duration,
+    size,
+  };
+}
+
+function Dataset() {
+  const { fileName, duration, size } = useLoaderData<typeof loader>();
 
   return (
     <DatasetView file={fileName} duration={duration} size={size}></DatasetView>
