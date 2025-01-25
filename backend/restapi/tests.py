@@ -664,7 +664,6 @@ class RestAPITopicsByFile(APIAuthTestCase):
         file_content = ContentFile("")
         test_storage.save("path/to/file1", file_content)
 
-        super().setUp()
         # Create a mission
         self.mission = Mission.objects.create(
             name="TestMission",
