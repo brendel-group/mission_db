@@ -134,6 +134,7 @@ def allowed_topic_names_delete(request, name):
     success response or
     HTTP_404_NOT_FOUND if allowed topic name not found
     """
+    name = urllib.parse.unquote(name)
     try:
         allowed_topic_name = Allowed_topic_names.objects.get(name=name)
     except Allowed_topic_names.DoesNotExist:
