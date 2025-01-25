@@ -24,7 +24,7 @@ export function ServerError({ statusCode, errorMessage }: ServerErrorProps) {
           component="a"
           href="/"
         >
-          Take me to the main page
+          Return to the main page
         </Button>
       </Group>
     </Container>
