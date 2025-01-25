@@ -49,9 +49,18 @@ def sync_folder():
 
     # update db_missions after adding and deleting missions
     db_missions = Mission.objects.filter()
+    
+    # flag if any mission was modified
+    modified_mission_found = False
 
     # save metadata for each mission in the filesystem
     for mission in db_missions:
+        # skip mission if nothing was modified
+        if not mission.was_modified:
+            continue
+        # else save metadata
+        modified_mission_found = True
+        Mission.objects.filter(id=mission.id).update(was_modified=False)
         tags = Tag.objects.filter(mission_tags__mission=mission)
         tag_serializer = TagSerializer(tags, many=True)
         mission_tags = [
@@ -69,3 +78,5 @@ def sync_folder():
             logging.info(
                 f"Saved metadata for mission '{mission.name}' to the mission folder"
             )
+    if not modified_mission_found:
+        logging.info("Nothing was modified, no new metadata was saved")

@@ -10,6 +10,7 @@ class Mission(models.Model):
     date = models.DateField()
     location = models.CharField(max_length=65536, null=True, blank=True)
     notes = models.CharField(max_length=65536, null=True, blank=True)
+    was_modified = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ["name", "date"]
