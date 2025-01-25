@@ -4,11 +4,16 @@ import {
   data,
   MetaFunction,
   redirect,
+  useLoaderData,
   useSearchParams,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
-import { getFormattedDetails, getTotalDuration, getTotalSize } from "~/fetchapi/details";
+import {
+  getFormattedDetails,
+  getTotalDuration,
+  getTotalSize,
+} from "~/fetchapi/details";
 import { getMission } from "~/fetchapi/missions";
 import { getTagsByMission } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
@@ -25,14 +30,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (!user) throw redirect("/login");
 
-  return data(null);
+  let url = new URL(request.url);
+  const id = url.searchParams.get("id");
+
+  if (!id) {
+    throw new Response(null, { status: 400, statusText: "Invalid URL" });
+  }
+
+  const numberId = Number(id);
+  if (Number.isNaN(numberId)) {
+    throw new Response(null, { status: 400, statusText: "Invalid URL" });
+  }
+
+  return {
+    numberId,
+  };
 }
 
 function Detail() {
-  const [searchParams] = useSearchParams();
-  const id = searchParams.get("id");
-
-  if (!id) return <h1>Invalid URL</h1>;
+  const { numberId } = useLoaderData<typeof loader>();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,13 +62,7 @@ function Detail() {
   // Detail View data
   const [detailViewData, setDetailViewData] = useState<DetailViewData>();
   const [totalSize, setTotalSize] = useState<string>("0 GB");
-  const [totalDuration, setTotalDuration] = useState<string>(
-    "00:00:00"
-  );
-
-  const numberId = Number(id);
-
-  if (isNaN(numberId)) return <h1>Invalid URL</h1>;
+  const [totalDuration, setTotalDuration] = useState<string>("00:00:00");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,16 +85,15 @@ function Detail() {
 
         setMissionData(transformedMission);
         setAllTags(tags);
-        
+
         // data for the detail view
         setDetailViewData(await getFormattedDetails(mission.id));
-        
+
         // data for the information view (size)
         setTotalSize(await getTotalSize(mission.id));
 
         // data for the information view (duration)
         setTotalDuration(await getTotalDuration(mission.id));
-
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);
@@ -97,7 +106,7 @@ function Detail() {
     };
 
     fetchData();
-  }, [id]);
+  });
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;

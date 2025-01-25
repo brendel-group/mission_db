@@ -2,12 +2,30 @@ import "@mantine/core/styles.css";
 
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import {
+  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "@remix-run/react";
+import { ServerError } from "./pages/error/ErrorPage";
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  const statusCode = isRouteErrorResponse(error)
+    ? `${error.status}`
+    : "Unknown";
+  const errorMessage = isRouteErrorResponse(error)
+    ? error.statusText
+    : error instanceof Error
+    ? error.message
+    : "Unknown Error";
+
+  return <ServerError statusCode={statusCode} errorMessage={errorMessage} />;
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
