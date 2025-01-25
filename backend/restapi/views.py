@@ -136,7 +136,7 @@ def allowed_topic_names_delete(request, name):
     """
     try:
         allowed_topic_name = Allowed_topic_names.objects.get(name=name)
-    except Mission.DoesNotExist:
+    except Allowed_topic_names.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     allowed_topic_name.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
