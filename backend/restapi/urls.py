@@ -44,7 +44,7 @@ urlpatterns = [
     ),
     path("auth/", include("dj_rest_auth.urls")),
     path(
-        "missions/<str:file_path>/files/topics",
+        "topics/<path:file_path>",
         get_topics_from_files,
         name="get_topics_from_files",
     ),
