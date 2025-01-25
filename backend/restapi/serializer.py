@@ -13,6 +13,12 @@ class MissionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class MissionWasModifiedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Mission
+        fields = ["id", "was_modified"]
+
+
 class FileSerializer(serializers.ModelSerializer):
     file_path = serializers.CharField(source="file.file", initial=None)
 

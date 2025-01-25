@@ -16,6 +16,7 @@ from .serializer import (
     AllowedTopicNameSerializer,
     TagSerializer,
     MissionSerializer,
+    MissionWasModifiedSerializer,
     MissionTagSerializer,
     FileWithTypeSerializer,
     TopicSerializer,
@@ -28,6 +29,24 @@ def get_missions(request):
     missions = Mission.objects.all()
     serializer = MissionSerializer(missions, many=True)
     return Response(serializer.data)
+
+
+@api_view(["PUT"])
+def set_was_modified(request, pk):
+    try:
+        mission = Mission.objects.get(pk=pk)
+    except Mission.DoesNotExist:
+        return Response(
+            {"error": "Mission not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = MissionWasModifiedSerializer(
+        instance=mission, data=request.data, partial=True
+    )
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])

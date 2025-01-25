@@ -17,7 +17,7 @@ export const getMissions = async (): Promise<MissionData[]> => {
 
 // Function to create a new mission
 export const createMission = async (
-  mission: Omit<MissionData, "id">
+  mission: Omit<MissionData, "id">,
 ): Promise<MissionData> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/missions/create`, {
     method: "POST",
@@ -46,7 +46,7 @@ export const getMission = async (id: number): Promise<MissionData> => {
 
 // Function to update an existing mission
 export const updateMission = async (
-  mission: MissionData
+  mission: MissionData,
 ): Promise<MissionData> => {
   const response = await fetch(`${FETCH_API_BASE_URL}/missions/${mission.id}`, {
     method: "PUT",
@@ -58,6 +58,26 @@ export const updateMission = async (
     throw new Error(`Failed to update mission with id ${mission.id}`);
   }
   return response.json();
+};
+
+export const setWasModified = async (
+  id: number,
+  was_modified: boolean,
+): Promise<void> => {
+  const response = await fetch(
+    `${FETCH_API_BASE_URL}/missions/${id}/was_modified`,
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: getHeaders(),
+      body: JSON.stringify({ was_modified }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to set wasModified to ${was_modified} for mission with id ${id}`,
+    );
+  }
 };
 
 // Function to delete a mission by ID

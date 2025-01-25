@@ -37,11 +37,11 @@ class TableTests(TestCase):
         sys.stdout.flush()
         self.assertEqual(
             self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
-            "id│name│date│location│notes\n"
-            + "┼┼┼┼\n"
-            + f"{missions[0].id}│Test0│2024-12-02│None│None\n"
-            + f"{missions[1].id}│Test1│2024-12-02│None│None\n"
-            + f"{missions[2].id}│Test2│2024-12-02│None│None",
+            "id│name│date│location│notes│was_modified\n"
+            + "┼┼┼┼┼\n"
+            + f"{missions[0].id}│Test0│2024-12-02│None│None│False\n"
+            + f"{missions[1].id}│Test1│2024-12-02│None│None│False\n"
+            + f"{missions[2].id}│Test2│2024-12-02│None│None│False",
         )
 
     def test_print_tag_table(self):
@@ -69,9 +69,9 @@ class TableTests(TestCase):
         sys.stdout.flush()
         self.assertEqual(
             self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
-            "id│name│date│location│notes\n"
-            + "┼┼┼┼\n"
-            + f"{mission[0].id}│Test│2024-12-26│None│Test\n"
-            + "│linebreak│││with\n"
-            + "││││newline",
+            "id│name│date│location│notes│was_modified\n"
+            + "┼┼┼┼┼\n"
+            + f"{mission[0].id}│Test│2024-12-26│None│Test│False\n"
+            + "│linebreak│││with│\n"
+            + "││││newline│",
         )

@@ -15,6 +15,7 @@ from .views import (
     add_tag_to_mission,
     delete_mission_tag,
     get_files_by_mission_id,
+    set_was_modified,
 )
 
 urlpatterns = [
@@ -65,5 +66,10 @@ urlpatterns = [
         "topics-names/<str:name>",
         allowed_topic_names_delete,
         name="allowed_topic_names_delete",
+    ),
+    path(
+        "missions/<int:pk>/was_modified",
+        set_was_modified,
+        name="set_was_modified",
     ),
 ]
