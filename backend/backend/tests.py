@@ -33,7 +33,7 @@ class FileDownloadTest(TestCase):
         file_content = ContentFile("12345678901", "path/to/file.test")
         test_storage.save("path/to/file.test", file_content)
 
-        file = File.objects.create(file=file_content, size=123, duration=123)
+        file = File.objects.create(file=file_content.name, size=123, duration=123)
         self.file = file.file
 
         # override _chunk_generator to force smaller chunk_size (5)
