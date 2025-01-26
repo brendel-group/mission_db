@@ -47,6 +47,9 @@ def sync_folder():
     # find unused tags and delete them
     Tag.objects.filter(mission_tags=None).delete()
 
+    # update db_missions after adding and deleting missions
+    db_missions = Mission.objects.filter()
+
     # save metadata for each mission in the filesystem
     for mission in db_missions:
         tags = Tag.objects.filter(mission_tags__mission=mission)
