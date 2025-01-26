@@ -28,10 +28,11 @@ class FileDownloadTest(TestCase):
         self._default_storage = backend.views.storage
         test_storage = InMemoryStorage()
         backend.views.storage = test_storage
+        File.file.field.storage = test_storage
 
         # create files
         file_content = ContentFile("12345678901", "path/to/file.test")
-        test_storage.save("path/to/file.test", file_content)
+        test_storage.save(file_content.name, file_content)
 
         file = File.objects.create(file=file_content.name, size=123, duration=123)
         self.file = file.file
@@ -49,6 +50,7 @@ class FileDownloadTest(TestCase):
     def tearDown(self):
         self.client.logout()
         backend.views.storage = self._default_storage
+        File.file.field.storage = self._default_storage
         self._chunk_generator_patcher.stop()
 
     def test_whole_file_download(self):
@@ -59,6 +61,9 @@ class FileDownloadTest(TestCase):
         self.assertEqual(b"".join(response.streaming_content), self.file.open().read())
 
     def test_single_range_download(self):
+        file_content = self.file.open().read()
+        self.file.close()
+
         # range with start and end
         response: StreamingHttpResponse = self.client.get(
             reverse("download", kwargs={"file_path": self.file.name})
@@ -67,7 +72,7 @@ class FileDownloadTest(TestCase):
                 "range": "bytes=0-5",
             },
         )
-        self.assertEqual(b"".join(response.streaming_content), self.file.open().read(6))
+        self.assertEqual(b"".join(response.streaming_content), file_content[:6])
 
         # range without start (last 5 bytes)
         response: StreamingHttpResponse = self.client.get(
@@ -77,10 +82,8 @@ class FileDownloadTest(TestCase):
                 "range": "bytes=-5",
             },
         )
-        file = self.file.open()
-        file.seek(6)
-        self.assertEqual(b"".join(response.streaming_content), file.read(5))
-        file.close()
+        content = b"".join(response.streaming_content)
+        self.assertEqual(content, file_content[-5:])
 
         # range without end (read from start till end of file)
         response: StreamingHttpResponse = self.client.get(
@@ -90,10 +93,7 @@ class FileDownloadTest(TestCase):
                 "range": "bytes=5-",
             },
         )
-        file = self.file.open()
-        file.seek(5)
-        self.assertEqual(b"".join(response.streaming_content), file.read())
-        file.close()
+        self.assertEqual(b"".join(response.streaming_content), file_content[5:])
 
     def test_multi_range_download(self):
         response: StreamingHttpResponse = self.client.get(
