@@ -8,6 +8,6 @@ gunicorn
 pre-commit
 psycopg2-binary
 pyreadline3; platform_system == 'Windows'
-ruff==0.9.3
+ruff
 whitenoise
 dj-rest-auth==7.*
