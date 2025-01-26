@@ -173,6 +173,15 @@ REST_AUTH = {
     "TOKEN_MODEL": None,
 }
 
+MEDIA_URL = f"{env('DOMAIN', default='http://localhost:8000')}/file/download/"
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+
+STATIC_URL = "static/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 USE_S3 = env("USE_S3", bool, False)
 
 if USE_S3:
@@ -181,9 +190,11 @@ if USE_S3:
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
                 "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
+                "custom_domain": MEDIA_URL.rstrip("/").lstrip("htps:/"),
+                "url_protocol": "https:" if "https:" in MEDIA_URL else "http:",
+                "object_parameters": {"CacheControl": "max-age=86400"},
                 # the commented out values need to be uncommented when using S3 presigned urls.
                 # "custom_domain": f"{env('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com",
-                "object_parameters": {"CacheControl": "max-age=86400"},
                 # "cloudfront_key": open(env("AWS_CLOUDFRONT_KEY_FILE")).read(),
                 # "cloudfront_key_id": env("AWS_CLOUDFRONT_KEY_ID"),
             },
@@ -192,21 +203,7 @@ if USE_S3:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
         },
     }
-    MEDIA_LOCATION = "media"
-    MEDIA_URL = f"{env('DOMAIN', default='http://localhost:8000')}/file/download/"
-
-    STATIC_URL = "static/"
-
-    STATIC_ROOT = BASE_DIR / "staticfiles"
 else:
     MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
-    MEDIA_URL = f"{env('DOMAIN', default='http://localhost:8000')}/file/download/"
-
-    # Static files (CSS, JavaScript, Images)
-    # https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-    STATIC_URL = "static/"
-
-    STATIC_ROOT = BASE_DIR / "staticfiles"
 
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

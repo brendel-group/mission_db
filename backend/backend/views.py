@@ -57,7 +57,11 @@ def download(request: HttpRequest, file_path: str):
     """
     # try to find user by sessionid
     if not settings.DEBUG:
-        _ = authenticate(request.GET["sessionid"])
+        try:
+            sessionid = request.GET["sessionid"]
+        except Exception:
+            raise PermissionDenied
+        _ = authenticate(sessionid)
 
     try:
         file = storage.open(file_path)
