@@ -6,6 +6,7 @@ import {
   getMission,
   getMissions,
   updateMission,
+  setWasModified,
 } from "../missions";
 
 /*
@@ -141,6 +142,21 @@ describe("Fetch API Functions", () => {
         credentials: "include",
         headers: { "Content-Type": "application/json" },
       });
+    });
+
+    test("setWasModified should set the was_modified flag for a mission", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
+
+      await setWasModified(1, true);
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/missions/1/was_modified`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ was_modified: true }),
+        }
+      );
     });
   });
 });
