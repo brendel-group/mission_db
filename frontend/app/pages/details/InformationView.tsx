@@ -107,14 +107,17 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         startName="Enter new location"
         sizeError="Location name too long"
         onValueChange={async (value) => {
-          setLocation(value);
-          setLocation_(value);
+          const oldLocation = location;
+          if (oldLocation !== value) {
+            setLocation(value);
+            setLocation_(value);
 
-          missionData.location = value;
-          missionData.notes = notes;
+            missionData.location = value;
+            missionData.notes = notes;
 
-          await setWasModified(missionData.id, true);
-          await updateMission(convertToMissionData(missionData));
+            await setWasModified(missionData.id, true);
+            await updateMission(convertToMissionData(missionData));
+          }
         }}
       />
 
@@ -124,13 +127,17 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         startName="Add notes"
         sizeError="Notes too long"
         onValueChange={async (value) => {
-          setNotes(value);
+          const oldNotes = notes;
 
-          missionData.location = location;
-          missionData.notes = value;
+          if (oldNotes !== value) {
+            setNotes(value);
 
-          await setWasModified(missionData.id, true);
-          await updateMission(convertToMissionData(missionData));
+            missionData.location = location;
+            missionData.notes = value;
+
+            await setWasModified(missionData.id, true);
+            await updateMission(convertToMissionData(missionData));
+          }
         }}
       />
     </div>
