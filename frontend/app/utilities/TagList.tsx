@@ -2,7 +2,6 @@ import { Badge, Group, Popover } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { Tag } from "~/data";
 import { TagPicker } from "./TagPicker";
-import { setWasModified } from "~/fetchapi/missions";
 
 import { useState } from "react";
 import { addTagToMission, changeTagColor, changeTagName, createTag, deleteTag, getMissionsByTag, removeTagFromMission } from "~/fetchapi/tags";
