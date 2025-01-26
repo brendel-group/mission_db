@@ -122,6 +122,7 @@ describe("Fetch API Functions", () => {
         ok: true,
         json: jest.fn().mockResolvedValueOnce(updatedMission),
       });
+      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
 
       const result = await updateMission(updatedMission);
       expect(result).toEqual(updatedMission);
@@ -131,7 +132,19 @@ describe("Fetch API Functions", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedMission),
       });
+    
+      // check if setWasModified was called
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/missions/1/was_modified`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ was_modified: true }),
+        }
+      );
     });
+    
 
     test("deleteMission should delete a mission by ID", async () => {
       (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
