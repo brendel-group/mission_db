@@ -1,5 +1,5 @@
 argcomplete
-django>=4.2
+django>=5.2a1
 django-colorfield
 django-cors-headers
 django-environ
