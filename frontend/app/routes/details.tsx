@@ -1,11 +1,9 @@
 import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import {
-  data,
   MetaFunction,
   redirect,
   useLoaderData,
-  useSearchParams,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
@@ -107,7 +105,7 @@ function Detail() {
     };
 
     fetchData();
-  });
+  }, [numberId]);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
