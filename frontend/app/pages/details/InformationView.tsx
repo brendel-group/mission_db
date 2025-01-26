@@ -115,7 +115,6 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
             missionData.location = value;
             missionData.notes = notes;
 
-            await setWasModified(missionData.id, true);
             await updateMission(convertToMissionData(missionData));
           }
         }}
@@ -135,7 +134,6 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
             missionData.location = location;
             missionData.notes = value;
 
-            await setWasModified(missionData.id, true);
             await updateMission(convertToMissionData(missionData));
           }
         }}

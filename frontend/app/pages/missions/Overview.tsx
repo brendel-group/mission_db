@@ -317,9 +317,6 @@ export function Overview() {
                   setAllTags([...allTags, newTag]);
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
-
-                  // notify backend that data was modified
-                  await setWasModified(row.id, true);
                 }}
                 onAddExistingTag={async (tagName) => {
                   // update tags in backend
@@ -336,9 +333,6 @@ export function Overview() {
                       : mission;
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
-
-                  // notify backend that data was modified
-                  await setWasModified(row.id, true);
                 }}
                 onRemoveTag={async (tagName) => {
                   // update tags in backend
@@ -362,9 +356,6 @@ export function Overview() {
                       : mission;
                   setFetchedData(fetchedData.map(updateMissionTags));
                   setRenderedData(renderedData.map(updateMissionTags));
-
-                  // notify backend that data was modified
-                  await setWasModified(row.id, true);
                 }}
                 onEditTag={async (tagName, newName, newColor) => {
                   // update tag name in backend
@@ -391,9 +382,6 @@ export function Overview() {
                   );
                   setFetchedData(fetchedData.map(updateTag));
                   setRenderedData(renderedData.map(updateTag));
-
-                  // notify backend that data was modified
-                  await setWasModified(row.id, true);
                 }}
                 onDeleteAllTags={async () => {
                   // update tags in backend
@@ -416,9 +404,6 @@ export function Overview() {
                     mission.id === row.id ? { ...mission, tags: [] } : mission;
                   setFetchedData(fetchedData.map(clearTags));
                   setRenderedData(renderedData.map(clearTags));
-
-                  // notify backend that data was modified
-                  await setWasModified(row.id, true);
                 }}
               />
             </Popover.Dropdown>

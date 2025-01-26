@@ -54,6 +54,7 @@ export const updateMission = async (
     headers: getHeaders(),
     body: JSON.stringify(mission),
   });
+  await setWasModified(mission.id, true);
   if (!response.ok) {
     throw new Error(`Failed to update mission with id ${mission.id}`);
   }

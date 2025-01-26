@@ -44,9 +44,6 @@ export function RenderTagsDetailView({
               const newTag = { name: tagName, color: tagColor };
               setTags([...tags, newTag]);
               setAllTags([...allTags, newTag]);
-
-              // notify backend that mission was modified
-              await setWasModified(missionId, true);
             }}
             onAddExistingTag={async (tagName) => {
               // update tags in backend
@@ -57,9 +54,6 @@ export function RenderTagsDetailView({
                 allTags.find((tag) => tag.name === tagName)?.color || "#000000";
               const existingTag = { name: tagName, color: tagColor };
               setTags([...tags, existingTag]);
-
-              // notify backend that mission was modified
-              await setWasModified(missionId, true);
             }}
             onRemoveTag={async (tagName) => {
               // update tags in backend
@@ -72,9 +66,6 @@ export function RenderTagsDetailView({
               }
               // update tags in frontend
               setTags(tags.filter((tag) => tag.name !== tagName));
-
-              // notify backend that mission was modified
-              await setWasModified(missionId, true);
             }}
             onEditTag={async (tagName, newName, newColor) => {
               // update tag in backend
@@ -96,9 +87,6 @@ export function RenderTagsDetailView({
                     : tag,
                 ),
               );
-
-              // notify backend that mission was modified
-              await setWasModified(missionId, true);
             }}
             onDeleteAllTags={async () => {
               // update tags in backend
@@ -116,9 +104,6 @@ export function RenderTagsDetailView({
 
               // update tags in frontend
               setTags([]);
-
-              // notify backend that mission was modified
-              await setWasModified(missionId, true);
             }}
           />
         </Popover.Dropdown>
