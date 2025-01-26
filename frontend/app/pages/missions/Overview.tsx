@@ -27,7 +27,7 @@ import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
 import { getMissions } from "~/fetchapi/missions";
 import { addTagToMission, changeTagColor, changeTagName, createTag, deleteTag, getMissionsByTag, getTags, getTagsByMission, removeTagFromMission } from "~/fetchapi/tags";
-import { getDetailsByMission, getRobotNames, getTotalDuration, getTotalSize } from "~/fetchapi/details";
+import { getRobotNames, getTotalDuration, getTotalSize } from "~/fetchapi/details";
 import { formatRobotNames } from "~/utilities/FormatTransformer";
 
 interface ThProps {

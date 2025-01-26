@@ -2,7 +2,7 @@ import { Badge, Button, Group, Menu, Text, Textarea } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 import { convertToMissionData, RenderedMission } from "~/data";
-import { updateMission } from "~/fetchapi/missions";
+import { setWasModified, updateMission } from "~/fetchapi/missions";
 
 type EditableFieldProps = {
   fieldName: string;
@@ -107,13 +107,16 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         startName="Enter new location"
         sizeError="Location name too long"
         onValueChange={async (value) => {
-          setLocation(value);
-          setLocation_(value);
+          const oldLocation = location;
+          if (oldLocation !== value) {
+            setLocation(value);
+            setLocation_(value);
 
-          missionData.location = value;
-          missionData.notes = notes;
+            missionData.location = value;
+            missionData.notes = notes;
 
-          await updateMission(convertToMissionData(missionData));
+            await updateMission(convertToMissionData(missionData));
+          }
         }}
       />
 
@@ -123,12 +126,16 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         startName="Add notes"
         sizeError="Notes too long"
         onValueChange={async (value) => {
-          setNotes(value);
+          const oldNotes = notes;
 
-          missionData.location = location;
-          missionData.notes = value;
+          if (oldNotes !== value) {
+            setNotes(value);
 
-          await updateMission(convertToMissionData(missionData));
+            missionData.location = location;
+            missionData.notes = value;
+
+            await updateMission(convertToMissionData(missionData));
+          }
         }}
       />
     </div>

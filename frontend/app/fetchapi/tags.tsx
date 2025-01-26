@@ -1,6 +1,7 @@
 import { Tag } from "~/data";
 import { FETCH_API_BASE_URL } from "~/config";
 import { getHeaders } from "./headers";
+import { setWasModified } from "~/fetchapi/missions";
 
 // Get all tags
 export const getTags = async (): Promise<Tag[]> => {
@@ -31,6 +32,7 @@ export const addTagToMission = async (
     headers: getHeaders(),
     body: JSON.stringify({ mission_id: missionId, tag_name: tagName }),
   });
+  await setWasModified(missionId, true);
   if (!response.ok) {
     if (response.status === 400) {
       throw new Error(
@@ -59,6 +61,7 @@ export const removeTagFromMission = async (
       headers: getHeaders(),
     }
   );
+  await setWasModified(missionId, true);
   if (!response.ok) {
     if (response.status === 404) {
       throw new Error("Mission, tag, or relationship not found.");
@@ -83,6 +86,11 @@ export const changeTagName = async (
       body: JSON.stringify({ name: newName }),
     }
   );
+  // get all missions with the tag and set was_modified to true
+  const missionsWithTag = await getMissionsByTag(newName);
+  for (let i = 0; i < missionsWithTag.length; i++) {
+    await setWasModified(missionsWithTag[i].id, true);
+  }
   if (!response.ok) {
     if (response.status === 400) {
       throw new Error("Invalid data. Ensure the tag name is correct.");
@@ -114,6 +122,11 @@ export const changeTagColor = async (
       body: JSON.stringify({ name: tagName, color: newColor }),
     }
   );
+  // get all missions with the tag and set was_modified to true
+  const missionsWithTag = await getMissionsByTag(tagName);
+  for (let i = 0; i < missionsWithTag.length; i++) {
+    await setWasModified(missionsWithTag[i].id, true);
+  }
   if (!response.ok) {
     if (response.status === 400) {
       throw new Error(

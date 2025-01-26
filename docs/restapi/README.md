@@ -140,5 +140,9 @@ For more details about how to use the endpoints refer to the [dj-rest-auth docum
   - Using a [DELETE Request](http://localhost:8000/topics-names/test) with the name.
   - The URL is of the format `topics-names/<str:name>`
   - The result will be HTTP_204_NO_CONTENT or HTTP_404_NOT_FOUND if the name is not found.
+
+- PUT request to set the was_modified field of a mission
+  - Using a [PUT Request](http://localhost:8000/restapi/missions/0/was-modified) with the mission id.
+  - The URL is of the format `restapi/missions/<int:mission_id>/was-modified`
   
 If you want to confirm your actions further, you can always check the current state of the database. The steps to achieve this are described in docs/database.

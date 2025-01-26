@@ -44,12 +44,14 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
             date="2024-10-29",
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
         self.secondMission = Mission.objects.create(
             name="TestMission2",
             date="2024-10-29",
             location="TestLocation2",
             notes="TestOther2",
+            was_modified=False,
         )
 
     def tearDown(self):
@@ -70,6 +72,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
         self.assertEqual(
@@ -80,6 +83,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation2",
                 "notes": "TestOther2",
+                "was_modified": False,
             },
         )
 
@@ -97,6 +101,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
 
@@ -108,6 +113,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
             format="json",
         )
@@ -120,6 +126,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
 
@@ -318,6 +325,7 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
             date=timezone.now(),
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
         self.tags = []
         for i in range(3):
@@ -537,6 +545,7 @@ class MissionFilesTestCase(APIAuthTestCase):
             date=timezone.now(),
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
 
         # Create files
@@ -670,6 +679,7 @@ class RestAPITopicsByFile(APIAuthTestCase):
             date=timezone.now(),
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
 
         # Create file
@@ -743,3 +753,57 @@ class RestAPITopicsByFile(APIAuthTestCase):
         self.assertEqual(response.data[2]["type"], "imu")
         self.assertEqual(response.data[2]["message_count"], 10000)
         self.assertEqual(response.data[2]["frequency"], 200)
+
+
+class SetWasModifiedTestCase(APITestCase):
+    def setUp(self):
+        # Create a user
+        self.user = User.objects.create_user(username="testuser", password="password")
+
+        # Create a mission
+        self.mission = Mission.objects.create(
+            name="Test Mission",
+            date="2025-01-01",
+            location="Test Location",
+            notes="Test Notes",
+            was_modified=False,
+        )
+
+        # Log in the user
+        self.client.login(username="testuser", password="password")
+
+        # Define URLs
+        self.valid_url = reverse("set_was_modified", kwargs={"pk": self.mission.id})
+        self.invalid_url = reverse("set_was_modified", kwargs={"pk": 9999})
+        self.valid_payload = {"was_modified": True}
+        self.invalid_payload = {"wasModified": True}
+
+    def test_set_was_modified_successful(self):
+        """Test setting was_modified to True for an existing mission"""
+        response = self.client.put(self.valid_url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], self.mission.id)
+        self.assertTrue(response.data["was_modified"])
+
+        # Verify the mission in the database is updated
+        self.mission.refresh_from_db()
+        self.assertTrue(self.mission.was_modified)
+
+    def test_set_was_modified_mission_not_found(self):
+        """Test setting was_modified for a non-existent mission"""
+        response = self.client.put(self.invalid_url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["error"], "Mission not found")
+
+    def test_partial_update(self):
+        """Test for partial update (only 'was_modified' field is updated)"""
+        new_payload = {"was_modified": True}
+        old_notes = self.mission.notes
+        response = self.client.put(self.valid_url, new_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.mission.refresh_from_db()
+        self.assertTrue(self.mission.was_modified)
+        self.assertEqual(
+            self.mission.notes, old_notes
+        )  # make sure notes are not changed

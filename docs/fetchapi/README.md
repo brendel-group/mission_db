@@ -7,6 +7,9 @@ The `fetchapi.ts` file provides utility functions to interact with the Mission D
 
 ## Functions
 
+### setWasModified(id, was_modified)
+- set the was_modified field of mission with id to was_modified
+
 ### getMissions()
 - Fetches all missions from the backend.
 - **Returns**: `Promise<BackendMissionData[]>`

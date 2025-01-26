@@ -15,7 +15,7 @@ import {
   getTotalSize,
 } from "~/fetchapi/details";
 import { getMission } from "~/fetchapi/missions";
-import { getTagsByMission } from "~/fetchapi/tags";
+import { getTagsByMission, getTags } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
 import { sessionStorage } from "~/utilities/LoginHandler";
@@ -69,6 +69,7 @@ function Detail() {
       try {
         const mission: MissionData = await getMission(numberId); // Fetch mission
         const tags: Tag[] = await getTagsByMission(numberId); //Fetch the tags for the mission
+        const allTags: Tag[] = await getTags(); //Fetch all tags
         tags.sort((a, b) => a.name.localeCompare(b.name));
 
         const transformedMission: RenderedMission = {
@@ -84,8 +85,8 @@ function Detail() {
         };
 
         setMissionData(transformedMission);
-        setAllTags(tags);
-
+        setAllTags(allTags);
+        
         // data for the detail view
         setDetailViewData(await getFormattedDetails(mission.id));
 

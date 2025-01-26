@@ -56,6 +56,7 @@ describe("Fetch API Functions", () => {
         ok: true,
         json: jest.fn().mockResolvedValueOnce(mockResponse),
       });
+      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
 
       const result = await addTagToMission(1, "Important");
       expect(result).toEqual(mockResponse);
@@ -68,9 +69,19 @@ describe("Fetch API Functions", () => {
           body: JSON.stringify({ mission_id: 1, tag_name: "Important" }),
         }
       );
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/missions/1/was_modified`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ was_modified: true }),
+        }
+      );
     });
 
     test("removeTagFromMission should remove a tag from a mission", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
       (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
 
       await removeTagFromMission(1, "Important");
@@ -82,6 +93,15 @@ describe("Fetch API Functions", () => {
           headers: { "Content-Type": "application/json" },
         }
       );
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/missions/1/was_modified`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ was_modified: true }),
+        }
+      );
     });
 
     test("changeTagName should change the name of a tag by name", async () => {
@@ -89,14 +109,19 @@ describe("Fetch API Functions", () => {
         name: "ImportantTag",
         color: "#FF0000",
       };
+      // Mock for the tagUpdate call
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({
-          //id: 1,
-          name: "ImportantTag",
-          color: "#FF0000",
-        }),
+        json: jest.fn().mockResolvedValueOnce(mockResponse),
       });
+
+      // Mock for getMissionsByTag call
+      const mockMissions = [{ id: 1, name: "Mission1" }];
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce(mockMissions),
+      });
+      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
       const result = await changeTagName("ImportantTag", "NewTag");
       expect(result).toEqual(mockResponse);
       expect(fetch).toHaveBeenCalledWith(
@@ -108,6 +133,15 @@ describe("Fetch API Functions", () => {
           body: JSON.stringify({ name: "NewTag" }),
         }
       );
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/missions/1/was_modified`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ was_modified: true }),
+        }
+      );
     });
 
     test("changeTagColor should change the color of a tag by name", async () => {
@@ -115,14 +149,19 @@ describe("Fetch API Functions", () => {
         name: "ImportantTag",
         color: "#00FF00",
       };
+      // Mock for the Tag-Update call
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({
-          //id: 1,
-          name: "ImportantTag",
-          color: "#00FF00",
-        }),
+        json: jest.fn().mockResolvedValueOnce(mockResponse),
       });
+
+      // Mock for getMissionsByTag
+      const mockMissions = [{ id: 1, name: "Mission1" }];
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValueOnce(mockMissions),
+      });
+      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true });
 
       const result = await changeTagColor("ImportantTag", "#00FF00");
       expect(result).toEqual(mockResponse);
@@ -133,6 +172,15 @@ describe("Fetch API Functions", () => {
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: "ImportantTag", color: "#00FF00" }),
+        }
+      );
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/missions/1/was_modified`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ was_modified: true }),
         }
       );
     });
