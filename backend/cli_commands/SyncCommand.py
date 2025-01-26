@@ -49,7 +49,7 @@ def sync_folder():
 
     # update db_missions after adding and deleting missions
     db_missions = Mission.objects.filter()
-    
+
     # flag if any mission was modified
     modified_mission_found = False
 
