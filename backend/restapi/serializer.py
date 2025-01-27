@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
-from .models import Mission
+from .models import Allowed_topic_names, Mission, Topic
 from .models import File
 from .models import Mission_files
 from .models import Tag
@@ -13,10 +13,18 @@ class MissionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class MissionWasModifiedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Mission
+        fields = ["id", "was_modified"]
+
+
 class FileSerializer(serializers.ModelSerializer):
+    file_path = serializers.CharField(source="file.file", initial=None)
+
     class Meta:
         model = File
-        fields = "__all__"
+        fields = ["id", "file_path", "video", "robot", "duration", "size"]
 
 
 class MissionFileSerializer(serializers.ModelSerializer):
@@ -73,3 +81,15 @@ class MissionTagSerializer(serializers.ModelSerializer):
         tag, self.tag_created = Tag.objects.get_or_create(name=tag_name)
         mission_tag, _ = Mission_tags.objects.get_or_create(mission=mission, tag=tag)
         return mission_tag
+
+
+class TopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = ["id", "name", "type", "message_count", "frequency"]
+
+
+class AllowedTopicNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Allowed_topic_names
+        fields = ["name"]

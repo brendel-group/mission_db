@@ -1,5 +1,9 @@
 # Command-line Interface
 
+When listing for example Missions the output is a table that uses unicode characters for nice formatting,\
+but if your terminal doesn't support unicode you can disable this by setting the envirment variable `USE_UNICODE` to `False` in the .env file.\
+The table will then be printed using ASCII characters.
+
 ## Interactive mode:
 Executing `cli.py` without any arguments will start an interactive shell mode.\
 Every argument is available as a command in the shell.\
@@ -29,6 +33,22 @@ id │ name                          │ date       │ location │ notes
 >>> exit
 ```
 
+It's possible to input multiple lines when using quotes.
+Example:
+```bash
+./cli.py
+cli.py interactive mode
+  type 'help' for help or 'exit' to exit
+>>> mission add --name "Multi
+... line
+... example" --date "2024-12-26"
+INFO:root:'Multi
+line
+example' added.
+>>> exit
+```
+Strings with linebreaks are also supported when listing something in a table.
+
 ## Argument mode:
 
 Instead of using the interactive mode you can directly call the CLI with the arguments.
@@ -39,6 +59,10 @@ Use
 ```
 to display help information\
 `--help` can be called on every command and subcommand
+
+When the output is too wide or long for the terminal and is a table, a pager will be used to display the table.\
+The pager can be set usin the  `PAGER` or `MANPAGER` environmental variables.\
+On Debian systems the default pager is `less` in most cases. With `less` the option `-S` can be used to disable folding of long lines to correctly display the table.
 
 ### `cli.py mission`
 
@@ -62,11 +86,11 @@ removes a Mission from the Database
 #### Attention: doesn't ask for confirmation
 
 Arguments:
-- `--id` delete mission using the id
+- `id` delete mission using the id
 
 Example:
 ```
-./cli.py mission remove --id 1
+./cli.py mission remove 1
 ```
 
 ### `cli.py mission list`
@@ -85,11 +109,11 @@ List all Tags of one Mission in a table\
 Sorted ascending by id
 
 Arguments:
-- `--id` Mission id
+- `id` Mission id
 
 Example:
 ```bash
-./cli.py mission tag list --id 1
+./cli.py mission tag list 1
 ```
 
 ### `cli.py mission tag add`
@@ -102,6 +126,8 @@ Arguments:
 - `--tag-id` (optional) Tag id
 - `--tag-name` (optional) Tag name
 
+`--tag-id` and `--tag-name` are mutually exclusive, so at least one is required but both are not allowed.
+
 Example:
 ```bash
 ./cli.py mission tag add --id 1 --name "TestTag"
@@ -109,12 +135,14 @@ Example:
 
 ### `cli.py mission tag remove`
 Remove Tag from Mission.\
-A Tag can be removed using the id or the name, but at least one of them must be used.
+A Tag can be removed using the id or the name.
 
 Arguments:
 - `--id` Mission id
 - `--tag-id` (optional) Tag id
 - `--tag-name` (optional) Tag name
+
+`--tag-id` and `--tag-name` are mutually exclusive, so at least one is required but both are not allowed.
 
 Example:
 ```bash
@@ -130,18 +158,15 @@ Arguments:
 - `--location` (optional) the location where the mission took place
 - `--notes` (optional) additional information
 
-### `cli.py syncfolder`
-adds all missions from a folder not currently in the database
+### `cli.py deletefolder`
+delets a folder from the database
 
 Arguments:
-- `--path` path to mission folder containing the missionfolders 
-- `--location` (optional) the location where the mission took place
-- `--notes` (optional) additional information
+- `--path` path to mission folder of format `YYYY.MM.DD_mission_name` without trailing /
 
-Example:
-```
-./cli.py syncfolder --path "your/path/name" --location "location(optional)" --notes "notes(optional)"
-```
+### `cli.py sync`
+adds all missions from a folder not currently in the database and deletes all missions from the database that are not in the folder\
+The folder that is searched for mission folders is the root of the Default Storage as configured in [settings.py](../../backend/backend/settings.py)
 
 ### `cli.py tag`
 command to make changes to tags
@@ -166,7 +191,7 @@ Arguments:
 - `--id` remove tag by id
 - `--name` remove tag by name
 
-Either `--id` or `--name` must be given. If both are given the id will be used and the name is ignored. \
+`--id` and `--name` are mutually exclusive, so at least one is required but both are not allowed.
 
 Example
 ```bash
@@ -208,38 +233,57 @@ Arguments:
 - `--id` (optional) Tag id
 - `--name` (optional) Tag name
 
+`--id` and `--name` are mutually exclusive, so at least one is required but both are not allowed.
+
 Example:
 ```bash
 ./cli.py tag mission list --id 1
 ```
 
-### `cli.py api-key`
-command to make changes to API KEYs
+### `cli.py user`
+Make changes to Users
 
-### `cli.py api-key add`
-Create a new API KEY\
-This is the only time the key itself is visible.
-
-Argumemts:
-- `--name` Name of the API KEY
-- `--expiry-date` (optional) Expiration Date of the API KEY\
-format: `YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]`
-
-### `cli.py api-key remove`
-Remove an API KEY\
-The API KEY can be selected using the name or prefix.\
-The prefix can be found when listing all keys.\
-If the name is used and there are multiple keys with that name, all of them will be removed.
+### `cli.py user add`
+Add a user
 
 Arguments:
-- `--name` (optional) Name of the API KEY
-- `--prefix` (optional) Prefix of an API KEY
+- `--name` username of new user
+- `--email` (optional) email-address of new user
 
-### `cli.py api-key list`
-List all API KEYs\
-This will not display the keys itself.\
-It will display all information as stored in the database.\
-The keys itself are stored as hash values.
+The password can not be given as an argument and must be entered interactively after the command.\
+For rules for a password refer to the [password policies](../password_policy/README.md)
+
+Example:
+```bash
+./cli.py user add --name test
+```
+will then ask for a password:
+```bash
+Password: 
+```
+and to verify the password:
+```bash
+Verify Password: 
+```
+
+### `cli.py user remove`
+Delete/remove a User.
+
+Arguments:
+- `--name` username of user to remove
+
+### `cli.py user change-password`
+Change the password of a User. Doesn't ask for the old password, just the new password.
+
+Arguments:
+- `--name` username of User which wants to change the password
+
+The password rules can be found [here](../password_policy/README.md)
+
+### `cli.py user list`
+Show all users.\
+Lists the Users with the data stored in the database.\
+The password is not stored in clear-text but as a hash value.
 
 ## Troubleshooting
 
@@ -250,3 +294,37 @@ The keys itself are stored as hash values.
   ```bash
   ./manage.py flush
   ```
+
+## Notes for Developers:
+
+All commands are implemented in the folder cli_commands.\
+To add a new command import the abstract class `Command` from `Command.py`
+and make a new class that inherits from this abstract class and implements all abstract methods and properties.
+
+All .py files in the cli_commands folder are imported by cli.py except files that start with `test` and the file `__init__.py`\
+Like this all classes inheriting from the `Command` class are found and added as a command and no changes of cli.py are required to add a new command.
+
+There is one abstract property: `name`
+
+And 2 abstract methods: 
+- `parser_setup(self, subparser: argparse._SubParsersAction)`
+- `command(self, args: argparse.Namespace)`
+
+For information on what they do check `backend/cli_commands/Command.py`
+
+Example implementation:
+```python
+from .Command import Command
+
+class Example(Command):
+
+  name = "example"
+
+  def parser_setup(self, subparser):
+    self.parser = subparser.add_parser(self.name,help="example")
+    # add more arguments
+
+  def command(self, args):
+    pass # (remove this)
+    # do something
+```

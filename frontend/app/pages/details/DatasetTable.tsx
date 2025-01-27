@@ -1,5 +1,4 @@
 import { Table } from "@mantine/core";
-import { useState } from "react";
 import { DetailViewData } from "~/data";
 import { useNavigate } from "@remix-run/react";
 
@@ -23,6 +22,7 @@ export function ShowDatasets({ data }: { data: DetailViewData }) {
       <Table.Td>{file}</Table.Td>
       <Table.Td>{data.durations[index]}</Table.Td>
       <Table.Td>{data.sizes[index]}</Table.Td>
+      <Table.Td>{data.robots[index]}</Table.Td>
     </Table.Tr>
   ));
 
@@ -34,7 +34,8 @@ export function ShowDatasets({ data }: { data: DetailViewData }) {
           <Table.Tr>
             <Table.Th>File</Table.Th>
             <Table.Th>Duration</Table.Th>
-            <Table.Th>Size (MB)</Table.Th>
+            <Table.Th>Size</Table.Th>
+            <Table.Th>Robot</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>

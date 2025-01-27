@@ -2,27 +2,34 @@ import { Grid } from "@mantine/core";
 import React, { useState } from "react";
 import { RenderTagsDetailView } from "../../utilities/TagList";
 import { ShowDatasets } from "./DatasetTable";
-import { RenderedMission } from "~/data";
+import { DetailViewData, RenderedMission, Tag } from "~/data";
 import AbstractPage from "../AbstractPage";
 import { ShowInformationView } from "./InformationView";
+import { formatRobotNames } from "~/utilities/FormatTransformer";
 
 interface DetailsViewProps {
   missionData: RenderedMission;
+  detailViewData: DetailViewData | undefined;
+  totalSize: string;
+  totalDuration: string;
+  allTags: Tag[];
 }
 
-const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
-  const detailViewData = {
-    files: ["file1.mcap", "file2.mcap", "file3.mcap"],
-    durations: ["00:01:30", "00:02:45", "00:00:50"],
-    sizes: ["2000", "4500", "1000"],
-  };
-
+const DetailsView: React.FC<DetailsViewProps> = ({
+  missionData,
+  detailViewData,
+  totalSize,
+  totalDuration,
+  allTags,
+}) => {
   const [location, setLocation] = useState<string>(missionData.location);
 
   return (
     <AbstractPage
-      headline={`${missionData.name}${location ? `, ${location}` : ""}${
-        missionData.robot ? ` with ${missionData.robot}` : ""
+      headline={`${missionData.name}${location ? ` in ${location}` : ""}${
+        detailViewData?.robots && detailViewData?.robots.length > 0
+          ? ` with ${formatRobotNames(detailViewData.robots)}`
+          : ""
       }`}
     >
       {/* Main content */}
@@ -36,6 +43,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
                 <RenderTagsDetailView
                   tags_={missionData.tags}
                   missionId={missionData.id}
+                  allTags_={allTags}
                 />
               )}
             </Grid.Col>
@@ -51,6 +59,8 @@ const DetailsView: React.FC<DetailsViewProps> = ({ missionData }) => {
           <ShowInformationView
             missionData={missionData}
             setLocation_={setLocation}
+            totalSize={totalSize}
+            totalDuration={totalDuration}
           />
         </Grid.Col>
       </Grid>

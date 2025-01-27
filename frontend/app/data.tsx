@@ -6,8 +6,10 @@ export interface Tag {
 //Fetch this data by mission_id from MissionTableData
 export interface DetailViewData {
   files: string[];
+  videos: string[];
   durations: string[];
   sizes: string[];
+  robots: string[];
 }
 
 //Represents a mission in the backend
@@ -41,6 +43,9 @@ export interface User {
   id: number;
   username: string;
   password: string;
+
+  //Backend part
+  backendCookie?: string[];
 }
 
 //Converts a rendered mission to mission data

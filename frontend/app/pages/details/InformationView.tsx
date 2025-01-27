@@ -1,8 +1,8 @@
 import { Badge, Button, Group, Menu, Text, Textarea } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
-import { convertToMissionData, MissionData, RenderedMission } from "~/data";
-import { updateMission } from "~/utilities/fetchapi";
+import { convertToMissionData, RenderedMission } from "~/data";
+import { setWasModified, updateMission } from "~/fetchapi/missions";
 
 type EditableFieldProps = {
   fieldName: string;
@@ -79,11 +79,15 @@ const EditableField: React.FC<EditableFieldProps> = ({
 interface ShowInformationViewProps {
   missionData: RenderedMission;
   setLocation_: (loc: string) => void;
+  totalSize: string;
+  totalDuration: string;
 }
 
 export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
   missionData,
   setLocation_,
+  totalSize,
+  totalDuration,
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
   const [notes, setNotes] = useState<string>(missionData.notes);
@@ -94,8 +98,8 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         Information
       </Text>
       <Text>Date: {missionData.date}</Text>
-      <Text>Total Duration: {missionData.totalDuration}</Text>
-      <Text>Total Size: {missionData.totalSize} GB</Text>
+      <Text>Total Duration: {totalDuration}</Text>
+      <Text>Total Size: {totalSize}</Text>
 
       <EditableField
         fieldName="Location"
@@ -103,13 +107,16 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         startName="Enter new location"
         sizeError="Location name too long"
         onValueChange={async (value) => {
-          setLocation(value);
-          setLocation_(value);
+          const oldLocation = location;
+          if (oldLocation !== value) {
+            setLocation(value);
+            setLocation_(value);
 
-          const backend_data = convertToMissionData(missionData);
-          backend_data.location = value;
+            missionData.location = value;
+            missionData.notes = notes;
 
-          await updateMission(backend_data);
+            await updateMission(convertToMissionData(missionData));
+          }
         }}
       />
 
@@ -119,12 +126,16 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         startName="Add notes"
         sizeError="Notes too long"
         onValueChange={async (value) => {
-          setNotes(value);
+          const oldNotes = notes;
 
-          const backend_data = convertToMissionData(missionData);
-          backend_data.notes = value;
+          if (oldNotes !== value) {
+            setNotes(value);
 
-          await updateMission(backend_data);
+            missionData.location = location;
+            missionData.notes = value;
+
+            await updateMission(convertToMissionData(missionData));
+          }
         }}
       />
     </div>

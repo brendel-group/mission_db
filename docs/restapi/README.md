@@ -5,21 +5,43 @@ The request functions are located in the backend/restapi/views.py. The @api_view
 
 To test the API, one can use the django webserver. The backend/restapi/urls.py file defines the URL needed to visit, in order to test the function.
 
-## authorization
-When the server is started with `DEBUG=False` (default is `False` can be set in `.env` file) authorization is required.\
-This means that every request has to be sent together with an API KEY in the Authorization header. It must be formatted as:
+## Authentication
+
+Session Authentication is used to authenticate a user.\
+To use the REST API you first need to login at the API ENDPOINT at `/restapi/auth/login` which will have a HTTP 204 response and sets 2 cookies in the browser if the login was successfull.\
+These cookies are `csrftoken` and `sessionid`.\
+The `sessionid` is used to authenticate the user and allows you to make other requests.
+
+It is possible to set the cookie domain with the environmental variable `COOKIE_DOMAIN`
+
+To logout use the API ENDPOINT at `/restapi/auth/logout` (only make a post request without any data) which will delete the `sessionid` cookie and the session stored in the backend. \
+The respone will be
+```json
+{
+    "detail": "Successfully logged out."
+}
 ```
-Authorization: Api-Key <API_KEY>
-```
-without this every request will have a HTTP 403 response.\
-For information on how to get an API KEY refer to the [cli documentation](https://github.com/brendel-group/mission_db/blob/main/docs/cli/README.md) for the `api-key` command.
+even if the user is already logged out.\
+Without logout the cookie will be stored and keeps you logged in until the expiration date (currently 2 weeks).
+
+## authentication for the frontend
+Available URLs are:
+- `/restapi/auth/login/` (POST) returns 204 status code if credentials are valid. Creates django session
+- `/restapi/auth/logout/` (POST) Deletes django session
+- `/restapi/auth/user/` (GET,PUT,PATCH) User details
+- `/restapi/auth/password/change/` (POST) change password
+- `/restapi/auth/password/reset/` (POST) not usable until email delivery is supported
+- `/restapi/auth/password/reset/confirm/` (POST) also not usable until email delivery is supported
+
+This should only be a short overview about what is suported.\
+For more details about how to use the endpoints refer to the [dj-rest-auth documentation](https://dj-rest-auth.readthedocs.io/en/latest/api_endpoints.html).
 
 ## how to test using the webserver
 ### starting the webserver
 - cd into the backend dir
 - run `python manage.py runserver`
 
-### using the webserver
+## using the webserver
 - GET Requests for missions
     - [GET Missions](http://127.0.0.1:8000/restapi/missions/) shows all stored missions in our database
 - POST Requests for missions
@@ -99,4 +121,28 @@ For information on how to get an API KEY refer to the [cli documentation](https:
   - The URL is of the format `restapi/missions/<int:mission_id>/files/`
   - The result will be a list of files associated with the specific mission.
 
+- GET request to list all topics for a file path
+  - Using a [GET Request](http://localhost:8000/restapi/topics/yourpathhere) the topics from a file path can be listed.
+  - The URL is of the format `restapi/topics/<path:file_path>`
+  - The result will be a list of topics.
+
+- GET request to list all allowed topic names
+  - Using a [GET Request](http://localhost:8000/restapi/topics-names/) the allowed topic names can be listed.
+  - The URL is of the format `restapi/topics-names/`
+  - The result will be a list of allowed topic names.
+
+- POST request to add an allowed topic name
+  - Using a [POST Request](http://localhost:8000/restapi/topics-names/create/) with a name field.
+  - The URL is of the format `restapi/topics-names/create/`
+  - The result will be an object containing the added name.
+
+- DELETE request to delete an allowed topic name
+  - Using a [DELETE Request](http://localhost:8000/topics-names/test) with the name.
+  - The URL is of the format `topics-names/<str:name>`
+  - The result will be HTTP_204_NO_CONTENT or HTTP_404_NOT_FOUND if the name is not found.
+
+- PUT request to set the was_modified field of a mission
+  - Using a [PUT Request](http://localhost:8000/restapi/missions/0/was-modified) with the mission id.
+  - The URL is of the format `restapi/missions/<int:mission_id>/was-modified`
+  
 If you want to confirm your actions further, you can always check the current state of the database. The steps to achieve this are described in docs/database.

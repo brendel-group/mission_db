@@ -32,7 +32,31 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev"]
-CSRF_TRUSTED_ORIGINS = ["https://*.fly.dev"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.fly.dev",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+
+CSRF_COOKIE_HTTPONLY = False
+
+SESSION_COOKIE_HTTPONLY = False
+
+SESSION_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_SECURE = not DEBUG
+
+SESSION_COOKIE_SAMESITE = "Lax"
+
+CSRF_COOKIE_SAMESITE = "Lax"
+
+COOKIE_DOMAIN = env("COOKIE_DOMAIN", default=None)
+
+SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
+
+CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
+
+MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
 
 
 # Application definition
@@ -46,9 +70,9 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework_api_key",
     "restapi",
     "corsheaders",
+    "dj_rest_auth",
 ]
 
 MIDDLEWARE = [
@@ -141,7 +165,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 if not DEBUG:
     REST_FRAMEWORK = {
-        "DEFAULT_PERMISSION_CLASSES": [
-            "rest_framework_api_key.permissions.HasAPIKey",
-        ]
+        "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+        "DEFAULT_AUTHENTICATION_CLASSES": [
+            "rest_framework.authentication.SessionAuthentication",
+        ],
     }
+
+# Authentication
+# https://dj-rest-auth.readthedocs.io/en/latest/configuration.html
+REST_AUTH = {
+    "TOKEN_MODEL": None,
+}

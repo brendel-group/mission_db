@@ -1,45 +1,58 @@
-import { Badge, Group, Menu } from "@mantine/core";
+import { Badge, Group, Popover } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { Tag } from "~/data";
 import { TagPicker } from "./TagPicker";
-import {
-  addTagToMission,
-  changeTagColor,
-  createTag,
-  deleteTag,
-  getMissionsByTag,
-  removeTagFromMission,
-} from "./fetchapi";
+
 import { useState } from "react";
+import { addTagToMission, changeTagColor, changeTagName, createTag, deleteTag, getMissionsByTag, removeTagFromMission } from "~/fetchapi/tags";
 
 export function RenderTagsDetailView({
   tags_,
+  allTags_,
   missionId,
 }: {
   tags_: Tag[];
+  allTags_: Tag[];
   missionId: number;
 }) {
   const [tags, setTags] = useState<Tag[]>(tags_);
+  const [allTags, setAllTags] = useState<Tag[]>(allTags_);
 
   return (
     <Group gap="xs">
       {/*edit button*/}
-      <Menu>
-        <Menu.Target>
+      <Popover>
+        <Popover.Target>
           <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
             <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
           </Badge>
-        </Menu.Target>
+        </Popover.Target>
         {/*Actions for the Tag Picker*/}
-        <Menu.Dropdown style={{ padding: "10px", marginLeft: "75px" }}>
+        <Popover.Dropdown
+          style={{ padding: "10px", marginLeft: "75px", width: "300px" }}
+        >
           <TagPicker
             tags={tags}
-            onAddNewTag={(tagName, tagColor) => {
+            allTags={allTags}
+            onAddNewTag={async (tagName, tagColor) => {
               //update tags in backend
-              createTag(tagName, tagColor);
-              addTagToMission(missionId, tagName);
+              await createTag(tagName, tagColor);
+              await addTagToMission(missionId, tagName);
+
               // update tags in frontend
-              setTags([...tags, { name: tagName, color: tagColor }]);
+              const newTag = { name: tagName, color: tagColor };
+              setTags([...tags, newTag]);
+              setAllTags([...allTags, newTag]);
+            }}
+            onAddExistingTag={async (tagName) => {
+              // update tags in backend
+              await addTagToMission(missionId, tagName);
+
+              // update tags in frontend
+              const tagColor =
+                allTags.find((tag) => tag.name === tagName)?.color || "#000000";
+              const existingTag = { name: tagName, color: tagColor };
+              setTags([...tags, existingTag]);
             }}
             onRemoveTag={async (tagName) => {
               // update tags in backend
@@ -47,28 +60,53 @@ export function RenderTagsDetailView({
               const missionsWithTag = await getMissionsByTag(tagName);
               if (missionsWithTag.length === 0) {
                 // delete tag from database if no missions are using it
-                deleteTag(tagName);
+                await deleteTag(tagName);
+                setAllTags(allTags.filter((tag) => tag.name !== tagName));
               }
               // update tags in frontend
               setTags(tags.filter((tag) => tag.name !== tagName));
             }}
-            onChangeTagColor={(tagName, newColor) => {
-              // update tag color in backend
-              changeTagColor(tagName, newColor);
+            onEditTag={async (tagName, newName, newColor) => {
+              // update tag in backend
+              await changeTagName(tagName, newName);
+              await changeTagColor(newName, newColor);
 
               // update tags in frontend
               setTags((prev) =>
-                prev.map((tag) => {
-                  if (tag.name === tagName) {
-                    return { ...tag, color: newColor };
-                  }
-                  return tag;
-                })
+                prev.map((tag) =>
+                  tag.name === tagName
+                    ? { name: newName, color: newColor }
+                    : tag,
+                ),
+              );
+              setAllTags((prev) =>
+                prev.map((tag) =>
+                  tag.name === tagName
+                    ? { name: newName, color: newColor }
+                    : tag,
+                ),
               );
             }}
+            onDeleteAllTags={async () => {
+              // update tags in backend
+              for (let i = 0; i < tags.length; i++) {
+                await removeTagFromMission(missionId, tags[i].name);
+                const missionsWithTag = await getMissionsByTag(tags[i].name);
+                if (missionsWithTag.length === 0) {
+                  // delete tag from database if no missions are using it
+                  await deleteTag(tags[i].name);
+                  setAllTags(
+                    allTags.filter((tag) => tag.name !== tags[i].name),
+                  );
+                }
+              }
+
+              // update tags in frontend
+              setTags([]);
+            }}
           />
-        </Menu.Dropdown>
-      </Menu>
+        </Popover.Dropdown>
+      </Popover>
       {/*list of tags*/}
       {tags.map((item) => (
         <Badge

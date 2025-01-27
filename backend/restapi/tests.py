@@ -1,27 +1,39 @@
 from django.test import TestCase
 from rest_framework.test import APITestCase
 from rest_framework import status
-from rest_framework_api_key.models import APIKey
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.utils import timezone
-from .models import Tag, Mission, Mission_tags, File, Mission_files
+from django.contrib.auth.models import User
+from django.core.files.storage.memory import InMemoryStorage
+from django.core.files.base import ContentFile
+from .models import (
+    Allowed_topic_names,
+    Tag,
+    Mission,
+    Mission_tags,
+    File,
+    Mission_files,
+    Topic,
+)
 import logging
 import urllib.parse
+
+# user without password for tests
+user: User = User(username="test")
 
 
 class APIAuthTestCase(APITestCase):
     def setUp(self):
-        super().setUp()
-        _, key = APIKey.objects.create_key(name="key_for_tests")
-        self.header = {
-            "Authorization": f"Api-Key {key}",
-        }
+        global user
+        if not User.objects.filter(username=user.username).exists():
+            user.save()
+
+        # login the user even without password (faster, because skips hashing)
+        self.client.force_login(user=user)
 
     def tearDown(self):
-        super().tearDown()
-        key = APIKey.objects.get(name="key_for_tests")
-        key.delete()
+        self.client.logout()
 
 
 class RestApiPostMissionTestCase(APIAuthTestCase):
@@ -32,12 +44,14 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
             date="2024-10-29",
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
         self.secondMission = Mission.objects.create(
             name="TestMission2",
             date="2024-10-29",
             location="TestLocation2",
             notes="TestOther2",
+            was_modified=False,
         )
 
     def tearDown(self):
@@ -45,7 +59,8 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
 
     def test_get_missions(self):
         response = self.client.get(
-            reverse("get_missions"), format="json", headers=self.header
+            reverse("get_missions"),
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
@@ -57,6 +72,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
         self.assertEqual(
@@ -67,6 +83,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation2",
                 "notes": "TestOther2",
+                "was_modified": False,
             },
         )
 
@@ -74,7 +91,6 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
         response = self.client.get(
             reverse("mission_detail", kwargs={"pk": self.firstMission.id}),
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -85,6 +101,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
 
@@ -96,9 +113,9 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -109,13 +126,13 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
 
     def test_delete_by_id(self):
         response = self.client.delete(
             reverse("mission_detail", kwargs={"pk": self.secondMission.id}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(Mission.objects.filter(id=self.secondMission.id)), 0)
@@ -177,7 +194,8 @@ class RestAPITagTestCase(APIAuthTestCase):
 
     def test_get_tags(self):
         response = self.client.get(
-            reverse("get_tags"), format="json", headers=self.header
+            reverse("get_tags"),
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 5)
@@ -217,7 +235,6 @@ class RestAPITagTestCase(APIAuthTestCase):
             reverse("create_tag"),
             {"name": "test_create_tag"},
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(response.data), 3)
@@ -235,7 +252,6 @@ class RestAPITagTestCase(APIAuthTestCase):
             reverse("create_tag"),
             {"name": "test_create_tag2", "color": "#00FF00"},
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(response.data), 3)
@@ -254,7 +270,6 @@ class RestAPITagTestCase(APIAuthTestCase):
             reverse("create_tag"),
             {"name": existing_name},
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -265,7 +280,6 @@ class RestAPITagTestCase(APIAuthTestCase):
         response = self.client.get(
             reverse("tag_detail", kwargs={"name": self.test_names[0]}),
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -282,7 +296,6 @@ class RestAPITagTestCase(APIAuthTestCase):
             reverse("tag_detail", kwargs={"name": self.test_names[0]}),
             {"name": "test_detail_put"},
             format="json",
-            headers=self.header,
         )
         self.test_names[0] = "test_detail_put"
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -298,7 +311,6 @@ class RestAPITagTestCase(APIAuthTestCase):
     def test_tag_detail_delete(self):
         response = self.client.delete(
             reverse("tag_detail", kwargs={"name": self.test_names[0]}),
-            headers=self.header,
         )
         del self.test_names[0]
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -313,6 +325,7 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
             date=timezone.now(),
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
         self.tags = []
         for i in range(3):
@@ -331,7 +344,9 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
         # Add a new tag to a mission using the API
         data = {"mission_id": self.mission.id, "tag_name": "TestTag4"}
         response = self.client.post(
-            reverse("add_tag_to_mission"), data, format="json", headers=self.header
+            reverse("add_tag_to_mission"),
+            data,
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -344,7 +359,9 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
         # Add an exsiting tag to confirm different status code
         data = {"mission_id": self.mission.id, "tag_name": "TestTag1"}
         response = self.client.post(
-            reverse("add_tag_to_mission"), data, format="json", headers=self.header
+            reverse("add_tag_to_mission"),
+            data,
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -356,7 +373,6 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
                 "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id, "tag_name": self.tags[0].name},
             ),
-            headers=self.header,
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -369,7 +385,6 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
         # Check missions related to a specific tag
         response = self.client.get(
             reverse("get_missions_by_tag", kwargs={"name": "TestTag0"}),
-            headers=self.header,
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -380,7 +395,6 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
         # Check tags associated with a mission
         response = self.client.get(
             reverse("get_tags_by_mission_id", kwargs={"id": self.mission.id}),
-            headers=self.header,
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -440,7 +454,7 @@ class NotFoundErrors(APIAuthTestCase):
 
     def test_tag_detail_not_found(self):
         response = self.client.get(
-            reverse("tag_detail", kwargs={"name": "notfound"}), headers=self.header
+            reverse("tag_detail", kwargs={"name": "notfound"}),
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -451,7 +465,6 @@ class NotFoundErrors(APIAuthTestCase):
                 "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id, "tag_name": "notfound"},
             ),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"error": "Tag not found."})
@@ -462,7 +475,6 @@ class NotFoundErrors(APIAuthTestCase):
                 "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id + 1, "tag_name": "test tag"},
             ),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"error": "Mission not found."})
@@ -473,7 +485,6 @@ class NotFoundErrors(APIAuthTestCase):
                 "delete_mission_tag",
                 kwargs={"mission_id": self.mission.id, "tag_name": "test tag"},
             ),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"error": "Mission_tags entry not found."})
@@ -481,7 +492,6 @@ class NotFoundErrors(APIAuthTestCase):
     def test_get_missions_by_tag(self):
         response = self.client.get(
             reverse("get_missions_by_tag", kwargs={"name": "notfound"}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"detail": "Tag with name notfound not found"})
@@ -489,27 +499,27 @@ class NotFoundErrors(APIAuthTestCase):
     def test_get_tags_by_mission(self):
         response = self.client.get(
             reverse("get_tags_by_mission_id", kwargs={"id": self.mission.id + 1}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
-            response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
+            response.data,
+            {"detail": f"Mission with id {self.mission.id + 1} not found"},
         )
 
     def test_create_mission_tag(self):
         response = self.client.post(
             reverse("add_tag_to_mission"),
             {"mission_id": self.mission.id + 1, "tag_name": "test tag"},
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(
-            response.data, {"detail": f"Mission with id {self.mission.id+1} not found"}
+            response.data,
+            {"detail": f"Mission with id {self.mission.id + 1} not found"},
         )
 
     def test_get_files_by_nonexistent_mission(self):
         response = self.client.get(
-            reverse("get_files", kwargs={"mission_id": 999}), headers=self.header
+            reverse("get_files_by_mission_id", kwargs={"mission_id": 999}),
         )  # Nonexistent ID
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"detail": "Mission with ID 999 not found"})
@@ -517,6 +527,17 @@ class NotFoundErrors(APIAuthTestCase):
 
 class MissionFilesTestCase(APIAuthTestCase):
     def setUp(self):
+        # fake storage
+        self._field = File.file.field
+        self._default_storage = self._field.storage
+        test_storage = InMemoryStorage()
+        self._field.storage = test_storage
+
+        # create files
+        file_content = ContentFile("")
+        test_storage.save("path/to/file1", file_content)
+        test_storage.save("path/to/file2", file_content)
+
         super().setUp()
         # Create a mission
         self.mission = Mission.objects.create(
@@ -524,19 +545,20 @@ class MissionFilesTestCase(APIAuthTestCase):
             date=timezone.now(),
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
 
         # Create files
         self.file1 = File.objects.create(
             id=0,
-            file_path="path/to/file1",
+            file="path/to/file1",
             robot="TestRobot1",
             duration=12000,
             size=1024,
         )
         self.file2 = File.objects.create(
             id=1,
-            file_path="path/to/file2",
+            file="path/to/file2",
             robot="TestRobot2",
             duration=24000,
             size=2048,
@@ -548,11 +570,11 @@ class MissionFilesTestCase(APIAuthTestCase):
 
     def tearDown(self):
         super().tearDown()
+        self._field.storage = self._default_storage
 
     def test_get_files_by_mission(self):
         response = self.client.get(
-            reverse("get_files", kwargs={"mission_id": self.mission.id}),
-            headers=self.header,
+            reverse("get_files_by_mission_id", kwargs={"mission_id": self.mission.id}),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
@@ -576,7 +598,8 @@ class SpecialTagNameTest(APIAuthTestCase):
 
     def test_create_other_tag(self):
         response = self.client.post(
-            reverse("create_tag"), {"name": "test"}, headers=self.header
+            reverse("create_tag"),
+            {"name": "test"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Tag.objects.filter(name="test").exists())
@@ -586,7 +609,6 @@ class SpecialTagNameTest(APIAuthTestCase):
             reverse("tag_detail", kwargs={"name": self.encoded_name}),
             {"name": "create/", "color": "#ff0000"},
             format="json",
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.tag.refresh_from_db()
@@ -595,7 +617,193 @@ class SpecialTagNameTest(APIAuthTestCase):
     def test_delete_tag(self):
         response = self.client.delete(
             reverse("tag_detail", kwargs={"name": self.encoded_name}),
-            headers=self.header,
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Tag.objects.filter(name="create/").exists())
+
+
+class RestAPIAllowedTopicNamesTestCases(APIAuthTestCase):
+    def setUp(self):
+        super().setUp()
+        Allowed_topic_names.objects.create(name="Car1")
+        Allowed_topic_names.objects.create(name="Car2")
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_get_allowed_topic_names(self):
+        response = self.client.get(
+            reverse("allowed_topic_names"),
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0]["name"], "Car1")
+        self.assertEqual(response.data[1]["name"], "Car2")
+
+    def test_create_allowed_topic_name(self):
+        response = self.client.post(
+            reverse("allowed_topic_names_create"),
+            {"name": "Car3"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["name"], "Car3")
+        self.assertTrue(Allowed_topic_names.objects.filter(name="Car3").exists())
+
+    def test_delete_allowed_topic_name(self):
+        response = self.client.delete(
+            reverse("allowed_topic_names_delete", kwargs={"name": "Car1"}),
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Allowed_topic_names.objects.filter(name="Car1").exists())
+
+
+class RestAPITopicsByFile(APIAuthTestCase):
+    def setUp(self):
+        super().setUp()
+
+        # fake storage
+        self._field = File.file.field
+        self._default_storage = self._field.storage
+        test_storage = InMemoryStorage()
+        self._field.storage = test_storage
+
+        # create files
+        file_content = ContentFile("")
+        test_storage.save("path/to/file1", file_content)
+
+        # Create a mission
+        self.mission = Mission.objects.create(
+            name="TestMission",
+            date=timezone.now(),
+            location="TestLocation",
+            notes="TestOther",
+            was_modified=False,
+        )
+
+        # Create file
+        self.file1 = File.objects.create(
+            id=0,
+            file="path/to/file1",
+            robot="TestRobot1",
+            duration=12000,
+            size=1024,
+        )
+
+        # Create allowed topic names
+        car1 = Allowed_topic_names(name="Car1")
+        car1.full_clean()
+        car1.save()
+
+        car2 = Allowed_topic_names(name="Car2")
+        car2.full_clean()
+        car2.save()
+
+        car3 = Allowed_topic_names(name="Car3")
+        car3.full_clean()
+        car3.save()
+
+        # Create topics
+        Topic.objects.create(
+            name=car1,
+            file=self.file1,
+            type="sensor",
+            message_count=124,
+            frequency=6.5,
+        )
+
+        Topic.objects.create(
+            name=car2,
+            file=self.file1,
+            type="camera",
+            message_count=1024,
+            frequency=60,
+        )
+
+        Topic.objects.create(
+            name=car3,
+            file=self.file1,
+            type="imu",
+            message_count=10000,
+            frequency=200,
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        self._field.storage = self._default_storage
+
+    def test_get_topics_by_file(self):
+        response = self.client.get(
+            reverse("get_topics_from_files", kwargs={"file_path": "path/to/file1"}),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]["name"], "Car1")
+        self.assertEqual(response.data[0]["type"], "sensor")
+        self.assertEqual(response.data[0]["message_count"], 124)
+        self.assertEqual(response.data[0]["frequency"], 6.5)
+
+        self.assertEqual(response.data[1]["name"], "Car2")
+        self.assertEqual(response.data[1]["type"], "camera")
+        self.assertEqual(response.data[1]["message_count"], 1024)
+        self.assertEqual(response.data[1]["frequency"], 60)
+
+        self.assertEqual(response.data[2]["name"], "Car3")
+        self.assertEqual(response.data[2]["type"], "imu")
+        self.assertEqual(response.data[2]["message_count"], 10000)
+        self.assertEqual(response.data[2]["frequency"], 200)
+
+
+class SetWasModifiedTestCase(APITestCase):
+    def setUp(self):
+        # Create a user
+        self.user = User.objects.create_user(username="testuser", password="password")
+
+        # Create a mission
+        self.mission = Mission.objects.create(
+            name="Test Mission",
+            date="2025-01-01",
+            location="Test Location",
+            notes="Test Notes",
+            was_modified=False,
+        )
+
+        # Log in the user
+        self.client.login(username="testuser", password="password")
+
+        # Define URLs
+        self.valid_url = reverse("set_was_modified", kwargs={"pk": self.mission.id})
+        self.invalid_url = reverse("set_was_modified", kwargs={"pk": 9999})
+        self.valid_payload = {"was_modified": True}
+        self.invalid_payload = {"wasModified": True}
+
+    def test_set_was_modified_successful(self):
+        """Test setting was_modified to True for an existing mission"""
+        response = self.client.put(self.valid_url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], self.mission.id)
+        self.assertTrue(response.data["was_modified"])
+
+        # Verify the mission in the database is updated
+        self.mission.refresh_from_db()
+        self.assertTrue(self.mission.was_modified)
+
+    def test_set_was_modified_mission_not_found(self):
+        """Test setting was_modified for a non-existent mission"""
+        response = self.client.put(self.invalid_url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["error"], "Mission not found")
+
+    def test_partial_update(self):
+        """Test for partial update (only 'was_modified' field is updated)"""
+        new_payload = {"was_modified": True}
+        old_notes = self.mission.notes
+        response = self.client.put(self.valid_url, new_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.mission.refresh_from_db()
+        self.assertTrue(self.mission.was_modified)
+        self.assertEqual(
+            self.mission.notes, old_notes
+        )  # make sure notes are not changed

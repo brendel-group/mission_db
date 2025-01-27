@@ -1,16 +1,21 @@
 import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import {
-  data,
   MetaFunction,
   redirect,
-  useSearchParams,
+  useLoaderData,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { MissionData, RenderedMission, Tag } from "~/data";
+import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
+import {
+  getFormattedDetails,
+  getTotalDuration,
+  getTotalSize,
+} from "~/fetchapi/details";
+import { getMission } from "~/fetchapi/missions";
+import { getTagsByMission, getTags } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
-import { getMission, getTagsByMission } from "~/utilities/fetchapi";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -23,28 +28,46 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (!user) throw redirect("/login");
 
-  return data(null);
+  let url = new URL(request.url);
+  const id = url.searchParams.get("id");
+
+  if (!id) {
+    throw new Response(null, { status: 400, statusText: "Invalid URL" });
+  }
+
+  const numberId = Number(id);
+  if (Number.isNaN(numberId)) {
+    throw new Response(null, { status: 400, statusText: "Invalid URL" });
+  }
+
+  return {
+    numberId,
+  };
 }
 
 function Detail() {
-  const [searchParams] = useSearchParams();
-  const id = searchParams.get("id");
-
-  if (!id) return <h1>Invalid URL</h1>;
+  const { numberId } = useLoaderData<typeof loader>();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Mission
   const [missionData, setMissionData] = useState<any | null>(null);
 
-  const numberId = Number(id);
+  // Tags
+  const [allTags, setAllTags] = useState<any | null>(null);
 
-  if (isNaN(numberId)) return <h1>Invalid URL</h1>;
+  // Detail View data
+  const [detailViewData, setDetailViewData] = useState<DetailViewData>();
+  const [totalSize, setTotalSize] = useState<string>("0 GB");
+  const [totalDuration, setTotalDuration] = useState<string>("00:00:00");
 
   useEffect(() => {
-    const fetchMission = async () => {
+    const fetchData = async () => {
       try {
-        const mission: MissionData = await getMission(numberId); // Fetch the mission using the REST API
+        const mission: MissionData = await getMission(numberId); // Fetch mission
         const tags: Tag[] = await getTagsByMission(numberId); //Fetch the tags for the mission
+        const allTags: Tag[] = await getTags(); //Fetch all tags
         tags.sort((a, b) => a.name.localeCompare(b.name));
 
         const transformedMission: RenderedMission = {
@@ -60,25 +83,43 @@ function Detail() {
         };
 
         setMissionData(transformedMission);
+        setAllTags(allTags);
+        
+        // data for the detail view
+        setDetailViewData(await getFormattedDetails(mission.id));
+
+        // data for the information view (size)
+        setTotalSize(await getTotalSize(mission.id));
+
+        // data for the information view (duration)
+        setTotalDuration(await getTotalDuration(mission.id));
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);
         } else {
-          setError("An unknown error occurred");
+          setError("An unknown error occurred during mission fetching");
         }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMission();
-  }, [id]);
+    fetchData();
+  }, [numberId]);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
   if (!missionData) return <p>No data available</p>;
 
-  return <DetailsView missionData={missionData}></DetailsView>;
+  return (
+    <DetailsView
+      missionData={missionData}
+      detailViewData={detailViewData}
+      totalSize={totalSize}
+      totalDuration={totalDuration}
+      allTags={allTags}
+    ></DetailsView>
+  );
 }
 
 const App = () => {

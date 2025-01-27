@@ -21,14 +21,24 @@ export async function action({ request }: ActionFunctionArgs) {
   try {
     user = await authenticator.authenticate("user-pass", request);
   } catch (error) {
+    console.error(error);
     return "Invalid username or password"; //This message is rendered on the front end
   }
 
   let session = await sessionStorage.getSession(request.headers.get("cookie"));
   session.set("user", user);
 
+  let backendCookie: string[] = [];
+  if (user.backendCookie) backendCookie = user.backendCookie;
+  let headers = new Headers({
+    "set-cookie": await sessionStorage.commitSession(session),
+  });
+  backendCookie.forEach((cookie: string) => {
+    headers.append("set-cookie", cookie);
+  });
+
   throw redirect("/missions", {
-    headers: { "Set-Cookie": await sessionStorage.commitSession(session) },
+    headers: headers,
   });
 }
 
