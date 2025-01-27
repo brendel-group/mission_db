@@ -122,8 +122,6 @@ def add_details(mission_path, robot, mission):
     iterates through the folders and subfolders to find the mcap files and metadata files
     this information is then stored in the database
     """
-    mcap_path, metadata = None, None
-
     # storage.listdir returns a tuple where the first element is a list of all directories
     # and the second element a list of all files
     for folder in storage.listdir(mission_path)[0]:
@@ -133,6 +131,7 @@ def add_details(mission_path, robot, mission):
         for subfolder in storage.listdir(folder_path)[0]:
             subfolder_path = os.path.join(folder_path, subfolder)
 
+            mcap_path, metadata = None, None
             for item in storage.listdir(subfolder_path)[1]:
                 if os.path.join(subfolder_path, item).endswith(".mcap"):
                     mcap_path = os.path.join(subfolder_path, item)
