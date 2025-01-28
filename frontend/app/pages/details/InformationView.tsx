@@ -79,7 +79,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
       {/* Field Data */}
       <Text>
         <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-          {data === null ? "None" : data}
+          {data === null ? "" : data}
         </div>
       </Text>
     </Stack>
