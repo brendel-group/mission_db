@@ -516,7 +516,14 @@ export function Overview() {
       <div style={{ display: "flex", alignItems: "center" }}>
         {/* Dropdown on the left */}
         <Select
-          data={["5 Entries", "10 Entries", "25 Entries", "50 Entries"]}
+          data={[
+            "5 Entries",
+            "10 Entries",
+            "20 Entries",
+            "30 Entries",
+            "40 Entries",
+            "50 Entries",
+          ]}
           value={String(entriesPerPage + " Entries")}
           onChange={(value) => setEntriesPerPage(Number(value?.split(" ")[0]))}
           style={{ width: 120, marginRight: 16 }}
