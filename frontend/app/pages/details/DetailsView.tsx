@@ -5,7 +5,7 @@ import { ShowDatasets } from "./DatasetTable";
 import { DetailViewData, RenderedMission, Tag } from "~/data";
 import AbstractPage from "../AbstractPage";
 import { ShowInformationView } from "./InformationView";
-import { formatRobotNames } from "~/utilities/FormatTransformer";
+import { formatRobotNames } from "~/utilities/FormatHandler";
 
 interface DetailsViewProps {
   missionData: RenderedMission;
