@@ -1,15 +1,34 @@
-import { Table } from "@mantine/core";
+import { Table, ThemeIcon, UnstyledButton } from "@mantine/core";
 import { DetailViewData } from "~/data";
 import { useNavigate } from "@remix-run/react";
+import { IconClipboard } from "@tabler/icons-react";
+import { useClipboard } from "@mantine/hooks";
+import { notifications } from '@mantine/notifications';
 
-export function ShowDatasets({ data }: { data: DetailViewData }) {
+export function ShowDatasets({
+  data,
+  basePath,
+}: {
+  data: DetailViewData;
+  basePath: string;
+}) {
   const navigate = useNavigate();
-
+  const clipboard = useClipboard({ timeout: 500 });
+  
   // Creates rows of table
   const rows = data.files.map((file, index) => (
     <Table.Tr
       key={file}
-      onClick={() => navigate('/dataset?fileName=' + file + "&duration=" + data.durations[index] + "&size=" + data.sizes[index])}
+      onClick={() =>
+        navigate(
+          "/dataset?fileName=" +
+            file +
+            "&duration=" +
+            data.durations[index] +
+            "&size=" +
+            data.sizes[index]
+        )
+      }
       // Change color on mouse hover
       style={{
         cursor: "pointer",
@@ -19,7 +38,33 @@ export function ShowDatasets({ data }: { data: DetailViewData }) {
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
     >
       {/* Inserts data from DetailViewData, see data.tsx */}
-      <Table.Td>{file}</Table.Td>
+      <Table.Td>
+        <UnstyledButton
+          onClick={(e) => {
+            e.stopPropagation();
+            clipboard.copy(basePath + file);
+            
+            notifications.clean();
+
+            notifications.show({
+              title: 'Copied to clipboard!',
+              message: basePath + file,
+              color: 'orange',
+              radius: 'md',
+            })
+
+          }}
+        >
+          <ThemeIcon variant="white">
+            <IconClipboard
+              stroke={2}
+              color="orange"
+              style={{ width: "50%", height: "50%" }}
+            />
+          </ThemeIcon>
+        </UnstyledButton>
+        {file}
+      </Table.Td>
       <Table.Td>{data.durations[index]}</Table.Td>
       <Table.Td>{data.sizes[index]}</Table.Td>
       <Table.Td>{data.robots[index]}</Table.Td>

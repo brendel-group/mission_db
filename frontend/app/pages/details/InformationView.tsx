@@ -36,7 +36,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
         onClose={() => setMenuOpened(false)}
       >
         <Menu.Target>
-          <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
+          <Badge color="orange" variant="light" style={{ cursor: "pointer" }}>
             <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
           </Badge>
         </Menu.Target>
@@ -62,6 +62,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
           />
           <div style={{ display: "flex", justifyContent: "center" }}>
             <Button
+              variant="gradient"
+              gradient={{ from: "yellow", to: "orange", deg: 269 }}
               onClick={() => {
                 setMenuOpened(false);
                 onValueChange(fieldValue);
