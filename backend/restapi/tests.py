@@ -13,7 +13,6 @@ from .models import (
     Mission,
     Mission_tags,
     File,
-    Mission_files,
     Topic,
 )
 import logging
@@ -551,6 +550,7 @@ class MissionFilesTestCase(APIAuthTestCase):
         # Create files
         self.file1 = File.objects.create(
             id=0,
+            mission=self.mission,
             file="path/to/file1",
             robot="TestRobot1",
             duration=12000,
@@ -558,15 +558,12 @@ class MissionFilesTestCase(APIAuthTestCase):
         )
         self.file2 = File.objects.create(
             id=1,
+            mission=self.mission,
             file="path/to/file2",
             robot="TestRobot2",
             duration=24000,
             size=2048,
         )
-
-        # Associate files with the mission
-        Mission_files.objects.create(mission=self.mission, file=self.file1)
-        Mission_files.objects.create(mission=self.mission, file=self.file2)
 
     def tearDown(self):
         super().tearDown()
