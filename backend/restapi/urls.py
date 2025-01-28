@@ -16,6 +16,7 @@ from .views import (
     delete_mission_tag,
     get_files_by_mission_id,
     set_was_modified,
+    get_file_by_path,
 )
 
 urlpatterns = [
@@ -72,4 +73,5 @@ urlpatterns = [
         set_was_modified,
         name="set_was_modified",
     ),
+    path("file/<path:file_path>", get_file_by_path, name="get_file_by_path"),
 ]

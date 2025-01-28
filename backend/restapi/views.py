@@ -19,6 +19,7 @@ from .serializer import (
     MissionWasModifiedSerializer,
     MissionTagSerializer,
     FileWithTypeSerializer,
+    FileSerializer,
     TopicSerializer,
 )
 import urllib.parse
@@ -95,6 +96,17 @@ def get_files_by_mission_id(request, mission_id):
         raise NotFound(f"Mission with ID {mission_id} not found")
     mission_files = Mission_files.objects.filter(mission__id=mission.id)
     serializer = FileWithTypeSerializer(mission_files, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def get_file_by_path(request, file_path: str):
+    try:
+        file = File.objects.get(file=file_path)
+    except File.DoesNotExist:
+        raise NotFound(f"No such file: {file_path}")
+
+    serializer = FileSerializer(file)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
