@@ -16,6 +16,7 @@
   "dependencies": {
     "@mantine/core": "^7.14.2",
     "@mantine/hooks": "^7.14.2",
+    "@mantine/notifications": "^7.16.2",
     "@remix-run/node": "^2.15.0",
     "@remix-run/react": "^2.15.0",
     "@remix-run/serve": "^2.15.0",
@@ -31,7 +32,6 @@
     "vite": ">=5.4.12"
   },
   "devDependencies": {
-    "@mantine/notifications": "^7.16.2",
     "@remix-run/dev": "^2.15.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@types/jest": "^29.5.14",
