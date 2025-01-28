@@ -92,11 +92,9 @@ function Detail() {
 
         // transform files manually, to obtain the correct base path
         const { commonPath, files } = transformFilePaths(detailViewData.files);
-
-        setBasePath(commonPath);
-
         detailViewData.files = files;
         
+        setBasePath(commonPath);
         setDetailViewData(detailViewData);
 
         // data for the information view (size)
