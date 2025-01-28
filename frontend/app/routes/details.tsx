@@ -127,6 +127,7 @@ function Detail() {
       totalSize={totalSize}
       totalDuration={totalDuration}
       allTags={allTags}
+      basePath={basePath}
     ></DetailsView>
   );
 }

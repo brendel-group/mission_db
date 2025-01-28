@@ -23,7 +23,7 @@ export function RenderTagsDetailView({
       {/*edit button*/}
       <Popover>
         <Popover.Target>
-          <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
+          <Badge color="orange" variant="light" style={{ cursor: "pointer" }}>
             <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
           </Badge>
         </Popover.Target>

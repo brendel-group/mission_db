@@ -13,6 +13,7 @@ interface DetailsViewProps {
   totalSize: string;
   totalDuration: string;
   allTags: Tag[];
+  basePath: string;
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({
@@ -21,6 +22,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({
   totalSize,
   totalDuration,
   allTags,
+  basePath
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
 
@@ -49,7 +51,9 @@ const DetailsView: React.FC<DetailsViewProps> = ({
             </Grid.Col>
             {/* Table */}
             <Grid.Col span={12}>
-              {detailViewData && <ShowDatasets data={detailViewData} />}
+              {detailViewData && (
+                <ShowDatasets data={detailViewData} basePath={basePath} />
+              )}
             </Grid.Col>
           </Grid>
         </Grid.Col>

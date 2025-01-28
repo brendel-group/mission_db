@@ -1,4 +1,5 @@
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import {
@@ -11,6 +12,7 @@ import {
   useRouteError,
 } from "@remix-run/react";
 import { ServerError } from "./pages/error/ErrorPage";
+import { Notifications } from "@mantine/notifications";
 
 export function ErrorBoundary() {
   const error = useRouteError();
@@ -39,7 +41,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
       </head>
       <body>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider>
+          <Notifications />
+          {children}
+        </MantineProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
