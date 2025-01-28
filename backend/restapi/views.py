@@ -101,6 +101,12 @@ def get_files_by_mission_id(request, mission_id):
 
 @api_view(["GET"])
 def get_file_by_path(request, file_path: str):
+    """
+    Get info about one file
+    ### Returns
+    A json containing info about a file
+    Or 404 Not found if the requested file does not exist
+    """
     try:
         file = File.objects.get(file=file_path)
     except File.DoesNotExist:
