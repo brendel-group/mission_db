@@ -123,7 +123,9 @@ For more details about how to use the endpoints refer to the [dj-rest-auth docum
 
 - GET request to get file by path
   - Suing a GET request it's possible to get info about a single file
-  - The URL is of the format `restapi/file/<path:file_path>`
+  - The URL is of the format `restapi/file/<path:file_path>`\
+    The file path is the relative path inside the `backend/media/` folder, if 
+    local file storage is used.
   - The result is a single json containing information about a file
 
 - GET request to list all topics for a file path
