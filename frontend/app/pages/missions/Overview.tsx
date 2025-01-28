@@ -12,6 +12,8 @@ import {
   Skeleton,
   Badge,
   Popover,
+  Pagination,
+  Select,
 } from "@mantine/core";
 import { isValidHexColor } from "~/utilities/TagPicker";
 import {
@@ -26,8 +28,22 @@ import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
 import { getMissions } from "~/fetchapi/missions";
-import { addTagToMission, changeTagColor, changeTagName, createTag, deleteTag, getMissionsByTag, getTags, getTagsByMission, removeTagFromMission } from "~/fetchapi/tags";
-import { getRobotNames, getTotalDuration, getTotalSize } from "~/fetchapi/details";
+import {
+  addTagToMission,
+  changeTagColor,
+  changeTagName,
+  createTag,
+  deleteTag,
+  getMissionsByTag,
+  getTags,
+  getTagsByMission,
+  removeTagFromMission,
+} from "~/fetchapi/tags";
+import {
+  getRobotNames,
+  getTotalDuration,
+  getTotalSize,
+} from "~/fetchapi/details";
 import { formatRobotNames } from "~/utilities/FormatHandler";
 
 interface ThProps {
@@ -67,7 +83,7 @@ function truncateText(text: string | null, maxLength: number) {
 function filterData(
   data: RenderedMission[],
   search: string,
-  searchedTags: string[] = [],
+  searchedTags: string[] = []
 ) {
   const query = search.toLowerCase().trim();
   return data.filter((item) => {
@@ -83,7 +99,7 @@ function filterData(
       searchedTags.length === 0 ||
       (item.tags &&
         searchedTags.every((tag) =>
-          item.tags.some((itemTag) => itemTag.name === tag),
+          item.tags.some((itemTag) => itemTag.name === tag)
         ));
 
     return matchesSearch && matchesTags;
@@ -97,7 +113,7 @@ function sortData(
     reversed: boolean;
     search: string;
     searchedTags: string[];
-  },
+  }
 ) {
   const { sortBy, reversed, search, searchedTags } = payload;
 
@@ -144,6 +160,8 @@ export function Overview() {
   const [error, setError] = useState<string | null>(null);
   const [searchedTags, setSearchedTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [activePage, setPage] = useState(1);
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -162,7 +180,10 @@ export function Overview() {
           const totalSize: string = await getTotalSize(missions[i].id);
 
           // Fetch robot name for each mission
-          const robots_formatted: string = formatRobotNames(await getRobotNames(missions[i].id), false);
+          const robots_formatted: string = formatRobotNames(
+            await getRobotNames(missions[i].id),
+            false
+          );
 
           renderedMissions.push({
             id: missions[i].id,
@@ -188,7 +209,7 @@ export function Overview() {
             reversed: false,
             search,
             searchedTags,
-          }),
+          })
         );
 
         const tags = await getTags();
@@ -216,7 +237,7 @@ export function Overview() {
     setReverseSortDirection(reversed);
     setSortBy(field);
     setRenderedData(
-      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags }),
+      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags })
     );
   };
 
@@ -229,11 +250,14 @@ export function Overview() {
         reversed: reverseSortDirection,
         search: value,
         searchedTags,
-      }),
+      })
     );
   };
 
-  const rows = renderedData.map((row) => (
+  const start = (activePage - 1) * entriesPerPage;
+  const end = start + entriesPerPage;
+
+  const rows = renderedData.slice(start, end).map((row) => (
     <Table.Tr
       key={row.name}
       onClick={() => navigate("/details?id=" + row.id)}
@@ -287,7 +311,7 @@ export function Overview() {
                     reversed: reverseSortDirection,
                     search,
                     searchedTags: updatedTags,
-                  }),
+                  })
                 );
               }}
             >
@@ -297,7 +321,11 @@ export function Overview() {
           <Popover>
             {/*edit button*/}
             <Popover.Target>
-              <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
+              <Badge
+                color="orange"
+                variant="light"
+                style={{ cursor: "pointer" }}
+              >
                 <IconPencil
                   size={16}
                   style={{ transform: "translateY(2px)" }}
@@ -363,7 +391,7 @@ export function Overview() {
                       ? {
                           ...mission,
                           tags: mission.tags.filter(
-                            (tag) => tag.name !== tagName,
+                            (tag) => tag.name !== tagName
                           ),
                         }
                       : mission;
@@ -383,15 +411,15 @@ export function Overview() {
                     tags: mission.tags.map((tag) =>
                       tag.name === tagName
                         ? { name: newName, color: newColor }
-                        : tag,
+                        : tag
                     ),
                   });
                   setAllTags(
                     allTags.map((tag) =>
                       tag.name === tagName
                         ? { name: newName, color: newColor }
-                        : tag,
-                    ),
+                        : tag
+                    )
                   );
                   setFetchedData(fetchedData.map(updateTag));
                   setRenderedData(renderedData.map(updateTag));
@@ -401,13 +429,13 @@ export function Overview() {
                   for (let i = 0; i < row.tags.length; i++) {
                     await removeTagFromMission(row.id, row.tags[i].name);
                     const missionsWithTag = await getMissionsByTag(
-                      row.tags[i].name,
+                      row.tags[i].name
                     );
                     if (missionsWithTag.length === 0) {
                       // delete tag from database if no missions are using it
                       await deleteTag(row.tags[i].name);
                       setAllTags(
-                        allTags.filter((tag) => tag.name !== row.tags[i].name),
+                        allTags.filter((tag) => tag.name !== row.tags[i].name)
                       );
                     }
                   }
@@ -485,6 +513,27 @@ export function Overview() {
           )}
         </Table.Tbody>
       </Table>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {/* Dropdown on the left */}
+        <Select
+          data={["5 Entries", "10 Entries", "25 Entries", "50 Entries"]}
+          value={String(entriesPerPage + " Entries")}
+          onChange={(value) => setEntriesPerPage(Number(value?.split(" ")[0]))}
+          style={{ width: 120, marginRight: 16 }}
+        />
+
+        {/* Centered pagination */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <Pagination
+            total={Math.ceil(renderedData.length / entriesPerPage)}
+            color="orange"
+            size="sm"
+            radius="md"
+            withControls={false}
+            onChange={setPage}
+          />
+        </div>
+      </div>
     </ScrollArea>
   );
 }
