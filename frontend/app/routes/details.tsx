@@ -88,17 +88,16 @@ function Detail() {
         setAllTags(allTags);
         
         // data for the detail view
-        setDetailViewData(await getFormattedDetails(mission.id));
+        let detailViewData = await getFormattedDetails(mission.id);
 
         // transform files manually, to obtain the correct base path
-        if (detailViewData) {
-          const { commonPath, files } = transformFilePaths(detailViewData.files);
+        const { commonPath, files } = transformFilePaths(detailViewData.files);
 
-          setBasePath(commonPath);
+        setBasePath(commonPath);
 
-          detailViewData.files = files;
-          setDetailViewData(detailViewData);
-        }
+        detailViewData.files = files;
+        
+        setDetailViewData(detailViewData);
 
         // data for the information view (size)
         setTotalSize(await getTotalSize(mission.id));
