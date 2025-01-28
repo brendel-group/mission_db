@@ -4,7 +4,7 @@ import { getHeaders } from "./headers";
 import {
   transformDurations,
   transformSizes,
-} from "~/utilities/FormatTransformer";
+} from "~/utilities/FormatHandler";
 
 // Get details by mission
 export const getDetailsByMission = async (

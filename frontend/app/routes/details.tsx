@@ -16,6 +16,7 @@ import { getMission } from "~/fetchapi/missions";
 import { getTagsByMission, getTags } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
+import { transformFilePaths } from "~/utilities/FormatHandler";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -61,6 +62,7 @@ function Detail() {
   const [detailViewData, setDetailViewData] = useState<DetailViewData>();
   const [totalSize, setTotalSize] = useState<string>("0 GB");
   const [totalDuration, setTotalDuration] = useState<string>("00:00:00");
+  const [basePath, setBasePath] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,6 +89,16 @@ function Detail() {
         
         // data for the detail view
         setDetailViewData(await getFormattedDetails(mission.id));
+
+        // transform files manually, to obtain the correct base path
+        if (detailViewData) {
+          const { commonPath, files } = transformFilePaths(detailViewData.files);
+
+          setBasePath(commonPath);
+
+          detailViewData.files = files;
+          setDetailViewData(detailViewData);
+        }
 
         // data for the information view (size)
         setTotalSize(await getTotalSize(mission.id));

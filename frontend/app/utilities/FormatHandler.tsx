@@ -75,3 +75,55 @@ export function formatRobotNames(
     return uniqueRobots.join(", ");
   }
 }
+
+// Transforms file paths and removes the common path prefix. It returns the transformed file name list, but also the global
+// path prefix.
+// ["/home/simon/Desktop/Teamproject/polybot_mission_db/backend/media/2025.11.11_hiho/train_recording1.mcap",
+// "/home/simon/Desktop/Teamproject/polybot_mission_db/backend/media/2025.11.11_hiho/train_recording2.mcap"]
+// => common path: "/home/simon/Desktop/Teamproject/polybot_mission_db/backend/media/2025.11.11_hiho/"
+// => files: ["train_recording1.mcap", "train_recording2.mcap"]
+
+export function transformFilePaths(filePaths: string[]): {
+  commonPath: string;
+  files: string[];
+} {
+  if (filePaths.length === 0) {
+    return { commonPath: "", files: [] };
+  }
+
+  if (filePaths.length === 1) {
+    const pathSegments = filePaths[0].split("/");
+    const fileName = pathSegments.pop() ?? "";
+    const commonPath =
+      pathSegments.join("/") + (pathSegments.length > 0 ? "/" : "");
+
+    return { commonPath, files: [fileName] };
+  }
+
+  const splitPaths = filePaths.map((path) => path.split("/"));
+  const minSegmentsLength = Math.min(
+    ...splitPaths.map((segments) => segments.length)
+  );
+
+  let commonSegmentCount = 0;
+  for (let segmentIndex = 0; segmentIndex < minSegmentsLength; segmentIndex++) {
+    const segment = splitPaths[0][segmentIndex];
+    if (
+      splitPaths.every((pathSegments) => pathSegments[segmentIndex] === segment)
+    ) {
+      commonSegmentCount++;
+    } else break;
+  }
+
+  let commonPath = splitPaths[0].slice(0, commonSegmentCount).join("/");
+  if (!commonPath.startsWith("/") && filePaths[0].startsWith("/"))
+    commonPath = "/" + commonPath;
+
+  if (commonPath && !commonPath.endsWith("/")) commonPath += "/";
+
+  const files = filePaths.map((fullPath) => {
+    return fullPath.replace(commonPath, "");
+  });
+
+  return { commonPath, files };
+}

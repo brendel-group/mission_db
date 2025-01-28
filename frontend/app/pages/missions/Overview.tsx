@@ -28,7 +28,7 @@ import { useNavigate } from "@remix-run/react";
 import { getMissions } from "~/fetchapi/missions";
 import { addTagToMission, changeTagColor, changeTagName, createTag, deleteTag, getMissionsByTag, getTags, getTagsByMission, removeTagFromMission } from "~/fetchapi/tags";
 import { getRobotNames, getTotalDuration, getTotalSize } from "~/fetchapi/details";
-import { formatRobotNames } from "~/utilities/FormatTransformer";
+import { formatRobotNames } from "~/utilities/FormatHandler";
 
 interface ThProps {
   children: React.ReactNode;
