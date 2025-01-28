@@ -59,6 +59,11 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
   );
 }
 
+function truncateText(text: string | null, maxLength: number) {
+  if (text === null) return "";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+}
+
 function filterData(
   data: RenderedMission[],
   search: string,
@@ -240,12 +245,20 @@ export function Overview() {
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
     >
       <Table.Td>{row.name}</Table.Td>
-      <Table.Td>{row.location === null ? "" : row.location}</Table.Td>
+      <Table.Td>
+        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          {truncateText(row.location, 42)}
+        </div>
+      </Table.Td>
       <Table.Td>{row.totalDuration}</Table.Td>
       <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.date}</Table.Td>
-      <Table.Td>{row.notes === null ? "" : row.notes}</Table.Td>
+      <Table.Td>
+        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          {truncateText(row.notes, 42)}
+        </div>
+      </Table.Td>
       <Table.Td
         onClick={(e) => e.stopPropagation()}
         style={{ cursor: "default" }}
