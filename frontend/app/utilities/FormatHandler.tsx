@@ -82,6 +82,9 @@ export function formatRobotNames(
 // "/home/simon/Desktop/Teamproject/polybot_mission_db/backend/media/2025.11.11_hiho/train_recording2.mcap"]
 // => common path: "/home/simon/Desktop/Teamproject/polybot_mission_db/backend/media/2025.11.11_hiho/"
 // => files: ["train_recording1.mcap", "train_recording2.mcap"]
+function convertSlash(path: string, usesBackslashes: boolean): string {
+  return usesBackslashes ? path.replace(/\//g, "\\") : path;
+}
 
 export function transformFilePaths(filePaths: string[]): {
   commonPath: string;
@@ -91,39 +94,57 @@ export function transformFilePaths(filePaths: string[]): {
     return { commonPath: "", files: [] };
   }
 
-  if (filePaths.length === 1) {
-    const pathSegments = filePaths[0].split("/");
-    const fileName = pathSegments.pop() ?? "";
-    const commonPath =
-      pathSegments.join("/") + (pathSegments.length > 0 ? "/" : "");
+  const firstPath = filePaths[0];
+  const usesBackslashes = firstPath.includes("\\");
 
-    return { commonPath, files: [fileName] };
+  const normalizedPaths = filePaths.map((p) => p.replace(/\\/g, "/"));
+
+  if (normalizedPaths.length === 1) {
+    const single = normalizedPaths[0];
+    const segments = single.split("/");
+    const fileName = segments.pop() ?? "";
+    let commonPath = segments.join("/");
+    if (commonPath) {
+      commonPath += "/";
+    }
+    return {
+      commonPath: convertSlash(commonPath, usesBackslashes),
+      files: [convertSlash(fileName, usesBackslashes)],
+    };
   }
 
-  const splitPaths = filePaths.map((path) => path.split("/"));
+  const splitPaths = normalizedPaths.map((p) => p.split("/"));
   const minSegmentsLength = Math.min(
     ...splitPaths.map((segments) => segments.length)
   );
 
   let commonSegmentCount = 0;
-  for (let segmentIndex = 0; segmentIndex < minSegmentsLength; segmentIndex++) {
-    const segment = splitPaths[0][segmentIndex];
-    if (
-      splitPaths.every((pathSegments) => pathSegments[segmentIndex] === segment)
-    ) {
+  for (let i = 0; i < minSegmentsLength; i++) {
+    const segment = splitPaths[0][i];
+    if (splitPaths.every((s) => s[i] === segment)) {
       commonSegmentCount++;
-    } else break;
+    } else {
+      break;
+    }
   }
 
   let commonPath = splitPaths[0].slice(0, commonSegmentCount).join("/");
-  if (!commonPath.startsWith("/") && filePaths[0].startsWith("/"))
-    commonPath = "/" + commonPath;
+  if (commonPath && !commonPath.endsWith("/")) {
+    commonPath += "/";
+  }
 
-  if (commonPath && !commonPath.endsWith("/")) commonPath += "/";
+  const files = normalizedPaths.map((fullPath) => {
+    if (commonPath && fullPath.startsWith(commonPath)) {
+      return fullPath.slice(commonPath.length);
+    }
 
-  const files = filePaths.map((fullPath) => {
-    return fullPath.replace(commonPath, "");
+    const segs = fullPath.split("/");
+    return segs.pop() ?? "";
   });
 
-  return { commonPath, files };
+  return {
+    commonPath: convertSlash(commonPath, usesBackslashes),
+    files: files.map((f) => convertSlash(f, usesBackslashes)),
+  };
 }
+
