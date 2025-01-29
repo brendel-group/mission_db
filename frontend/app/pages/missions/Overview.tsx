@@ -27,6 +27,7 @@ import { MissionData, RenderedMission, Tag } from "~/data";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
+import Cookies from "js-cookie";
 import { getMissions } from "~/fetchapi/missions";
 import {
   addTagToMission,
@@ -45,6 +46,7 @@ import {
   getTotalSize,
 } from "~/fetchapi/details";
 import { formatRobotNames } from "~/utilities/FormatHandler";
+import { CookieSerializeOptions } from "@remix-run/node";
 
 interface ThProps {
   children: React.ReactNode;
@@ -156,12 +158,28 @@ export function Overview() {
   const [renderedData, setRenderedData] = useState<RenderedMission[]>([]);
   const [sortBy, setSortBy] = useState<keyof RenderedMission | null>("name");
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
+
+  // Error handling
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Tags
   const [searchedTags, setSearchedTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
+
+  // Pagination management
   const [activePage, setPage] = useState(1);
-  const [entriesPerPage, setEntriesPerPage] = useState(10);
+
+  if (Cookies.get("entriesPerPage") === undefined) {
+    Cookies.set("entriesPerPage", "10", {
+      expires: 365,
+      sameSite: "strict",
+    } as CookieSerializeOptions);
+  }
+
+  const [entriesPerPage, setEntriesPerPage] = useState(
+    Number(Cookies.get("entriesPerPage"))
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -257,7 +275,11 @@ export function Overview() {
   const start = (activePage - 1) * entriesPerPage;
   const end = start + entriesPerPage;
 
-  const rows = renderedData.slice(start, end).map((row) => (
+  let slicedRows = renderedData;
+
+  if (entriesPerPage > 0) slicedRows = renderedData.slice(start, end);
+
+  const rows = slicedRows.map((row) => (
     <Table.Tr
       key={row.name}
       onClick={() => navigate("/details?id=" + row.id)}
@@ -520,19 +542,36 @@ export function Overview() {
             "5 Entries",
             "10 Entries",
             "20 Entries",
-            "30 Entries",
-            "40 Entries",
             "50 Entries",
+            "All Entries",
           ]}
-          value={String(entriesPerPage + " Entries")}
-          onChange={(value) => setEntriesPerPage(Number(value?.split(" ")[0]))}
+          value={
+            entriesPerPage === -1 ? "All Entries" : `${entriesPerPage} Entries`
+          }
+          onChange={(value) => {
+            let newVal = 0;
+
+            if (value === "All Entries") newVal = -1;
+            else newVal = Number(value?.split(" ")[0]);
+
+            setEntriesPerPage(newVal);
+
+            Cookies.set("entriesPerPage", String(newVal), {
+              expires: 365,
+              sameSite: "strict",
+            } as CookieSerializeOptions);
+          }}
           style={{ width: 120, marginRight: 16 }}
         />
 
         {/* Centered pagination */}
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           <Pagination
-            total={Math.ceil(renderedData.length / entriesPerPage)}
+            total={
+              entriesPerPage === -1
+                ? 1
+                : Math.ceil(renderedData.length / entriesPerPage)
+            }
             color="orange"
             size="sm"
             radius="md"
