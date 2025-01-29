@@ -9,6 +9,7 @@ from .DeleteFolderCommand import delete_mission_from_folder
 from restapi.models import File, Mission, Mission_files, Tag
 import json
 
+
 # Create a custom logging handler to track if any log message was emitted
 class LogTracker(logging.Handler):
     def __init__(self):
@@ -17,6 +18,7 @@ class LogTracker(logging.Handler):
 
     def emit(self, record):
         self.log_occurred = True
+
 
 class SyncCommand(Command):
     name = "sync"
@@ -30,6 +32,7 @@ class SyncCommand(Command):
 
 storage = DefaultStorage()
 
+
 def sync_mcap_files(mission_path, mission):
     """
     Syncs .mcap and metadata files:
@@ -37,7 +40,9 @@ def sync_mcap_files(mission_path, mission):
     - Removes files from the database if they are missing.
     """
 
-    existing_files = {mf.file.file for mf in Mission_files.objects.filter(mission=mission)}
+    existing_files = {
+        mf.file.file for mf in Mission_files.objects.filter(mission=mission)
+    }
     current_files = set()
 
     for folder in storage.listdir(mission_path)[0]:
@@ -62,12 +67,21 @@ def sync_mcap_files(mission_path, mission):
                     try:
                         size = storage.size(mcap_path)
                         metadata = load_yaml_metadata(metadata_path)
-                        duration = metadata.get("rosbag2_bagfile_information", {}).get("duration", {}).get("nanoseconds", 0) / 1e9
+                        duration = (
+                            metadata.get("rosbag2_bagfile_information", {})
+                            .get("duration", {})
+                            .get("nanoseconds", 0)
+                            / 1e9
+                        )
                         file = File(file=mcap_path, duration=duration, size=size)
                         file.save()
-                        mission_file = Mission_files(mission=mission, file=file, type=typ)
+                        mission_file = Mission_files(
+                            mission=mission, file=file, type=typ
+                        )
                         mission_file.save()
-                        logging.info(f"Added new file {mcap_path} for mission {mission.name}.")
+                        logging.info(
+                            f"Added new file {mcap_path} for mission {mission.name}."
+                        )
                     except Exception as e:
                         logging.error(f"Error processing {mcap_path}: {e}")
 
@@ -78,7 +92,10 @@ def sync_mcap_files(mission_path, mission):
             file.delete()
             logging.info(f"Deleted missing file {file_path} from database.")
         except File.DoesNotExist:
-            logging.warning(f"File {file_path} not found in database (already deleted).")
+            logging.warning(
+                f"File {file_path} not found in database (already deleted)."
+            )
+
 
 def load_yaml_metadata(yaml_filepath):
     """Loads YAML metadata."""

@@ -35,6 +35,7 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
     Calls sync_mcap_files to process and store associated .mcap and metadata files.
     """
     from .SyncCommand import sync_mcap_files
+
     folder_name = os.path.basename(folder_path)
     try:
         date_str, name = folder_name.split("_", 1)
