@@ -131,7 +131,6 @@ def sync_folder():
         if not mission.was_modified:
             continue
         # else save metadata
-        modified_mission_found = True
         Mission.objects.filter(id=mission.id).update(was_modified=False)
         tags = Tag.objects.filter(mission_tags__mission=mission)
         tag_serializer = TagSerializer(tags, many=True)
