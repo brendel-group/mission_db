@@ -1,10 +1,12 @@
 import logging
+import os
 from django.core.files.storage import DefaultStorage
+import yaml
 from restapi.serializer import TagSerializer
 from .Command import Command
 from .AddFolderCommand import add_mission_from_folder
 from .DeleteFolderCommand import delete_mission_from_folder
-from restapi.models import Mission, Tag
+from restapi.models import File, Mission, Mission_files, Tag
 import json
 
 
@@ -19,6 +21,43 @@ class SyncCommand(Command):
 
 
 storage = DefaultStorage()
+
+def sync_mcap_files(mission_path, mission):
+    """
+    Iterates through folders to find .mcap and metadata files, then stores their details in the database.
+    """
+    for folder in storage.listdir(mission_path)[0]:
+        folder_path = os.path.join(mission_path, folder)
+        typ = os.path.basename(folder_path)
+
+        for subfolder in storage.listdir(folder_path)[0]:
+            subfolder_path = os.path.join(folder_path, subfolder)
+            mcap_path, metadata_path = None, None
+
+            for item in storage.listdir(subfolder_path)[1]:
+                item_path = os.path.join(subfolder_path, item)
+                if item_path.endswith(".mcap"):
+                    mcap_path = item_path
+                elif item_path.endswith(".yaml"):
+                    metadata_path = item_path
+
+            if mcap_path and metadata_path:
+                try:
+                    size = storage.size(mcap_path)
+                    metadata = load_yaml_metadata(metadata_path)
+                    duration = metadata.get("rosbag2_bagfile_information", {}).get("duration", {}).get("nanoseconds", 0) / 1e9
+                    file = File(file=mcap_path, duration=duration, size=size)
+                    file.save()
+                    mission_file = Mission_files(mission=mission, file=file, type=typ)
+                    mission_file.save()
+                    logging.info(f"Stored file {mcap_path} for mission {mission.name}.")
+                except Exception as e:
+                    logging.error(f"Error processing {mcap_path}: {e}")
+
+def load_yaml_metadata(yaml_filepath):
+    """Loads YAML metadata."""
+    with storage.open(yaml_filepath, "r") as file:
+        return yaml.safe_load(file)
 
 
 def sync_folder():
@@ -38,7 +77,7 @@ def sync_folder():
 
     # Add missions for folders not yet in the database
     for folder in fs_mission_set - db_mission_set:
-        add_mission_from_folder(folder, None, None)
+        add_mission_from_folder(folder)
 
     # Delete missions from the database not found in the filesystem
     for folder in db_mission_set - fs_mission_set:
