@@ -193,10 +193,6 @@ if USE_S3:
                 "custom_domain": MEDIA_URL.rstrip("/").lstrip("htps:/"),
                 "url_protocol": "https:" if "https:" in MEDIA_URL else "http:",
                 "object_parameters": {"CacheControl": "max-age=86400"},
-                # the commented out values need to be uncommented when using S3 presigned urls.
-                # "custom_domain": f"{env('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com",
-                # "cloudfront_key": open(env("AWS_CLOUDFRONT_KEY_FILE")).read(),
-                # "cloudfront_key_id": env("AWS_CLOUDFRONT_KEY_ID"),
             },
         },
         "staticfiles": {

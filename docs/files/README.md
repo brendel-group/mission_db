@@ -21,3 +21,12 @@ To use S3 storage the following environmental variables are required:
 - `AWS_SECRET_ACCESS_KEY`
 
 For more info on the required values see the [django-storages docs](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
+
+## S3 presigned URLs
+It is possible to use signed URLs to give the user temporary direct access to the files in the S3 bucket. For more about this check the [django-storages docs](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#cloudfront-signed-urls).
+
+In our current setup it is also required to change the `custom_domain` in settings.py to something like this:
+```python
+f"{env('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com"
+```
+And the url generation in the FileSerializer needs to be adjusted (remove `sessionid` from url parameters). Then django-storages will generate signed urls automatically.
