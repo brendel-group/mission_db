@@ -50,7 +50,7 @@ export interface User {
 
 //Converts a rendered mission to mission data
 export function convertToMissionData(
-  renderedMission: RenderedMission
+  renderedMission: RenderedMission,
 ): MissionData {
   return {
     id: renderedMission.id,
@@ -59,4 +59,14 @@ export function convertToMissionData(
     date: renderedMission.date,
     notes: renderedMission.notes,
   };
+}
+
+export interface FileData {
+  filePath: string;
+  fileUrl: URL;
+  videoPath: string;
+  videoUrl: URL;
+  duration: number;
+  size: number;
+  robot: string;
 }
