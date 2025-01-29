@@ -4,7 +4,6 @@ from datetime import datetime
 from .Command import Command
 from django.core.files.storage import DefaultStorage
 from restapi.models import Mission
-from .SyncCommand import sync_mcap_files
 
 
 class AddFolderCommand(Command):
@@ -35,6 +34,7 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
     Adds a mission to the database based on the given folder path.
     Calls sync_mcap_files to process and store associated .mcap and metadata files.
     """
+    from .SyncCommand import sync_mcap_files
     folder_name = os.path.basename(folder_path)
     try:
         date_str, name = folder_name.split("_", 1)
