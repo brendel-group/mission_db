@@ -102,7 +102,7 @@ export const getFileData = async (filePath: string): Promise<FileData> => {
   });
   if (!response.ok) {
     if (response.status === 404) {
-      throw new Error((await response.json()).details);
+      throw new Error((await response.json()).detail);
     }
     throw new Error(`Failed to fetch details for file ${filePath}`);
   }
@@ -114,8 +114,8 @@ export const getFileData = async (filePath: string): Promise<FileData> => {
     fileUrl: data.file_url,
     videoPath: data.video_path,
     videoUrl: data.video_url,
-    duration: data.duration,
-    size: data.size,
+    duration: transformDurations([data.duration])[0],
+    size: transformSizes([data.size])[0],
     robot: data.robot,
   };
 };

@@ -66,7 +66,7 @@ export interface FileData {
   fileUrl: URL;
   videoPath: string;
   videoUrl: URL;
-  duration: number;
-  size: number;
+  duration: string;
+  size: string;
   robot: string;
 }

@@ -7,8 +7,8 @@ interface DatasetViewProps {
   fileUrl: URL | null;
   video: string | null;
   videoUrl: URL | null;
-  duration: number | null;
-  size: number | null;
+  duration: string | null;
+  size: string | null;
   robot: string | null;
 }
 
@@ -24,12 +24,16 @@ export function DatasetView(data: DatasetViewProps) {
           <Text size="lg">Duration: {data.duration}</Text>
           <Text size="lg">Size: {data.size}</Text>
           <Text size="lg">Robot: {data.robot}</Text>
-          <iframe
-            width="320"
-            height="320"
-            src={String(data.videoUrl)}
-            allowFullScreen
-          ></iframe>
+          {data.video ? (
+            <iframe
+              width="320"
+              height="320"
+              src={String(data.videoUrl)}
+              allowFullScreen
+            ></iframe>
+          ) : (
+            <Text size="lg">No video available</Text>
+          )}
         </div>
       ) : (
         <Text>No data available</Text>

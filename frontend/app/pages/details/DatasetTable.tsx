@@ -3,7 +3,7 @@ import { DetailViewData } from "~/data";
 import { useNavigate } from "@remix-run/react";
 import { IconClipboard } from "@tabler/icons-react";
 import { useClipboard } from "@mantine/hooks";
-import { notifications } from '@mantine/notifications';
+import { notifications } from "@mantine/notifications";
 
 export function ShowDatasets({
   data,
@@ -14,19 +14,15 @@ export function ShowDatasets({
 }) {
   const navigate = useNavigate();
   const clipboard = useClipboard({ timeout: 500 });
-  
+  const missionPathSplitted: string[] = basePath.split("/").slice(-2, -1);
+
   // Creates rows of table
   const rows = data.files.map((file, index) => (
     <Table.Tr
       key={file}
       onClick={() =>
         navigate(
-          "/dataset?fileName=" +
-            file +
-            "&duration=" +
-            data.durations[index] +
-            "&size=" +
-            data.sizes[index]
+          "/dataset?fileName=" + missionPathSplitted.concat(file).join("/"),
         )
       }
       // Change color on mouse hover
@@ -43,16 +39,15 @@ export function ShowDatasets({
           onClick={(e) => {
             e.stopPropagation();
             clipboard.copy(basePath + file);
-            
+
             notifications.clean();
 
             notifications.show({
-              title: 'Copied to clipboard!',
+              title: "Copied to clipboard!",
               message: basePath + file,
-              color: 'orange',
-              radius: 'md',
-            })
-
+              color: "orange",
+              radius: "md",
+            });
           }}
         >
           <ThemeIcon variant="white">
