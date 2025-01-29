@@ -45,7 +45,7 @@ class FileSerializer(serializers.ModelSerializer):
         if request and hasattr(request, "session"):
             sessionid = request.session.session_key
         if sessionid and obj.video:
-            url = f"{obj.video.url}?sessionid={sessionid}"
+            url = f"{obj.video.url.replace('/download/', '/stream/')}?sessionid={sessionid}"
             return url
         return None
 

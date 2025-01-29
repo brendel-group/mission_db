@@ -259,3 +259,11 @@ def _body_generator(file: File, body: list[Iterable[bytes]], boundary: str):
             if chunk == f"\r\n--{boundary}--\r\n":
                 file.close()
             yield chunk
+
+
+def stream(request: HttpRequest, file_path: str):
+    response = download(request, file_path)
+    if response["Content-Disposition"]:
+        del response["Content-Disposition"]
+    response["X-Frame-Options"] = ""
+    return response

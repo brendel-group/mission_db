@@ -17,10 +17,11 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from .views import download
+from .views import download, stream
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("restapi/", include("restapi.urls")),
     path("file/download/<path:file_path>", download, name="download"),
+    path("file/stream/<path:file_path>", stream, name="stream"),
 ]
