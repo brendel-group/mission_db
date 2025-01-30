@@ -170,5 +170,5 @@ def sync_folder():
                 f"Saved metadata for mission '{mission.name}' to the mission folder"
             )
     if not log_tracker.log_occurred:
-        logging.info("No changes detected.")
+        logging.info("Nothing was modified, no new metadata was saved")
     logger.removeHandler(log_tracker)
