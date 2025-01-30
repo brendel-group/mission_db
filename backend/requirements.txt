@@ -16,4 +16,3 @@ numpy
 opencv-python
 moviepy
 dj-rest-auth==7.*
-mcap
