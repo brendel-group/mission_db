@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import environ
+from corsheaders.defaults import default_headers
 
 env = environ.Env(DEBUG=(bool, False), SECRET_KEY=(str, "unsafe-secret-key"))
 # reading .env file
@@ -58,9 +59,6 @@ SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
 
 CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
 
-MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -75,6 +73,7 @@ INSTALLED_APPS = [
     "restapi",
     "corsheaders",
     "dj_rest_auth",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -92,6 +91,13 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
+
+
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+    "accept-ranges",
+    "range",
+)
 
 ROOT_URLCONF = "backend.urls"
 
@@ -150,16 +156,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -178,3 +174,34 @@ if not DEBUG:
 REST_AUTH = {
     "TOKEN_MODEL": None,
 }
+
+MEDIA_URL = f"{env('DOMAIN', default='http://localhost:8000')}/file/download/"
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+
+STATIC_URL = "static/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+USE_S3 = env("USE_S3", bool, False)
+
+if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
+                "custom_domain": MEDIA_URL.rstrip("/").lstrip("htps:/"),
+                "url_protocol": "https:" if "https:" in MEDIA_URL else "http:",
+                "object_parameters": {"CacheControl": "max-age=86400"},
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        },
+    }
+else:
+    MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
+
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

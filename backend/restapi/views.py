@@ -93,7 +93,7 @@ def get_files_by_mission_id(request, mission_id):
     except Mission.DoesNotExist:
         raise NotFound(f"Mission with ID {mission_id} not found")
     files = File.objects.filter(mission=mission)
-    serializer = FileSerializer(files, many=True)
+    serializer = FileSerializer(files, many=True, context={"request": request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

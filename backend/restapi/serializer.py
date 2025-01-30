@@ -20,10 +20,40 @@ class MissionWasModifiedSerializer(serializers.ModelSerializer):
 
 class FileSerializer(serializers.ModelSerializer):
     file_path = serializers.CharField(source="file.file", initial=None)
+    file_url = serializers.SerializerMethodField()
+    video_url = serializers.SerializerMethodField()
 
     class Meta:
         model = File
-        fields = ["id", "file_path", "video", "robot", "duration", "size", "type"]
+        fields = [
+            "id",
+            "file_path",
+            "file_url",
+            "video",
+            "video_url",
+            "robot",
+            "duration",
+            "size",
+            "type",
+        ]
+
+    def get_file_url(self, obj):
+        request = self.context.get("request")
+        if request and hasattr(request, "session"):
+            sessionid = request.session.session_key
+        if sessionid:
+            url = f"{obj.file.url}?sessionid={sessionid}"
+            return url
+        return None
+
+    def get_video_url(self, obj):
+        request = self.context.get("request")
+        if request and hasattr(request, "session"):
+            sessionid = request.session.session_key
+        if sessionid and obj.video:
+            url = f"{obj.video.url.replace('/download/', '/stream/')}?sessionid={sessionid}"
+            return url
+        return None
 
 
 class TagSerializer(serializers.ModelSerializer):

@@ -1,14 +1,15 @@
 argcomplete
-django
+django>=5.2a1
 django-colorfield
 django-cors-headers
 django-environ
+django-storages[s3]==1.*
 djangorestframework
 gunicorn
 pre-commit
 psycopg2-binary
 pyreadline3; platform_system == 'Windows'
-ruff
+ruff==0.9.3
 whitenoise
 djangorestframework-api-key==3.*
 mcap
@@ -16,3 +17,5 @@ numpy
 opencv-python
 moviepy
 dj-rest-auth==7.*
+boto3==1.*
+cryptography
