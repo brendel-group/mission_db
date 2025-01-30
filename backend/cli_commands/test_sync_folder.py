@@ -68,6 +68,7 @@ class SyncFolderArgumentTests(TestCase):
         # Ensure add_mission_from_folder is not called for invalid folders
         self.assertEqual(self.mock_add_mission_from_folder.call_count, 2)
 
+
 class SyncFilesTests(TestCase):
     def setUp(self):
         SyncCommand.storage = InMemoryStorage()
@@ -131,7 +132,10 @@ class SyncFilesTests(TestCase):
         """
         Test sync_files to ensure it handles exceptions gracefully.
         """
-        with patch("cli_commands.SyncCommand.storage.size", side_effect=Exception("Test exception")):
+        with patch(
+            "cli_commands.SyncCommand.storage.size",
+            side_effect=Exception("Test exception"),
+        ):
             sync_files("2024.12.02_mission1", self.mission)
             files = File.objects.filter(mission_id=self.mission.id)
             self.assertEqual(files.count(), 0)
