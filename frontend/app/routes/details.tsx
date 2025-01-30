@@ -1,23 +1,22 @@
 import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import {
-  data,
   MetaFunction,
   redirect,
-  useSearchParams,
+  useLoaderData,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
+import {
+  getFormattedDetails,
+  getTotalDuration,
+  getTotalSize,
+} from "~/fetchapi/details";
+import { getMission } from "~/fetchapi/missions";
+import { getTagsByMission, getTags } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
-import {
-  getMission,
-  getTagsByMission,
-  getTags,
-  getFormattedDetails,
-  getTotalSize,
-  getTotalDuration,
-} from "~/utilities/fetchapi";
+import { transformFilePaths } from "~/utilities/FormatHandler";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -30,14 +29,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (!user) throw redirect("/login");
 
-  return data(null);
+  let url = new URL(request.url);
+  const id = url.searchParams.get("id");
+
+  if (!id) {
+    throw new Response(null, { status: 400, statusText: "Invalid URL" });
+  }
+
+  const numberId = Number(id);
+  if (Number.isNaN(numberId)) {
+    throw new Response(null, { status: 400, statusText: "Invalid URL" });
+  }
+
+  return {
+    numberId,
+  };
 }
 
 function Detail() {
-  const [searchParams] = useSearchParams();
-  const id = searchParams.get("id");
-
-  if (!id) return <h1>Invalid URL</h1>;
+  const { numberId } = useLoaderData<typeof loader>();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,19 +61,15 @@ function Detail() {
   // Detail View data
   const [detailViewData, setDetailViewData] = useState<DetailViewData>();
   const [totalSize, setTotalSize] = useState<string>("0 GB");
-  const [totalDuration, setTotalDuration] = useState<string>(
-    "00:00:00"
-  );
-
-  const numberId = Number(id);
-
-  if (isNaN(numberId)) return <h1>Invalid URL</h1>;
+  const [totalDuration, setTotalDuration] = useState<string>("00:00:00");
+  const [basePath, setBasePath] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const mission: MissionData = await getMission(numberId); // Fetch the mission using the REST API
+        const mission: MissionData = await getMission(numberId); // Fetch mission
         const tags: Tag[] = await getTagsByMission(numberId); //Fetch the tags for the mission
+        const allTags: Tag[] = await getTags(); //Fetch all tags
         tags.sort((a, b) => a.name.localeCompare(b.name));
 
         const transformedMission: RenderedMission = {
@@ -79,17 +85,23 @@ function Detail() {
         };
 
         setMissionData(transformedMission);
-        setAllTags(tags);
+        setAllTags(allTags);
         
         // data for the detail view
-        setDetailViewData(await getFormattedDetails(mission.id));
+        let detailViewData = await getFormattedDetails(mission.id);
+
+        // transform files manually, to obtain the correct base path
+        const { commonPath, files } = transformFilePaths(detailViewData.files);
+        detailViewData.files = files;
         
+        setBasePath(commonPath);
+        setDetailViewData(detailViewData);
+
         // data for the information view (size)
         setTotalSize(await getTotalSize(mission.id));
 
         // data for the information view (duration)
         setTotalDuration(await getTotalDuration(mission.id));
-
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);
@@ -102,7 +114,7 @@ function Detail() {
     };
 
     fetchData();
-  }, [id]);
+  }, [numberId]);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
@@ -115,6 +127,7 @@ function Detail() {
       totalSize={totalSize}
       totalDuration={totalDuration}
       allTags={allTags}
+      basePath={basePath}
     ></DetailsView>
   );
 }

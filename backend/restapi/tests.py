@@ -7,7 +7,14 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.files.storage.memory import InMemoryStorage
 from django.core.files.base import ContentFile
-from .models import Tag, Mission, Mission_tags, File, Mission_files
+from .models import (
+    Allowed_topic_names,
+    Tag,
+    Mission,
+    Mission_tags,
+    File,
+    Topic,
+)
 import logging
 import urllib.parse
 
@@ -36,12 +43,14 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
             date="2024-10-29",
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
         self.secondMission = Mission.objects.create(
             name="TestMission2",
             date="2024-10-29",
             location="TestLocation2",
             notes="TestOther2",
+            was_modified=False,
         )
 
     def tearDown(self):
@@ -62,6 +71,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
         self.assertEqual(
@@ -72,6 +82,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation2",
                 "notes": "TestOther2",
+                "was_modified": False,
             },
         )
 
@@ -89,6 +100,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
 
@@ -100,6 +112,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
             format="json",
         )
@@ -112,6 +125,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "was_modified": False,
             },
         )
 
@@ -310,6 +324,7 @@ class RestAPIMissionTagsTestCase(APIAuthTestCase):
             date=timezone.now(),
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
         self.tags = []
         for i in range(3):
@@ -529,11 +544,13 @@ class MissionFilesTestCase(APIAuthTestCase):
             date=timezone.now(),
             location="TestLocation",
             notes="TestOther",
+            was_modified=False,
         )
 
         # Create files
         self.file1 = File.objects.create(
             id=0,
+            mission=self.mission,
             file="path/to/file1",
             robot="TestRobot1",
             duration=12000,
@@ -541,15 +558,12 @@ class MissionFilesTestCase(APIAuthTestCase):
         )
         self.file2 = File.objects.create(
             id=1,
+            mission=self.mission,
             file="path/to/file2",
             robot="TestRobot2",
             duration=24000,
             size=2048,
         )
-
-        # Associate files with the mission
-        Mission_files.objects.create(mission=self.mission, file=self.file1)
-        Mission_files.objects.create(mission=self.mission, file=self.file2)
 
     def tearDown(self):
         super().tearDown()
@@ -562,8 +576,8 @@ class MissionFilesTestCase(APIAuthTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
         # Expecting 2 files associated with the mission
-        self.assertEqual(response.data[0]["file"]["id"], self.file1.id)
-        self.assertEqual(response.data[1]["file"]["id"], self.file2.id)
+        self.assertEqual(response.data[0]["id"], self.file1.id)
+        self.assertEqual(response.data[1]["id"], self.file2.id)
 
 
 class SpecialTagNameTest(APIAuthTestCase):
@@ -603,3 +617,195 @@ class SpecialTagNameTest(APIAuthTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Tag.objects.filter(name="create/").exists())
+
+
+class RestAPIAllowedTopicNamesTestCases(APIAuthTestCase):
+    def setUp(self):
+        super().setUp()
+        Allowed_topic_names.objects.create(name="Car1")
+        Allowed_topic_names.objects.create(name="Car2")
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_get_allowed_topic_names(self):
+        response = self.client.get(
+            reverse("allowed_topic_names"),
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0]["name"], "Car1")
+        self.assertEqual(response.data[1]["name"], "Car2")
+
+    def test_create_allowed_topic_name(self):
+        response = self.client.post(
+            reverse("allowed_topic_names_create"),
+            {"name": "Car3"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["name"], "Car3")
+        self.assertTrue(Allowed_topic_names.objects.filter(name="Car3").exists())
+
+    def test_delete_allowed_topic_name(self):
+        response = self.client.delete(
+            reverse("allowed_topic_names_delete", kwargs={"name": "Car1"}),
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Allowed_topic_names.objects.filter(name="Car1").exists())
+
+
+class RestAPITopicsByFile(APIAuthTestCase):
+    def setUp(self):
+        super().setUp()
+
+        # fake storage
+        self._field = File.file.field
+        self._default_storage = self._field.storage
+        test_storage = InMemoryStorage()
+        self._field.storage = test_storage
+
+        # create files
+        file_content = ContentFile("")
+        test_storage.save("path/to/file1", file_content)
+
+        # Create a mission
+        self.mission = Mission.objects.create(
+            name="TestMission",
+            date=timezone.now(),
+            location="TestLocation",
+            notes="TestOther",
+            was_modified=False,
+        )
+
+        # Create file
+        self.file1 = File.objects.create(
+            id=0,
+            mission=self.mission,
+            file="path/to/file1",
+            robot="TestRobot1",
+            duration=12000,
+            size=1024,
+        )
+
+        # Create allowed topic names
+        car1 = Allowed_topic_names(name="Car1")
+        car1.full_clean()
+        car1.save()
+
+        car2 = Allowed_topic_names(name="Car2")
+        car2.full_clean()
+        car2.save()
+
+        car3 = Allowed_topic_names(name="Car3")
+        car3.full_clean()
+        car3.save()
+
+        # Create topics
+        Topic.objects.create(
+            name=car1,
+            file=self.file1,
+            type="sensor",
+            message_count=124,
+            frequency=6.5,
+        )
+
+        Topic.objects.create(
+            name=car2,
+            file=self.file1,
+            type="camera",
+            message_count=1024,
+            frequency=60,
+        )
+
+        Topic.objects.create(
+            name=car3,
+            file=self.file1,
+            type="imu",
+            message_count=10000,
+            frequency=200,
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        self._field.storage = self._default_storage
+
+    def test_get_topics_by_file(self):
+        response = self.client.get(
+            reverse("get_topics_from_files", kwargs={"file_path": "path/to/file1"}),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]["name"], "Car1")
+        self.assertEqual(response.data[0]["type"], "sensor")
+        self.assertEqual(response.data[0]["message_count"], 124)
+        self.assertEqual(response.data[0]["frequency"], 6.5)
+
+        self.assertEqual(response.data[1]["name"], "Car2")
+        self.assertEqual(response.data[1]["type"], "camera")
+        self.assertEqual(response.data[1]["message_count"], 1024)
+        self.assertEqual(response.data[1]["frequency"], 60)
+
+        self.assertEqual(response.data[2]["name"], "Car3")
+        self.assertEqual(response.data[2]["type"], "imu")
+        self.assertEqual(response.data[2]["message_count"], 10000)
+        self.assertEqual(response.data[2]["frequency"], 200)
+
+
+class SetWasModifiedTestCase(APIAuthTestCase):
+    def setUp(self):
+        super().setUp()
+        # Create a mission
+        self.mission = Mission.objects.create(
+            name="Test Mission",
+            date="2025-01-01",
+            location="Test Location",
+            notes="Test Notes",
+            was_modified=False,
+        )
+
+        # disable logging
+        self.logger = logging.getLogger("django.request")
+        self.logger.disabled = True
+
+        # Define URLs
+        self.valid_url = reverse("set_was_modified", kwargs={"pk": self.mission.id})
+        self.invalid_url = reverse("set_was_modified", kwargs={"pk": 9999})
+        self.valid_payload = {"was_modified": True}
+        self.invalid_payload = {"wasModified": True}
+
+    def tearDown(self):
+        super().tearDown()
+        # reenable logging
+        self.logger.disabled = False
+
+    def test_set_was_modified_successful(self):
+        """Test setting was_modified to True for an existing mission"""
+        response = self.client.put(self.valid_url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], self.mission.id)
+        self.assertTrue(response.data["was_modified"])
+
+        # Verify the mission in the database is updated
+        self.mission.refresh_from_db()
+        self.assertTrue(self.mission.was_modified)
+
+    def test_set_was_modified_mission_not_found(self):
+        """Test setting was_modified for a non-existent mission"""
+        response = self.client.put(self.invalid_url, self.valid_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["error"], "Mission not found")
+
+    def test_partial_update(self):
+        """Test for partial update (only 'was_modified' field is updated)"""
+        new_payload = {"was_modified": True}
+        old_notes = self.mission.notes
+        response = self.client.put(self.valid_url, new_payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.mission.refresh_from_db()
+        self.assertTrue(self.mission.was_modified)
+        self.assertEqual(
+            self.mission.notes, old_notes
+        )  # make sure notes are not changed

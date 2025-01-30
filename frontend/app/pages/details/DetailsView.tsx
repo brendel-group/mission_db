@@ -5,38 +5,7 @@ import { ShowDatasets } from "./DatasetTable";
 import { DetailViewData, RenderedMission, Tag } from "~/data";
 import AbstractPage from "../AbstractPage";
 import { ShowInformationView } from "./InformationView";
-
-// This functions returns the robot names in the format x, y and z.
-// For duplicate robot names, only the first occurance is used, e.g. x, y, x -> x and y and the camel case is ignored,
-// meaning x, y, X -> x and y.
-function formatRobotNames(robotNames: string[] | undefined | null): string {
-  if (!robotNames) {
-    return "";
-  }
-
-  // Create a Set to track normalized names and filter duplicates
-  const seen = new Set<string>();
-  const uniqueRobots = robotNames.filter((name) => {
-    if (!name) {
-      return false;
-    }
-    const normalizedName = name.toLowerCase();
-    if (seen.has(normalizedName)) {
-      return false;
-    }
-    seen.add(normalizedName);
-    return true;
-  });
-
-  if (uniqueRobots.length === 0) {
-    return "";
-  } else if (uniqueRobots.length === 1) {
-    return uniqueRobots[0];
-  } else {
-    const lastRobot = uniqueRobots.pop();
-    return `${uniqueRobots.join(", ")} and ${lastRobot}`;
-  }
-}
+import { formatRobotNames } from "~/utilities/FormatHandler";
 
 interface DetailsViewProps {
   missionData: RenderedMission;
@@ -44,6 +13,7 @@ interface DetailsViewProps {
   totalSize: string;
   totalDuration: string;
   allTags: Tag[];
+  basePath: string;
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({
@@ -52,13 +22,14 @@ const DetailsView: React.FC<DetailsViewProps> = ({
   totalSize,
   totalDuration,
   allTags,
+  basePath
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
 
   return (
     <AbstractPage
-      headline={`${missionData.name}${location ? `, ${location}` : ""}${
-        detailViewData?.robots
+      headline={`${missionData.name}${location ? ` in ${location}` : ""}${
+        detailViewData?.robots && detailViewData?.robots.length > 0
           ? ` with ${formatRobotNames(detailViewData.robots)}`
           : ""
       }`}
@@ -80,7 +51,9 @@ const DetailsView: React.FC<DetailsViewProps> = ({
             </Grid.Col>
             {/* Table */}
             <Grid.Col span={12}>
-              {detailViewData && <ShowDatasets data={detailViewData} />}
+              {detailViewData && (
+                <ShowDatasets data={detailViewData} basePath={basePath} />
+              )}
             </Grid.Col>
           </Grid>
         </Grid.Col>

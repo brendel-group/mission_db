@@ -4,8 +4,7 @@ import { User } from "~/data";
 
 import { createCookieSessionStorage } from "@remix-run/node";
 import { MAX_SESSION_AGES } from "~/config";
-import { attemptLogin, attemptLogout } from "./fetchapi";
-import { createCookie } from "@remix-run/node";
+import { attemptLogin, attemptLogout } from "~/fetchapi/auth";
 
 // export the whole sessionStorage object
 export const sessionStorage = createCookieSessionStorage({

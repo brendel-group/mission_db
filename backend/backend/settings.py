@@ -32,8 +32,9 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev", ".mission-explorer.xyz"]
 CSRF_TRUSTED_ORIGINS = [
+    "https://*.mission-explorer.xyz",
     "https://*.fly.dev",
     "http://localhost:3000",
     "http://localhost:5173",
@@ -51,7 +52,8 @@ SESSION_COOKIE_SAMESITE = "Lax"
 
 CSRF_COOKIE_SAMESITE = "Lax"
 
-COOKIE_DOMAIN = env("COOKIE_DOMAIN", default=None)
+# Front-end and back-end share the same domain.
+COOKIE_DOMAIN = env("COOKIE_DOMAIN", default=".mission-explorer.xyz")
 
 SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
 

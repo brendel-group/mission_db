@@ -4,7 +4,7 @@ import yaml
 from datetime import datetime
 from .Command import Command
 from django.core.files.storage import DefaultStorage
-from restapi.models import Mission, File, Mission_files
+from restapi.models import Mission, File
 
 
 class AddFolderCommand(Command):
@@ -16,7 +16,7 @@ class AddFolderCommand(Command):
         ### Parameters
         subparser: subparser to which this subcommand belongs to
         """
-        folder_parser = subparser.add_parser(self.name, help="adds details from folder")
+        folder_parser = subparser.add_parser(self.name, help="adds mission from folder")
         folder_parser.add_argument("--path", required=True, help="Filepath")
         folder_parser.add_argument("--location", required=False, help="location")
         folder_parser.add_argument(
@@ -117,7 +117,7 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
         logging.warning("Skipping folder due to naming issues.")
 
 
-def add_details(mission_path, robot, id):
+def add_details(mission_path, robot, mission):
     """
     iterates through the folders and subfolders to find the mcap files and metadata files
     this information is then stored in the database
@@ -141,22 +141,19 @@ def add_details(mission_path, robot, id):
             if mcap_path and metadata:
                 size = storage.size(mcap_path)
                 duration = get_duration(metadata)
-                save_Details(mcap_path, size, duration, robot)
-                details_id = get_details_id(mcap_path)
-                save_missionfiles(id, details_id, typ)
+                save_Details(mcap_path, size, duration, robot, mission, typ)
 
 
-def save_missionfiles(mission_id, details_id, typ):
-    try:
-        files = Mission_files(mission=mission_id, file=details_id, type=typ)
-        files.save()
-    except Exception as e:
-        logging.error(f"Error Adding Mission_files: {e}")
-
-
-def save_Details(path, size, duration, robot):
+def save_Details(path, size, duration, robot, mission, type):
     if size and duration:
-        file = File(file=path, robot=robot, duration=duration, size=size)
+        file = File(
+            file=path,
+            robot=robot,
+            duration=duration,
+            size=size,
+            mission=mission,
+            type=type,
+        )
         try:
             file.save()
         except Exception as e:

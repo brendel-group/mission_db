@@ -11,6 +11,11 @@ psycopg2-binary
 pyreadline3; platform_system == 'Windows'
 ruff==0.9.3
 whitenoise
+djangorestframework-api-key==3.*
+mcap
+numpy
+opencv-python
+moviepy
 dj-rest-auth==7.*
 boto3==1.*
 cryptography

@@ -10,6 +10,7 @@ class Mission(models.Model):
     date = models.DateField()
     location = models.CharField(max_length=65536, null=True, blank=True)
     notes = models.CharField(max_length=65536, null=True, blank=True)
+    was_modified = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ["name", "date"]
@@ -23,18 +24,12 @@ class File(models.Model):
     """The files table"""
 
     id = models.AutoField(primary_key=True)
+    mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
     file = models.FileField(max_length=65536)
     video = models.FileField(blank=True, null=True, max_length=65536)
     robot = models.CharField(max_length=65536, null=True, blank=True)  # can be optional
     duration = models.BigIntegerField()  # unit: seconds
     size = models.BigIntegerField()  # unit: bytes
-
-
-class Mission_files(models.Model):
-    """The relationship table to connect Misson and File"""
-
-    mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
-    file = models.ForeignKey(File, on_delete=models.CASCADE)
     type = models.CharField(max_length=65536)  # either 'train' or 'test'
 
 

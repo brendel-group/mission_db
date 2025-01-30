@@ -12,6 +12,8 @@ import {
   Skeleton,
   Badge,
   Popover,
+  Pagination,
+  Select,
 } from "@mantine/core";
 import { isValidHexColor } from "~/utilities/TagPicker";
 import {
@@ -22,23 +24,29 @@ import {
 } from "@tabler/icons-react";
 import classes from "./Overview.module.css";
 import { MissionData, RenderedMission, Tag } from "~/data";
-import {
-  addTagToMission,
-  changeTagName,
-  changeTagColor,
-  removeTagFromMission,
-  createTag,
-  getMissionsByTag,
-  deleteTag,
-  getMissions,
-  getTagsByMission,
-  getTotalDuration,
-  getTotalSize,
-  getTags,
-} from "~/utilities/fetchapi";
 import { TagPicker } from "~/utilities/TagPicker";
 import { IconPencil } from "@tabler/icons-react";
 import { useNavigate } from "@remix-run/react";
+import Cookies from "js-cookie";
+import { getMissions } from "~/fetchapi/missions";
+import {
+  addTagToMission,
+  changeTagColor,
+  changeTagName,
+  createTag,
+  deleteTag,
+  getMissionsByTag,
+  getTags,
+  getTagsByMission,
+  removeTagFromMission,
+} from "~/fetchapi/tags";
+import {
+  getRobotNames,
+  getTotalDuration,
+  getTotalSize,
+} from "~/fetchapi/details";
+import { formatRobotNames } from "~/utilities/FormatHandler";
+import { CookieSerializeOptions } from "@remix-run/node";
 
 interface ThProps {
   children: React.ReactNode;
@@ -69,10 +77,15 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
   );
 }
 
+function truncateText(text: string | null, maxLength: number) {
+  if (text === null) return "";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+}
+
 function filterData(
   data: RenderedMission[],
   search: string,
-  searchedTags: string[] = [],
+  searchedTags: string[] = []
 ) {
   const query = search.toLowerCase().trim();
   return data.filter((item) => {
@@ -88,7 +101,7 @@ function filterData(
       searchedTags.length === 0 ||
       (item.tags &&
         searchedTags.every((tag) =>
-          item.tags.some((itemTag) => itemTag.name === tag),
+          item.tags.some((itemTag) => itemTag.name === tag)
         ));
 
     return matchesSearch && matchesTags;
@@ -102,7 +115,7 @@ function sortData(
     reversed: boolean;
     search: string;
     searchedTags: string[];
-  },
+  }
 ) {
   const { sortBy, reversed, search, searchedTags } = payload;
 
@@ -143,12 +156,30 @@ export function Overview() {
   const [search, setSearch] = useState("");
   const [fetchedData, setFetchedData] = useState<RenderedMission[]>([]);
   const [renderedData, setRenderedData] = useState<RenderedMission[]>([]);
-  const [sortBy, setSortBy] = useState<keyof RenderedMission | null>(null);
+  const [sortBy, setSortBy] = useState<keyof RenderedMission | null>("name");
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
+
+  // Error handling
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Tags
   const [searchedTags, setSearchedTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
+
+  // Pagination management
+  const [activePage, setPage] = useState(1);
+
+  if (Cookies.get("entriesPerPage") === undefined) {
+    Cookies.set("entriesPerPage", "10", {
+      expires: 365,
+      sameSite: "strict",
+    } as CookieSerializeOptions);
+  }
+
+  const [entriesPerPage, setEntriesPerPage] = useState(
+    Number(Cookies.get("entriesPerPage"))
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -165,6 +196,13 @@ export function Overview() {
           const totalDuration: string = await getTotalDuration(missions[i].id);
           // Fetch total size for each mission
           const totalSize: string = await getTotalSize(missions[i].id);
+
+          // Fetch robot name for each mission
+          const robots_formatted: string = formatRobotNames(
+            await getRobotNames(missions[i].id),
+            false
+          );
+
           renderedMissions.push({
             id: missions[i].id,
             name: missions[i].name,
@@ -173,7 +211,7 @@ export function Overview() {
             notes: missions[i].notes,
             totalDuration: totalDuration,
             totalSize: totalSize,
-            robot: "Vader",
+            robot: robots_formatted || "",
             tags: tags || [],
           });
         }
@@ -183,7 +221,14 @@ export function Overview() {
         }
 
         setFetchedData(renderedMissions);
-        setRenderedData(renderedMissions);
+        setRenderedData(
+          sortData(renderedMissions, {
+            sortBy: "name",
+            reversed: false,
+            search,
+            searchedTags,
+          })
+        );
 
         const tags = await getTags();
         setAllTags(tags);
@@ -199,7 +244,6 @@ export function Overview() {
     };
 
     fetchData();
-    //console.log(JSON.stringify(fetchedData));
   }, []);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
@@ -211,7 +255,7 @@ export function Overview() {
     setReverseSortDirection(reversed);
     setSortBy(field);
     setRenderedData(
-      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags }),
+      sortData(fetchedData, { sortBy: field, reversed, search, searchedTags })
     );
   };
 
@@ -224,11 +268,18 @@ export function Overview() {
         reversed: reverseSortDirection,
         search: value,
         searchedTags,
-      }),
+      })
     );
   };
 
-  const rows = renderedData.map((row) => (
+  const start = (activePage - 1) * entriesPerPage;
+  const end = start + entriesPerPage;
+
+  let slicedRows = renderedData;
+
+  if (entriesPerPage > 0) slicedRows = renderedData.slice(start, end);
+
+  const rows = slicedRows.map((row) => (
     <Table.Tr
       key={row.name}
       onClick={() => navigate("/details?id=" + row.id)}
@@ -240,12 +291,20 @@ export function Overview() {
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
     >
       <Table.Td>{row.name}</Table.Td>
-      <Table.Td>{row.location === null ? "" : row.location}</Table.Td>
+      <Table.Td>
+        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          {truncateText(row.location, 42)}
+        </div>
+      </Table.Td>
       <Table.Td>{row.totalDuration}</Table.Td>
       <Table.Td>{row.totalSize}</Table.Td>
       <Table.Td>{row.robot}</Table.Td>
       <Table.Td>{row.date}</Table.Td>
-      <Table.Td>{row.notes === null ? "" : row.notes}</Table.Td>
+      <Table.Td>
+        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          {truncateText(row.notes, 42)}
+        </div>
+      </Table.Td>
       <Table.Td
         onClick={(e) => e.stopPropagation()}
         style={{ cursor: "default" }}
@@ -274,7 +333,7 @@ export function Overview() {
                     reversed: reverseSortDirection,
                     search,
                     searchedTags: updatedTags,
-                  }),
+                  })
                 );
               }}
             >
@@ -284,7 +343,11 @@ export function Overview() {
           <Popover>
             {/*edit button*/}
             <Popover.Target>
-              <Badge color="grey" variant="light" style={{ cursor: "pointer" }}>
+              <Badge
+                color="orange"
+                variant="light"
+                style={{ cursor: "pointer" }}
+              >
                 <IconPencil
                   size={16}
                   style={{ transform: "translateY(2px)" }}
@@ -350,7 +413,7 @@ export function Overview() {
                       ? {
                           ...mission,
                           tags: mission.tags.filter(
-                            (tag) => tag.name !== tagName,
+                            (tag) => tag.name !== tagName
                           ),
                         }
                       : mission;
@@ -370,15 +433,15 @@ export function Overview() {
                     tags: mission.tags.map((tag) =>
                       tag.name === tagName
                         ? { name: newName, color: newColor }
-                        : tag,
+                        : tag
                     ),
                   });
                   setAllTags(
                     allTags.map((tag) =>
                       tag.name === tagName
                         ? { name: newName, color: newColor }
-                        : tag,
-                    ),
+                        : tag
+                    )
                   );
                   setFetchedData(fetchedData.map(updateTag));
                   setRenderedData(renderedData.map(updateTag));
@@ -388,13 +451,13 @@ export function Overview() {
                   for (let i = 0; i < row.tags.length; i++) {
                     await removeTagFromMission(row.id, row.tags[i].name);
                     const missionsWithTag = await getMissionsByTag(
-                      row.tags[i].name,
+                      row.tags[i].name
                     );
                     if (missionsWithTag.length === 0) {
                       // delete tag from database if no missions are using it
                       await deleteTag(row.tags[i].name);
                       setAllTags(
-                        allTags.filter((tag) => tag.name !== row.tags[i].name),
+                        allTags.filter((tag) => tag.name !== row.tags[i].name)
                       );
                     }
                   }
@@ -472,6 +535,51 @@ export function Overview() {
           )}
         </Table.Tbody>
       </Table>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {/* Dropdown on the left */}
+        <Select
+          data={[
+            "5 Entries",
+            "10 Entries",
+            "20 Entries",
+            "50 Entries",
+            "All Entries",
+          ]}
+          value={
+            entriesPerPage === -1 ? "All Entries" : `${entriesPerPage} Entries`
+          }
+          onChange={(value) => {
+            let newVal = 0;
+
+            if (value === "All Entries") newVal = -1;
+            else newVal = Number(value?.split(" ")[0]);
+
+            setEntriesPerPage(newVal);
+
+            Cookies.set("entriesPerPage", String(newVal), {
+              expires: 365,
+              sameSite: "strict",
+            } as CookieSerializeOptions);
+          }}
+          style={{ width: 120, marginRight: 16 }}
+        />
+
+        {/* Centered pagination */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          <Pagination
+            total={
+              entriesPerPage === -1
+                ? 1
+                : Math.ceil(renderedData.length / entriesPerPage)
+            }
+            color="orange"
+            size="sm"
+            radius="md"
+            withControls={false}
+            onChange={setPage}
+          />
+        </div>
+      </div>
     </ScrollArea>
   );
 }

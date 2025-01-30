@@ -7,7 +7,7 @@ from django.contrib.sessions.models import Session
 from django.core.files.base import ContentFile
 from django.core.files.storage.memory import InMemoryStorage
 from django.http import FileResponse, StreamingHttpResponse
-from restapi.models import File
+from restapi.models import File, Mission
 from unittest.mock import patch
 
 
@@ -34,7 +34,11 @@ class FileDownloadTest(TestCase):
         file_content = ContentFile("12345678901", "path/to/file.test")
         test_storage.save(file_content.name, file_content)
 
-        file = File.objects.create(file=file_content.name, size=123, duration=123)
+        mission = Mission.objects.create(name="test", date="2025-01-30")
+
+        file = File.objects.create(
+            file=file_content.name, mission=mission, size=123, duration=123
+        )
         self.file = file.file
 
         # override _chunk_generator to force smaller chunk_size (5)

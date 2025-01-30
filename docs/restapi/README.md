@@ -121,4 +121,28 @@ For more details about how to use the endpoints refer to the [dj-rest-auth docum
   - The URL is of the format `restapi/missions/<int:mission_id>/files/`
   - The result will be a list of files associated with the specific mission.
 
+- GET request to list all topics for a file path
+  - Using a [GET Request](http://localhost:8000/restapi/topics/yourpathhere) the topics from a file path can be listed.
+  - The URL is of the format `restapi/topics/<path:file_path>`
+  - The result will be a list of topics.
+
+- GET request to list all allowed topic names
+  - Using a [GET Request](http://localhost:8000/restapi/topics-names/) the allowed topic names can be listed.
+  - The URL is of the format `restapi/topics-names/`
+  - The result will be a list of allowed topic names.
+
+- POST request to add an allowed topic name
+  - Using a [POST Request](http://localhost:8000/restapi/topics-names/create/) with a name field.
+  - The URL is of the format `restapi/topics-names/create/`
+  - The result will be an object containing the added name.
+
+- DELETE request to delete an allowed topic name
+  - Using a [DELETE Request](http://localhost:8000/topics-names/test) with the name.
+  - The URL is of the format `topics-names/<str:name>`
+  - The result will be HTTP_204_NO_CONTENT or HTTP_404_NOT_FOUND if the name is not found.
+
+- PUT request to set the was_modified field of a mission
+  - Using a [PUT Request](http://localhost:8000/restapi/missions/0/was-modified) with the mission id.
+  - The URL is of the format `restapi/missions/<int:mission_id>/was-modified`
+  
 If you want to confirm your actions further, you can always check the current state of the database. The steps to achieve this are described in docs/database.

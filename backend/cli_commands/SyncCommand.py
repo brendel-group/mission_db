@@ -1,9 +1,11 @@
-from datetime import datetime
 import logging
 from django.core.files.storage import DefaultStorage
+from restapi.serializer import TagSerializer
 from .Command import Command
 from .AddFolderCommand import add_mission_from_folder
-from restapi.models import Mission
+from .DeleteFolderCommand import delete_mission_from_folder
+from restapi.models import Mission, Tag
+import json
 
 
 class SyncCommand(Command):
@@ -39,15 +41,42 @@ def sync_folder():
         add_mission_from_folder(folder, None, None)
 
     # Delete missions from the database not found in the filesystem
-    for mission_str in db_mission_set - fs_mission_set:
-        date_str, name = mission_str.split("_", 1)
-        mission_date = datetime.strptime(date_str, "%Y.%m.%d").date()
-        mission_to_delete = Mission.objects.filter(name=name, date=mission_date)[0]
-        if mission_to_delete:
-            try:
-                mission_to_delete.delete()
-                logging.info(
-                    f"Deleted mission '{name}' from database as it's no longer in the filesystem."
-                )
-            except Exception as e:
-                logging.error(f"Error deleting mission '{name}': {e}")
+    for folder in db_mission_set - fs_mission_set:
+        delete_mission_from_folder(folder)
+
+    # find unused tags and delete them
+    Tag.objects.filter(mission_tags=None).delete()
+
+    # update db_missions after adding and deleting missions
+    db_missions = Mission.objects.filter()
+
+    # flag if any mission was modified
+    modified_mission_found = False
+
+    # save metadata for each mission in the filesystem
+    for mission in db_missions:
+        # skip mission if nothing was modified
+        if not mission.was_modified:
+            continue
+        # else save metadata
+        modified_mission_found = True
+        Mission.objects.filter(id=mission.id).update(was_modified=False)
+        tags = Tag.objects.filter(mission_tags__mission=mission)
+        tag_serializer = TagSerializer(tags, many=True)
+        mission_tags = [
+            {"name": tag["name"], "color": tag["color"]} for tag in tag_serializer.data
+        ]  # remove id field
+        metadata = {
+            "location": mission.location,
+            "notes": mission.notes,
+            "tags": mission_tags,
+        }
+        # save metadata to file inside mission folder
+        metadata_file = f"{mission.date.strftime('%Y.%m.%d')}_{mission.name}/{mission.name}_metadata.json"
+        with storage.open(metadata_file, "w") as f:
+            json.dump(metadata, f, indent=4)
+            logging.info(
+                f"Saved metadata for mission '{mission.name}' to the mission folder"
+            )
+    if not modified_mission_found:
+        logging.info("Nothing was modified, no new metadata was saved")

@@ -1,6 +1,6 @@
 import os
 from django.test import TestCase
-from restapi.models import Mission, File, Mission_files
+from restapi.models import Mission, File
 from cli_commands.AddFolderCommand import (
     add_mission_from_folder,
     extract_info_from_folder,
@@ -109,12 +109,7 @@ class AddDetailsTests(TestCase):
         self.assertEqual(len(file), 1)
         self.assertEqual(file.first().size, 3)
         self.assertEqual(file.first().duration, 14)
-
-        mission_files = Mission_files.objects.filter(mission__name="mission1")
-        self.assertTrue(mission_files.exists())
-        self.assertEqual(len(mission_files), 1)
-        self.assertEqual(mission_files.first().file, file.first())
-        self.assertEqual(mission_files.first().type, "test")
+        self.assertEqual(file.first().type, "test")
 
 
 class BasicTests(TestCase):

@@ -3,12 +3,22 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
-from .models import Tag, Mission, Mission_tags, Mission_files
+from .models import (
+    Allowed_topic_names,
+    File,
+    Tag,
+    Mission,
+    Mission_tags,
+    Topic,
+)
 from .serializer import (
+    AllowedTopicNameSerializer,
+    FileSerializer,
     TagSerializer,
     MissionSerializer,
+    MissionWasModifiedSerializer,
     MissionTagSerializer,
-    FileWithTypeSerializer,
+    TopicSerializer,
 )
 import urllib.parse
 
@@ -18,6 +28,24 @@ def get_missions(request):
     missions = Mission.objects.all()
     serializer = MissionSerializer(missions, many=True)
     return Response(serializer.data)
+
+
+@api_view(["PUT"])
+def set_was_modified(request, pk):
+    try:
+        mission = Mission.objects.get(pk=pk)
+    except Mission.DoesNotExist:
+        return Response(
+            {"error": "Mission not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = MissionWasModifiedSerializer(
+        instance=mission, data=request.data, partial=True
+    )
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -64,11 +92,73 @@ def get_files_by_mission_id(request, mission_id):
         mission = Mission.objects.get(id=mission_id)
     except Mission.DoesNotExist:
         raise NotFound(f"Mission with ID {mission_id} not found")
-    mission_files = Mission_files.objects.filter(mission__id=mission.id)
-    serializer = FileWithTypeSerializer(
-        mission_files, many=True, context={"request": request}
-    )
+    files = File.objects.filter(mission=mission)
+    serializer = FileSerializer(files, many=True, context={"request": request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def get_topics_from_files(request, file_path):
+    """
+    List all topics of a file
+    ### Returns
+    Response with list of topics in json format
+    """
+    try:
+        file = File.objects.get(file=file_path)
+    except File.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    topics = Topic.objects.filter(file=file)
+    serializer = TopicSerializer(topics, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def allowed_topic_names(request):
+    """
+    List all allowed topic names
+    ### Returns
+    List of allowed topic names in json format
+    """
+    topic_names = Allowed_topic_names.objects.all()
+    serializer = AllowedTopicNameSerializer(topic_names, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+def allowed_topic_names_create(request):
+    """
+    Creates a new allowed topic name
+    ### Parameters
+    request: POST Request containing name of the allowed topic name
+    ### Returns
+    Response with data of created allowed topic name object containing name\
+    Or HTTP_400_BAD_REQUEST Response
+    """
+    serializer = AllowedTopicNameSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["DELETE"])
+def allowed_topic_names_delete(request, name):
+    """
+    Delete an allowed topic name
+    ### Parameters
+    name: name of the allowed topic name
+    ### Returns
+    success response or
+    HTTP_404_NOT_FOUND if allowed topic name not found
+    """
+    name = urllib.parse.unquote(name)
+    try:
+        allowed_topic_name = Allowed_topic_names.objects.get(name=name)
+    except Allowed_topic_names.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    allowed_topic_name.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(["GET"])
