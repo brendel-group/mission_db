@@ -5,16 +5,21 @@ from .Command import Command
 import json
 import logging
 
+
 class RestoreMetadataCommand(Command):
     name = "restoremetadata"
 
     def parser_setup(self, subparser):
-        _ = subparser.add_parser(self.name, help="saves the metadata from the JSON files in the database")
+        _ = subparser.add_parser(
+            self.name, help="saves the metadata from the JSON files in the database"
+        )
 
     def command(self, args):
         restore_metadata()
 
+
 storage = DefaultStorage()
+
 
 def restore_metadata():
     fs_mission_set = set(storage.listdir("")[0])
@@ -39,7 +44,9 @@ def restore_metadata():
 
             # Process tags
             for tag_data in tags_data:
-                tag, _ = Tag.objects.get_or_create(name=tag_data['name'], color=tag_data['color'])
+                tag, _ = Tag.objects.get_or_create(
+                    name=tag_data["name"], color=tag_data["color"]
+                )
                 Mission_tags.objects.get_or_create(mission=mission, tag=tag)
 
             logging.info(f"restored metadata from json file for mission {mission_name}")
