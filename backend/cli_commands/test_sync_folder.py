@@ -1,3 +1,4 @@
+import logging
 import os
 from django.test import TestCase
 from unittest.mock import patch
@@ -31,6 +32,9 @@ class SyncFolderArgumentTests(TestCase):
         # Start patching
         self.mock_add_mission_from_folder = self.patcher_add_mission_from_folder.start()
 
+        self.logger = logging.getLogger()
+        self.logger.disabled = True
+
     def _delete_recursive(self, path: str):
         dirs, files = self.test_storage.listdir(path)
         for dir in dirs:
@@ -44,6 +48,7 @@ class SyncFolderArgumentTests(TestCase):
         # Stop all the patchers
         self.patcher_add_mission_from_folder.stop()
         self._delete_recursive("")
+        self.logger.disabled = False
 
     def test_sync_folder_calls_add_mission_from_folder_with_correct_arguments(self):
         """

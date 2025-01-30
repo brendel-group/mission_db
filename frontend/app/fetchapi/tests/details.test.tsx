@@ -1,6 +1,12 @@
 import { FETCH_API_BASE_URL } from "~/config";
 import { DetailViewData } from "~/data";
-import { getDetailsByMission, getFormattedDetails, getRobotNames, getTotalDuration, getTotalSize } from "../details";
+import {
+  getDetailsByMission,
+  getFormattedDetails,
+  getRobotNames,
+  getTotalDuration,
+  getTotalSize,
+} from "../details";
 
 /*
 How to run the tests:
@@ -23,28 +29,24 @@ describe("Fetch API Functions", () => {
     test("getDetailsByMission should fetch details of a mission", async () => {
       const mockResponse = [
         {
-          file: {
-            file_path: "file1.mcap",
-            video_path: "file1.mp4",
-            duration: "60000",
-            size: "1024",
-            robot: "hihi",
-          },
+          file_path: "file1.mcap",
+          video_path: "file1.mp4",
+          duration: "60000",
+          size: "1024",
+          robot: "hihi",
         },
         {
-          file: {
-            file_path: "file2.mcap",
-            video_path: "file2.mp4",
-            duration: "1200",
-            size: "2621440",
-            robot: "haha",
-          },
+          file_path: "file2.mcap",
+          video_path: "file2.mp4",
+          duration: "1200",
+          size: "2621440",
+          robot: "haha",
         },
       ];
 
       const expectedResponse: DetailViewData = {
         files: ["file1.mcap", "file2.mcap"],
-        videos: ['file1.mp4', 'file2.mp4'],
+        videos: ["file1.mp4", "file2.mp4"],
         durations: ["60000", "1200"],
         sizes: ["1024", "2621440"],
         robots: ["hihi", "haha"],
@@ -63,35 +65,31 @@ describe("Fetch API Functions", () => {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     });
 
     test("getFormattedDetails should fetch details of a mission and format them", async () => {
       const mockResponse = [
         {
-          file: {
-            file_path: "file1.mcap",
-            video_path: "file1.mp4",
-            duration: "60000",
-            size: "1024",
-            robot: "hihi",
-          },
+          file_path: "file1.mcap",
+          video_path: "file1.mp4",
+          duration: "60000",
+          size: "1024",
+          robot: "hihi",
         },
         {
-          file: {
-            file_path: "file2.mcap",
-            video_path: "file2.mp4",
-            duration: "1200",
-            size: "2621440",
-            robot: "haha",
-          },
+          file_path: "file2.mcap",
+          video_path: "file2.mp4",
+          duration: "1200",
+          size: "2621440",
+          robot: "haha",
         },
       ];
 
       const expectedResponse: DetailViewData = {
         files: ["file1.mcap", "file2.mcap"],
-        videos: ['file1.mp4', 'file2.mp4'],
+        videos: ["file1.mp4", "file2.mp4"],
         durations: ["16:40:00", "00:20:00"],
         sizes: ["1.00 KB", "2.50 MB"],
         robots: ["hihi", "haha"],
@@ -110,25 +108,21 @@ describe("Fetch API Functions", () => {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     });
 
     test("getTotalDuration should fetch total duration of all files of a mission and format them", async () => {
       const mockResponse = [
         {
-          file: {
-            file_path: "file1.mcap",
-            duration: "60000",
-            size: "1024",
-          },
+          file_path: "file1.mcap",
+          duration: "60000",
+          size: "1024",
         },
         {
-          file: {
-            file_path: "file2.mcap",
-            duration: "1200",
-            size: "2621440",
-          },
+          file_path: "file2.mcap",
+          duration: "1200",
+          size: "2621440",
         },
       ];
 
@@ -147,25 +141,21 @@ describe("Fetch API Functions", () => {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     });
 
     test("getTotalSize should fetch total size of all files of a mission and format them", async () => {
       const mockResponse = [
         {
-          file: {
-            file_path: "file1.mcap",
-            duration: "60000",
-            size: "1024",
-          },
+          file_path: "file1.mcap",
+          duration: "60000",
+          size: "1024",
         },
         {
-          file: {
-            file_path: "file2.mcap",
-            duration: "1200",
-            size: "2621440",
-          },
+          file_path: "file2.mcap",
+          duration: "1200",
+          size: "2621440",
         },
       ];
 
@@ -184,27 +174,23 @@ describe("Fetch API Functions", () => {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     });
 
     test("getRobotNames", async () => {
       const mockResponse = [
         {
-          file: {
-            file_path: "file1.mcap",
-            robot: "hihi",
-            duration: "60000",
-            size: "1024",
-          },
+          file_path: "file1.mcap",
+          robot: "hihi",
+          duration: "60000",
+          size: "1024",
         },
         {
-          file: {
-            file_path: "file2.mcap",
-            robot: "haha",
-            duration: "1200",
-            size: "2621440",
-          },
+          file_path: "file2.mcap",
+          robot: "haha",
+          duration: "1200",
+          size: "2621440",
         },
       ];
 
@@ -223,7 +209,7 @@ describe("Fetch API Functions", () => {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     });
   });

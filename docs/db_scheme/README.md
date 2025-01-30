@@ -2,24 +2,23 @@
 ![ER Diagram](db_scheme_er_diagram.png)
 The above diagram is an ER Diagram. Information on how to read those diagrams can be found [here](https://www.pertuniti.com/documentation/eer/).
 
+The diamond shaped objects that don't have any bubbles around them are not tables, they are only used to put the relationship of the tables in words.
+
 The first table is the `mission` table. It has the columns `id`, `name`, `date`, `location` and `notes`.
 - The `id` field is underlined which means it's the primary key and is an integer with auto increment.
 - `name` is a string.
 - `date` is a DateField.
 - `location` and `notes` are strings and are optional.
 
-The second table is the `file` table. It has the columns `id`, `file_path`, `robot`, `duration` and `size`.
+The second table is the `file` table. It has the columns `id`, `mission_id`, `file_path`, `robot`, `duration`, `size` and `type`.
 - `id` is the primary key and is an integer with auto increment.
+- `mission_id` is a foreign key that links a file to a mission.
 - `file` is a FileField containing the actual file.
 - `video` is a FileField containing the extracted video file.
 - `robot` is a string and contains the name of the used robot, can be optional.
 - `duration` is an integer/biginteger and is the time in nanoseconds as in the metadata.yaml file.
 - `size` is an integer/biginteger and is the size of the file in bytes.
-
-To connect the entries of those two tables we need a relationship table. This is the `mission_files` table.\
-It has the columns `mission_id`, `file_id` and `type`.
-- `misson_id` and `file_id` are foreign keys and contain the primary keys of the entries in the other tables.
-- `type` is used to indicate wether the file is used as train or test data and should be a string.
+- `type` is used to indicate wether the file is used as train or test data and is a string.
 
 The third table is the `tag` table. It has the columns `id`, `name` and `color`.
 - `name` is a string and is unique.

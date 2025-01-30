@@ -1,5 +1,5 @@
 from django.test import TestCase
-from restapi.models import Mission, File, Mission_files
+from restapi.models import Mission, File
 from cli_commands.DeleteFolderCommand import delete_mission_from_folder
 from datetime import datetime
 import logging
@@ -21,10 +21,8 @@ class DeleteFolderCommandTests(TestCase):
             file="2024.12.02_test_mission/test_file.mcap",
             size=1024,
             duration=120.0,
-        )
-
-        self.mission_file = Mission_files.objects.create(
-            mission=self.mission, file=self.file, type="test"
+            mission=self.mission,
+            type="test",
         )
 
     def tearDown(self):
@@ -37,7 +35,6 @@ class DeleteFolderCommandTests(TestCase):
         self.assertTrue(
             File.objects.filter(file="2024.12.02_test_mission/test_file.mcap").exists()
         )
-        self.assertTrue(Mission_files.objects.filter(mission=self.mission).exists())
 
         # Call the delete function
         delete_mission_from_folder("2024.12.02_test_mission")
@@ -47,7 +44,6 @@ class DeleteFolderCommandTests(TestCase):
         self.assertFalse(
             File.objects.filter(file="2024.12.02_test_mission/test_file.mcap").exists()
         )
-        self.assertFalse(Mission_files.objects.filter(mission=self.mission).exists())
 
     def test_delete_nonexistent_mission(self):
         logging.getLogger().disabled = False
