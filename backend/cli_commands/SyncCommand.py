@@ -7,6 +7,14 @@ from .DeleteFolderCommand import delete_mission_from_folder
 from restapi.models import Mission, Tag
 import json
 
+# Create a custom logging handler to track if any log message was emitted
+class LogTracker(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.log_occurred = False
+
+    def emit(self, record):
+        self.log_occurred = True
 
 class SyncCommand(Command):
     name = "sync"
@@ -27,6 +35,11 @@ def sync_folder():
     - Adds missions from folders in the filesystem that are not in the database.
     - Deletes missions from the database that are not in the filesystem.
     """
+    # custom logger to track if any log message was emitted
+    logger = logging.getLogger()
+    log_tracker = LogTracker()
+    logger.addHandler(log_tracker)
+
     # Get all existing missions in the database
     db_missions = Mission.objects.filter()
     db_mission_set = set(
@@ -59,7 +72,6 @@ def sync_folder():
         if not mission.was_modified:
             continue
         # else save metadata
-        modified_mission_found = True
         Mission.objects.filter(id=mission.id).update(was_modified=False)
         tags = Tag.objects.filter(mission_tags__mission=mission)
         tag_serializer = TagSerializer(tags, many=True)
@@ -78,5 +90,6 @@ def sync_folder():
             logging.info(
                 f"Saved metadata for mission '{mission.name}' to the mission folder"
             )
-    if not modified_mission_found:
-        logging.info("Nothing was modified, no new metadata was saved")
+    if not log_tracker.log_occurred:
+        logging.info("No changes detected.")
+    logger.removeHandler(log_tracker)
