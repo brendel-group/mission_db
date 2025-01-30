@@ -188,4 +188,6 @@ class FakeFileSystemTests(TestCase):
             self.assertTrue(
                 Mission.objects.filter(name="testmission", date="2024-12-02").exists()
             )
-            self.assertEqual(log.output, ["INFO:root:Mission 'testmission' added successfully."])
+            self.assertEqual(
+                log.output, ["INFO:root:Mission 'testmission' added successfully."]
+            )

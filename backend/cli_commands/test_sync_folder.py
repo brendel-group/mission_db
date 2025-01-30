@@ -53,11 +53,7 @@ class SyncFolderArgumentTests(TestCase):
         sync_folder()
 
         # Verify add_mission_from_folder is called with correct arguments
-        self.mock_add_mission_from_folder.assert_any_call(
-            "2024.12.02_mission1"
-        )
-        self.mock_add_mission_from_folder.assert_any_call(
-            "2024.12.03_mission2"
-        )
+        self.mock_add_mission_from_folder.assert_any_call("2024.12.02_mission1")
+        self.mock_add_mission_from_folder.assert_any_call("2024.12.03_mission2")
         # Ensure add_mission_from_folder is not called for invalid folders
         self.assertEqual(self.mock_add_mission_from_folder.call_count, 2)

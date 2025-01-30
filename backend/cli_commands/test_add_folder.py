@@ -32,8 +32,6 @@ class AddMissionTests(TestCase):
             Mission.objects.filter(name="test_mission", date="2024-12-02").exists()
         )
 
-    
-
 
 class AddDetailsTests(TestCase):
     def setUp(self):
@@ -41,10 +39,14 @@ class AddDetailsTests(TestCase):
         self.test_storage = SyncCommand.storage
 
         # Fake files
-        self.test_storage.save("2024.12.02_mission1/test/bag/bag.mcap", ContentFile("123"))
+        self.test_storage.save(
+            "2024.12.02_mission1/test/bag/bag.mcap", ContentFile("123")
+        )
         self.test_storage.save(
             "2024.12.02_mission1/test/bag/metadata.yaml",
-            ContentFile("rosbag2_bagfile_information:\n  duration:\n    nanoseconds: 14694379191"),
+            ContentFile(
+                "rosbag2_bagfile_information:\n  duration:\n    nanoseconds: 14694379191"
+            ),
         )
 
         self.logger = logging.getLogger()
