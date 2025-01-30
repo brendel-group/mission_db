@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 from django.test import TestCase
 import cli_commands.SyncCommand as SyncCommand
 from restapi.models import Mission, File, Mission_files
