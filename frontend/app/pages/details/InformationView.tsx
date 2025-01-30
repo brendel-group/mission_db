@@ -1,8 +1,8 @@
-import { Badge, Button, Group, Menu, Text, Textarea } from "@mantine/core";
+import { Badge, Button, Group, Menu, Text, Textarea, Stack } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 import { convertToMissionData, RenderedMission } from "~/data";
-import { setWasModified, updateMission } from "~/fetchapi/missions";
+import { updateMission } from "~/fetchapi/missions";
 
 type EditableFieldProps = {
   fieldName: string;
@@ -23,58 +23,66 @@ const EditableField: React.FC<EditableFieldProps> = ({
   const [menuOpened, setMenuOpened] = useState(false);
 
   return (
-    <Group gap="xs">
-      {/* Field Name and Current Value */}
-      <Text>
-        {fieldName}: {data === null ? "None" : data}
-      </Text>
+    <Stack gap="0px">
+      <Group gap="xs" align="center">
+        {/* Field Name */}
+        <Text>
+          <strong>{fieldName}:</strong>
+        </Text>
 
-      {/* Menu for Editing */}
-      <Menu
-        opened={menuOpened}
-        onOpen={() => setMenuOpened(true)}
-        onClose={() => setMenuOpened(false)}
-      >
-        <Menu.Target>
-          <Badge color="orange" variant="light" style={{ cursor: "pointer" }}>
-            <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
-          </Badge>
-        </Menu.Target>
+        {/* Menu for Editing */}
+        <Menu
+          opened={menuOpened}
+          onOpen={() => setMenuOpened(true)}
+          onClose={() => setMenuOpened(false)}
+        >
+          <Menu.Target>
+            <Badge color="orange" variant="light" style={{ cursor: "pointer" }}>
+              <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
+            </Badge>
+          </Menu.Target>
 
-        {/* Actions for the Editable Field */}
-        <Menu.Dropdown style={{ padding: "10px", marginLeft: "75px" }}>
-          <Textarea
-            variant="filled"
-            placeholder={data === null ? startName : data}
-            resize="vertical"
-            autosize
-            value={fieldValue}
-            error={fieldValue.length > 42 ? sizeError : ""}
-            onChange={(event) => setFieldValue(event.currentTarget.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault(); // Prevent newline
-                setMenuOpened(false);
-                onValueChange(fieldValue);
-              }
-            }}
-            mb="sm"
-          />
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <Button
-              variant="gradient"
-              gradient={{ from: "yellow", to: "orange", deg: 269 }}
-              onClick={() => {
-                setMenuOpened(false);
-                onValueChange(fieldValue);
+          {/* Actions for the Editable Field */}
+          <Menu.Dropdown style={{ padding: "10px", marginLeft: "-75px" }}>
+            <Textarea
+              variant="filled"
+              placeholder={data === null ? startName : data}
+              resize="vertical"
+              autosize
+              value={fieldValue}
+              error={fieldValue.length > 65536 ? sizeError : ""}
+              onChange={(event) => setFieldValue(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault(); // Prevent newline
+                  setMenuOpened(false);
+                  onValueChange(fieldValue);
+                }
               }}
-            >
-              Update
-            </Button>
-          </div>
-        </Menu.Dropdown>
-      </Menu>
-    </Group>
+              mb="sm"
+            />
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <Button
+                variant="gradient"
+                gradient={{ from: "yellow", to: "orange", deg: 269 }}
+                onClick={() => {
+                  setMenuOpened(false);
+                  onValueChange(fieldValue);
+                }}
+              >
+                Update
+              </Button>
+            </div>
+          </Menu.Dropdown>
+        </Menu>
+      </Group>
+      {/* Field Data */}
+      <Text>
+        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          {data === null ? "" : data}
+        </div>
+      </Text>
+    </Stack>
   );
 };
 
@@ -99,9 +107,9 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
       <Text size="xl" mb="sm">
         Information
       </Text>
-      <Text>Date: {missionData.date}</Text>
-      <Text>Total Duration: {totalDuration}</Text>
-      <Text>Total Size: {totalSize}</Text>
+      <Text><strong>Date:</strong> {missionData.date}</Text>
+      <Text><strong>Total Duration:</strong> {totalDuration}</Text>
+      <Text><strong>Total Size:</strong> {totalSize}</Text>
 
       <EditableField
         fieldName="Location"

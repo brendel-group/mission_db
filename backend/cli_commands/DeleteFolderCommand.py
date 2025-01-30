@@ -2,7 +2,7 @@ import os
 import logging
 from datetime import datetime
 from .Command import Command
-from restapi.models import Mission, Mission_files
+from restapi.models import Mission
 
 
 class DeleteFolderCommand(Command):
@@ -36,11 +36,6 @@ def delete_mission_from_folder(folder_path):
         try:
             # find mission
             mission = Mission.objects.get(name=name, date=mission_date)
-
-            # find related files and delete them
-            mission_files = Mission_files.objects.filter(mission=mission)
-            for mission_file in mission_files:
-                mission_file.file.delete()
 
             # delete mission
             mission.delete()

@@ -2,7 +2,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from .models import Allowed_topic_names, Mission, Topic
 from .models import File
-from .models import Mission_files
 from .models import Tag
 from .models import Mission_tags
 
@@ -21,27 +20,40 @@ class MissionWasModifiedSerializer(serializers.ModelSerializer):
 
 class FileSerializer(serializers.ModelSerializer):
     file_path = serializers.CharField(source="file.path", initial=None)
+    file_url = serializers.SerializerMethodField()
+    video_url = serializers.SerializerMethodField()
 
     class Meta:
         model = File
-        fields = ["id", "file_path", "video", "robot", "duration", "size"]
+        fields = [
+            "id",
+            "file_path",
+            "file_url",
+            "video",
+            "video_url",
+            "robot",
+            "duration",
+            "size",
+            "type",
+        ]
 
+    def get_file_url(self, obj):
+        request = self.context.get("request")
+        if request and hasattr(request, "session"):
+            sessionid = request.session.session_key
+        if sessionid:
+            url = f"{obj.file.url}?sessionid={sessionid}"
+            return url
+        return None
 
-class MissionFileSerializer(serializers.ModelSerializer):
-    mission_id = serializers.IntegerField(source="mission.id", initial=None)
-    file_id = serializers.IntegerField(source="file.id", initial=None)
-
-    class Meta:
-        model = Mission_files
-        fields = ["mission_id", "file_id", "type"]
-
-
-class FileWithTypeSerializer(serializers.ModelSerializer):
-    file = FileSerializer(read_only=True)
-
-    class Meta:
-        model = Mission_files
-        fields = ["type", "file"]
+    def get_video_url(self, obj):
+        request = self.context.get("request")
+        if request and hasattr(request, "session"):
+            sessionid = request.session.session_key
+        if sessionid and obj.video:
+            url = f"{obj.video.url.replace('/download/', '/stream/')}?sessionid={sessionid}"
+            return url
+        return None
 
 
 class TagSerializer(serializers.ModelSerializer):

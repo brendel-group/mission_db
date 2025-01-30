@@ -9,17 +9,15 @@ from .models import (
     Tag,
     Mission,
     Mission_tags,
-    Mission_files,
     Topic,
 )
 from .serializer import (
     AllowedTopicNameSerializer,
+    FileSerializer,
     TagSerializer,
     MissionSerializer,
     MissionWasModifiedSerializer,
     MissionTagSerializer,
-    FileWithTypeSerializer,
-    FileSerializer,
     TopicSerializer,
 )
 import urllib.parse
@@ -94,8 +92,8 @@ def get_files_by_mission_id(request, mission_id):
         mission = Mission.objects.get(id=mission_id)
     except Mission.DoesNotExist:
         raise NotFound(f"Mission with ID {mission_id} not found")
-    mission_files = Mission_files.objects.filter(mission__id=mission.id)
-    serializer = FileWithTypeSerializer(mission_files, many=True)
+    files = File.objects.filter(mission=mission)
+    serializer = FileSerializer(files, many=True, context={"request": request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -112,7 +110,7 @@ def get_file_by_path(request, file_path: str):
     except File.DoesNotExist:
         raise NotFound(f"No such file: {file_path}")
 
-    serializer = FileSerializer(file)
+    serializer = FileSerializer(file, context={"request": request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

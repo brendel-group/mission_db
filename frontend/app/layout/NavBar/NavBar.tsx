@@ -35,7 +35,7 @@ function NavbarLink({
 }
 
 const entries = [
-  { icon: IconHome2, label: "Missions", to: "/" },
+  { icon: IconHome2, label: "Missions", to: "/"},
   { icon: IconSettings, label: "Settings", to: "/settings" },
 ];
 

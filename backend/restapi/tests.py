@@ -13,7 +13,6 @@ from .models import (
     Mission,
     Mission_tags,
     File,
-    Mission_files,
     Topic,
 )
 import logging
@@ -558,6 +557,7 @@ class MissionFilesTestCase(APIAuthTestCase):
         # Create files
         self.file1 = File.objects.create(
             id=0,
+            mission=self.mission,
             file="path/to/file1",
             robot="TestRobot1",
             duration=12000,
@@ -565,15 +565,12 @@ class MissionFilesTestCase(APIAuthTestCase):
         )
         self.file2 = File.objects.create(
             id=1,
+            mission=self.mission,
             file="path/to/file2",
             robot="TestRobot2",
             duration=24000,
             size=2048,
         )
-
-        # Associate files with the mission
-        Mission_files.objects.create(mission=self.mission, file=self.file1)
-        Mission_files.objects.create(mission=self.mission, file=self.file2)
 
     def tearDown(self):
         super().tearDown()
@@ -586,8 +583,8 @@ class MissionFilesTestCase(APIAuthTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
         # Expecting 2 files associated with the mission
-        self.assertEqual(response.data[0]["file"]["id"], self.file1.id)
-        self.assertEqual(response.data[1]["file"]["id"], self.file2.id)
+        self.assertEqual(response.data[0]["id"], self.file1.id)
+        self.assertEqual(response.data[1]["id"], self.file2.id)
 
     def test_get_file_by_path(self):
         response = self.client.get(
@@ -700,6 +697,7 @@ class RestAPITopicsByFile(APIAuthTestCase):
         # Create file
         self.file1 = File.objects.create(
             id=0,
+            mission=self.mission,
             file="path/to/file1",
             robot="TestRobot1",
             duration=12000,
@@ -770,11 +768,9 @@ class RestAPITopicsByFile(APIAuthTestCase):
         self.assertEqual(response.data[2]["frequency"], 200)
 
 
-class SetWasModifiedTestCase(APITestCase):
+class SetWasModifiedTestCase(APIAuthTestCase):
     def setUp(self):
-        # Create a user
-        self.user = User.objects.create_user(username="testuser", password="password")
-
+        super().setUp()
         # Create a mission
         self.mission = Mission.objects.create(
             name="Test Mission",
@@ -784,14 +780,20 @@ class SetWasModifiedTestCase(APITestCase):
             was_modified=False,
         )
 
-        # Log in the user
-        self.client.login(username="testuser", password="password")
+        # disable logging
+        self.logger = logging.getLogger("django.request")
+        self.logger.disabled = True
 
         # Define URLs
         self.valid_url = reverse("set_was_modified", kwargs={"pk": self.mission.id})
         self.invalid_url = reverse("set_was_modified", kwargs={"pk": 9999})
         self.valid_payload = {"was_modified": True}
         self.invalid_payload = {"wasModified": True}
+
+    def tearDown(self):
+        super().tearDown()
+        # reenable logging
+        self.logger.disabled = False
 
     def test_set_was_modified_successful(self):
         """Test setting was_modified to True for an existing mission"""
