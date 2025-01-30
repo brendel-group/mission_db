@@ -1,9 +1,9 @@
 from django.test import TestCase
 from datetime import date
+import cli_commands.SyncCommand as SyncCommand
 from restapi.models import Mission, Tag
 from restapi.serializer import MissionSerializer
 from cli_commands.Command import Command
-import cli_commands.AddFolderCommand as AddFolderCommand
 import cli
 from io import StringIO
 import sys
@@ -158,12 +158,12 @@ class MainFunctionTests(TestCase):
 
 class FakeFileSystemTests(TestCase):
     def setUp(self):
-        AddFolderCommand.storage = InMemoryStorage()
-        self.test_storage = AddFolderCommand.storage
+        SyncCommand.storage = InMemoryStorage()
+        self.test_storage = SyncCommand.storage
 
         # create fake files
         empty_file = ContentFile("")
-        self.test_storage.save("2024.12.02_test/some_file", empty_file)
+        self.test_storage.save("2024.12.02_testmission/test/bag", empty_file)
 
     def _delete_recursive(self, path: str):
         dirs, files = self.test_storage.listdir(path)
@@ -178,13 +178,14 @@ class FakeFileSystemTests(TestCase):
         self._delete_recursive("")
 
     def test_addfolder(self):
-        args = ["addfolder", "--path", "2024.12.02_test"]
+        args = [
+            "addfolder",
+            "--path",
+            "2024.12.02_testmission",
+        ]
         with self.assertLogs(level="INFO") as log:
             cli.main(args)
             self.assertTrue(
-                Mission.objects.filter(name="test", date="2024-12-02").exists()
+                Mission.objects.filter(name="testmission", date="2024-12-02").exists()
             )
-            self.assertEqual(
-                log.output,
-                ["INFO:root:Mission 'test' from folder '2024.12.02_test' added."],
-            )
+            self.assertEqual(log.output, ["INFO:root:Mission 'testmission' added successfully."])

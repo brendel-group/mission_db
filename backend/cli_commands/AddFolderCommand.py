@@ -52,6 +52,9 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
         mission = Mission(name=name, date=mission_date, location=location, notes=notes)
         mission.save()
         logging.info(f"Mission '{name}' added successfully.")
-        sync_mcap_files(folder_path, mission)
     except Exception as e:
         logging.error(f"Error adding mission: {e}")
+    try:
+        sync_mcap_files(folder_path, mission)
+    except Exception as e:
+        logging.error(f"Error syncing files: {e}")
