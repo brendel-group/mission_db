@@ -38,6 +38,16 @@ export interface RenderedMission {
   tags: Tag[];
 }
 
+//Topic
+export interface Topic {
+  id: number;
+  file: string;
+  name: string;
+  type: string;
+  message_count: number;
+  frequency: number;
+}
+
 //User interface
 export interface User {
   id: number;
