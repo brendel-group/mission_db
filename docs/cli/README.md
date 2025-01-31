@@ -165,7 +165,8 @@ Arguments:
 - `--path` path to mission folder of format `YYYY.MM.DD_mission_name` without trailing /
 
 ### `cli.py sync`
-adds all missions from a folder not currently in the database and deletes all missions from the database that are not in the folder\
+adds all missions from a folder not currently in the database and deletes all missions from the database that are not in the folder.\
+It also scans if mcap files were deleted or added and updates the database accordingly.\
 The folder that is searched for mission folders is the root of the Default Storage as configured in [settings.py](../../backend/backend/settings.py)
 
 ### `cli.py tag`
