@@ -15,6 +15,12 @@ class RestoreMetadataCommand(Command):
         )
 
     def command(self, args):
+        confirmation = input(
+            "This will overwrite the metadata in the database. Are you sure? [y/N]: "
+        )
+        if confirmation.lower() != "y":
+            print("Aborted")
+            return
         restore_metadata()
 
 
