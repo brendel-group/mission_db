@@ -19,11 +19,19 @@ export function DatasetView(data: DatasetViewProps) {
         <div>
           <Text size="lg">File: {data.file}</Text>
           <Text size="lg">
-            File download: <a href={String(data.fileUrl)}>download</a>
+            File download: <a href={String(data.fileUrl)}>download</a>{" "}
+            <a
+              href={
+                "foxglove://open?ds=remote-file&ds.url=" + String(data.fileUrl)
+              }
+            >
+              open in Foxglove
+            </a>
           </Text>
           <Text size="lg">Duration: {data.duration}</Text>
           <Text size="lg">Size: {data.size}</Text>
           <Text size="lg">Robot: {data.robot}</Text>
+          <Text size="lg">Video:</Text>
           {data.video ? (
             <iframe
               width="320"
