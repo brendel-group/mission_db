@@ -43,7 +43,7 @@ export const createAllowedTopic = async (topic_name: string): Promise<Topic> => 
   };
 
 // Function to delete an allowed topic by name
-export const deleteAllowedTopic = async (topic_name: string): Promise<void> => {
+export const deleteAllowedTopic = async (topic_name: string): Promise<string> => {
     const response = await fetch(`${FETCH_API_BASE_URL}/topics-names/${topic_name}`, {
       method: "DELETE",
       credentials: "include",
@@ -52,4 +52,5 @@ export const deleteAllowedTopic = async (topic_name: string): Promise<void> => {
     if (!response.ok) {
       throw new Error(`Error ${response.status}: Failed to delete topic ${topic_name}`);
     }
+    return `Topic ${topic_name} successfully deleted from allowed topics`;
   };
