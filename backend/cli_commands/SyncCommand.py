@@ -40,7 +40,7 @@ def sync_files(mission_path, mission):
     - Removes files from the database if they are missing.
     """
 
-    existing_files = {file.file for file in File.objects.filter(mission_id=mission.id)}
+    existing_files = {file.file.name for file in File.objects.filter(mission=mission)}
     current_files = set()
 
     # Find all .mcap and metadata files from the mission in the filesystem
