@@ -523,6 +523,13 @@ class NotFoundErrors(APIAuthTestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data, {"detail": "Mission with ID 999 not found"})
 
+    def test_get_file_invalid_path(self):
+        response = self.client.get(
+            reverse("get_file_by_path", kwargs={"file_path": "invalid/path"})
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, {"detail": "No such file: invalid/path"})
+
 
 class MissionFilesTestCase(APIAuthTestCase):
     def setUp(self):
@@ -578,6 +585,14 @@ class MissionFilesTestCase(APIAuthTestCase):
         # Expecting 2 files associated with the mission
         self.assertEqual(response.data[0]["id"], self.file1.id)
         self.assertEqual(response.data[1]["id"], self.file2.id)
+
+    def test_get_file_by_path(self):
+        response = self.client.get(
+            reverse("get_file_by_path", kwargs={"file_path": self.file1.file.name})
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], self.file1.id)
+        self.assertIn(self.file1.file.name, response.data["file_path"])
 
 
 class SpecialTagNameTest(APIAuthTestCase):

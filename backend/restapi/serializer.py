@@ -19,7 +19,7 @@ class MissionWasModifiedSerializer(serializers.ModelSerializer):
 
 
 class FileSerializer(serializers.ModelSerializer):
-    file_path = serializers.CharField(source="file.file", initial=None)
+    file_path = serializers.CharField(source="file.path", initial=None)
     file_url = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
 

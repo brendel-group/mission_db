@@ -121,6 +121,13 @@ For more details about how to use the endpoints refer to the [dj-rest-auth docum
   - The URL is of the format `restapi/missions/<int:mission_id>/files/`
   - The result will be a list of files associated with the specific mission.
 
+- GET request to get file by path
+  - Using a GET request it's possible to get info about a single file
+  - The URL is of the format `restapi/file/<path:file_path>`\
+    The file path is the relative path inside the `backend/media/` folder, if 
+    local file storage is used.
+  - The result is a single json containing information about a file
+
 - GET request to list all topics for a file path
   - Using a [GET Request](http://localhost:8000/restapi/topics/yourpathhere) the topics from a file path can be listed.
   - The URL is of the format `restapi/topics/<path:file_path>`
