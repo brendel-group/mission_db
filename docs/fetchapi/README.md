@@ -103,6 +103,30 @@ The `fetchapi.ts` file provides utility functions to interact with the Mission D
 - **Parameters**: `missionID` (number)
 - **Returns**: `Promise<{ string }> (formatted)`
 - **Endpoint**: `GET /restapi/missions/{missionID}/files/`
+
+### getTopicsByFile(file_path)
+- Fetches all topics associated with a specific file.
+- **Parameters**: `file_path` (string)
+- **Returns**: `Promise<Topic[]>`
+- **Endpoint**: `GET /topics/{file_path}`
+
+### getAllowedTopics()
+- Fetches all allowed topic names.
+- **Returns**: `Promise<Topic[]>`
+- **Endpoint**: `GET /topics-names`
+
+### createAllowedTopic(topic_name)
+- Creates a new allowed topic.
+- **Parameters**: `topic_name` (string)
+- **Returns**: `Promise<Topic>`
+- **Endpoint**: `POST /topics-names/create`
+
+### deleteAllowedTopic(topic_name)
+- Deletes an allowed topic by its name.
+- **Parameters**: `topic_name` (string)
+- **Returns**: `Promise<string>`
+- **Endpoint**: `DELETE /topics-names/{topic_name}`
+
 -------------------------
 ## Configuration
 - **`FETCH_API_BASE_URL`**: The base URL for API requests, defined in `config.tsx`. Set to: `http://127.0.0.1:8000/restapi`
