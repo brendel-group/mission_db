@@ -69,4 +69,5 @@ export interface FileData {
   duration: string;
   size: string;
   robot: string;
+  type: string;
 }
