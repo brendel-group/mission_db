@@ -1,9 +1,8 @@
-import { DetailViewData } from "~/data";
+import { DetailViewData, FileData } from "~/data";
 import { FETCH_API_BASE_URL } from "~/config";
 import { getHeaders } from "./headers";
 import { transformDurations, transformSizes } from "~/utilities/FormatHandler";
 
-// Get details by mission
 export const getDetailsByMission = async (
   missionId: number,
 ): Promise<DetailViewData> => {
@@ -88,4 +87,36 @@ export const getRobotNames = async (missionId: number): Promise<string[]> => {
   const details = await getDetailsByMission(missionId);
 
   return details.robots;
+};
+
+/**
+ * Get details about a file by path
+ * @param filePath file path
+ * @returns FileData
+ */
+export const getFileData = async (filePath: string): Promise<FileData> => {
+  const response = await fetch(`${FETCH_API_BASE_URL}/file/${filePath}`, {
+    method: "GET",
+    credentials: "include",
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error((await response.json()).detail);
+    }
+    throw new Error(`Failed to fetch details for file ${filePath}`);
+  }
+
+  const data = await response.json();
+
+  return {
+    filePath: data.file_path,
+    fileUrl: new URL(data.file_url),
+    videoPath: data.video_path,
+    videoUrl: new URL(data.video_url),
+    duration: transformDurations([data.duration])[0],
+    size: transformSizes([data.size])[0],
+    robot: data.robot,
+    type: data.type,
+  };
 };

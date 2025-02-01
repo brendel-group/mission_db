@@ -20,6 +20,7 @@ class MissionWasModifiedSerializer(serializers.ModelSerializer):
 
 class FileSerializer(serializers.ModelSerializer):
     file_path = serializers.CharField(source="file.path", initial=None)
+    video_path = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
 
@@ -29,7 +30,7 @@ class FileSerializer(serializers.ModelSerializer):
             "id",
             "file_path",
             "file_url",
-            "video",
+            "video_path",
             "video_url",
             "robot",
             "duration",
@@ -53,6 +54,11 @@ class FileSerializer(serializers.ModelSerializer):
         if sessionid and obj.video:
             url = f"{obj.video.url.replace('/download/', '/stream/')}?sessionid={sessionid}"
             return url
+        return None
+
+    def get_video_path(self, obj):
+        if obj.video:
+            return obj.video.path
         return None
 
 

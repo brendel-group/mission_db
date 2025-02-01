@@ -1,11 +1,13 @@
+import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import {
-  data,
   MetaFunction,
   redirect,
   useLoaderData,
-  useSearchParams,
 } from "@remix-run/react";
+import { useEffect, useState } from "react";
+import { FileData } from "~/data";
+import { getFileData } from "~/fetchapi/details";
 import { CreateAppShell } from "~/layout/AppShell";
 import { DatasetView } from "~/pages/dataset/DatasetView";
 import { sessionStorage } from "~/utilities/LoginHandler";
@@ -22,10 +24,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   let url = new URL(request.url);
   const fileName = url.searchParams.get("fileName");
-  const duration = url.searchParams.get("duration");
-  const size = url.searchParams.get("size");
 
-  if (!fileName || !duration || !size)
+  if (!fileName)
     throw new Response(null, {
       status: 400,
       statusText: "Invalid URL",
@@ -33,16 +33,51 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   return {
     fileName,
-    duration,
-    size,
   };
 }
 
 function Dataset() {
-  const { fileName, duration, size } = useLoaderData<typeof loader>();
+  const { fileName } = useLoaderData<typeof loader>();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // File
+  const [fileData, setFileData] = useState<FileData>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const file: FileData = await getFileData(fileName);
+        setFileData(file);
+      } catch (e: any) {
+        if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError("An unknown error occurred during mission fetching");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [fileName]);
+
+  if (loading) return <Skeleton style={{ height: "30vh" }} />;
+  if (error) return <p>Error: {error}</p>;
+  if (!fileData) return <p>No data available</p>;
 
   return (
-    <DatasetView file={fileName} duration={duration} size={size}></DatasetView>
+    <DatasetView
+      file={fileData.filePath}
+      fileUrl={fileData.fileUrl}
+      video={fileData.videoPath}
+      videoUrl={fileData.videoUrl}
+      duration={fileData.duration}
+      size={fileData.size}
+      robot={fileData.robot}
+    ></DatasetView>
   );
 }
 
