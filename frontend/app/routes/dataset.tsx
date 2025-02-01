@@ -1,13 +1,10 @@
 import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import {
-  data,
   MetaFunction,
   redirect,
   useLoaderData,
-  useSearchParams,
 } from "@remix-run/react";
-import { stringify } from "postcss";
 import { useEffect, useState } from "react";
 import { FileData } from "~/data";
 import { getFileData } from "~/fetchapi/details";
