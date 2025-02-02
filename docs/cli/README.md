@@ -286,6 +286,10 @@ Show all users.\
 Lists the Users with the data stored in the database.\
 The password is not stored in clear-text but as a hash value.
 
+### `cli.py restoredb`
+Adds all missions to the database that are in the Default Storage but not in the database.\
+Saves the metadata stored in the json files into the database.
+
 ## Troubleshooting
 
 - ### `Error adding mission: duplicate key value violates unique constraint "restapi_mission_pkey"`
