@@ -1,17 +1,17 @@
 import json
 from django.test import TestCase
-from cli_commands.RestoreMetadataCommand import restore_metadata
-import cli_commands.RestoreMetadataCommand as RestoreMetadataCommand
+from cli_commands.RestoreDatabaseCommand import restore_database
+import cli_commands.RestoreDatabaseCommand as RestoreDatabaseCommand
 from django.core.files.base import ContentFile
 from restapi.models import Mission, Mission_tags
 from datetime import datetime
 import logging
 
 
-class RestoreMetadataCommandTests(TestCase):
+class RestoreDatabaseCommandTests(TestCase):
     def setUp(self):
-        RestoreMetadataCommand.storage = RestoreMetadataCommand.DefaultStorage()
-        self.test_storage = RestoreMetadataCommand.storage
+        RestoreDatabaseCommand.storage = RestoreDatabaseCommand.DefaultStorage()
+        self.test_storage = RestoreDatabaseCommand.storage
         self.test_storage.save(
             "2024.12.02_test_mission/test_mission_metadata.json", ContentFile("")
         )
@@ -38,7 +38,7 @@ class RestoreMetadataCommandTests(TestCase):
         # Re-enable logging
         self.logger.disabled = False
 
-    def test_restore_metadata(self):
+    def test_restore_database(self):
         # Verify mission details before restoration
         tags = Mission_tags.objects.filter(mission=self.mission)
         self.assertEqual(self.mission.location, None)
@@ -52,7 +52,7 @@ class RestoreMetadataCommandTests(TestCase):
             json.dump(self.json, f)
 
         # Call the restore function
-        restore_metadata()
+        restore_database()
 
         # Verify mission details after restoration
         tags = Mission_tags.objects.filter(mission=self.mission)

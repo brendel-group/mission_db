@@ -2,16 +2,18 @@ from datetime import datetime
 from django.core.files.storage import DefaultStorage
 from restapi.models import Mission, Tag, Mission_tags
 from .Command import Command
+from .AddFolderCommand import add_mission_from_folder
 import json
 import logging
 
 
-class RestoreMetadataCommand(Command):
-    name = "restoremetadata"
+class RestoreDatabaseCommand(Command):
+    name = "restoredb"
 
     def parser_setup(self, subparser):
         _ = subparser.add_parser(
-            self.name, help="saves the metadata from the JSON files in the database"
+            self.name,
+            help="Adds missing missions and saves the metadata from the JSON files into the database.",
         )
 
     def command(self, args):
@@ -21,24 +23,30 @@ class RestoreMetadataCommand(Command):
         if confirmation.lower() != "y":
             print("Aborted")
             return
-        restore_metadata()
+        restore_database()
 
 
 storage = DefaultStorage()
 
 
-def restore_metadata():
+def restore_database():
     fs_mission_set = set(storage.listdir("")[0])
 
     for folder in fs_mission_set:
         try:
             mission_date, mission_name = folder.split("_", 1)
             mission_date = datetime.strptime(mission_date, "%Y.%m.%d").date()
+            if f"{mission_name}_metadata.json" not in storage.listdir(folder)[1]:
+                continue
             metadata_file = f"{folder}/{mission_name}_metadata.json"
             with DefaultStorage().open(metadata_file, "r") as f:
                 metadata = json.load(f)
 
-            mission = Mission.objects.get(name=mission_name, date=mission_date)
+            if not Mission.objects.filter(
+                date=mission_date, name=mission_name
+            ).exists():
+                add_mission_from_folder(folder, None, None)
+            mission = Mission.objects.get(date=mission_date, name=mission_name)
             location = metadata.get("location")
             notes = metadata.get("notes")
             tags_data = metadata.get("tags", [])
