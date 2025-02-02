@@ -56,12 +56,13 @@ def restore_database():
             mission.notes = notes
             mission.save()
 
-            # Process tags
-            for tag_data in tags_data:
-                tag, _ = Tag.objects.get_or_create(
-                    name=tag_data["name"], color=tag_data["color"]
-                )
-                Mission_tags.objects.get_or_create(mission=mission, tag=tag)
+            # overwrite Mission_tags and Tags with the ones from the metadata
+            Mission_tags.objects.filter(mission=mission).delete()
+            for tag in tags_data:
+                tag_name = tag.get("name")
+                tag_color = tag.get("color")
+                tag_obj, _ = Tag.objects.get_or_create(name=tag_name, color=tag_color)
+                Mission_tags.objects.create(mission=mission, tag=tag_obj)
 
             logging.info(f"restored metadata from json file for mission {mission_name}")
         except Exception as e:
