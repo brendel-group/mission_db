@@ -77,7 +77,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
     newTagColor: string,
   ) => {
     // check if tag name already exists
-    if (tags.find((tag) => tag.name === newTagName) && tagName !== newTagName) {
+    if (allTags.find((tag) => tag.name === newTagName) && tagName !== newTagName) {
       setChangeTagNameError("This tag name is already in use");
       return;
     }
@@ -212,6 +212,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                     setEditedTagName(tag.name);
                     setChangedTagName(tag.name);
                     setNewColor(tag.color);
+                    setChangeTagNameError("");
+                    setChangeColorError("");
                   }}
                 >
                   {tag.name}
