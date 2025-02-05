@@ -10,6 +10,7 @@ from .models import Mission_tags
 class MissionSerializer(serializers.ModelSerializer):
     total_duration = serializers.SerializerMethodField()
     total_size = serializers.SerializerMethodField()
+    robots = serializers.SerializerMethodField()
 
     class Meta:  # definition of which data to serialize
         model = Mission
@@ -24,6 +25,13 @@ class MissionSerializer(serializers.ModelSerializer):
         # calculate the total size of all files in the mission
         result = File.objects.filter(mission=obj).aggregate(Sum("size"))
         return result["size__sum"] or 0
+
+    def get_robots(self, obj):
+        # get all robot names in the mission
+        result = (
+            File.objects.filter(mission=obj).values_list("robot", flat=True).distinct()
+        )
+        return result
 
 
 class MissionWasModifiedSerializer(serializers.ModelSerializer):

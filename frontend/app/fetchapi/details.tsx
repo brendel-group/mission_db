@@ -56,13 +56,6 @@ export const getFormattedDetails = async (
   return { files, videos, durations, sizes, robots };
 };
 
-// Get all robot names of a mission
-export const getRobotNames = async (missionId: number): Promise<string[]> => {
-  const details = await getDetailsByMission(missionId);
-
-  return details.robots;
-};
-
 /**
  * Get details about a file by path
  * @param filePath file path

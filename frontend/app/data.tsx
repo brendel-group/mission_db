@@ -22,6 +22,7 @@ export interface MissionData {
   notes: string;
   total_duration: string;
   total_size: string;
+  robots: string[];
 }
 
 //This is a local representation used for mission table and details view
@@ -34,9 +35,9 @@ export interface RenderedMission {
   notes: string;
   totalDuration: string;
   totalSize: string;
+  robots: string[];
 
   // Inherited from other data structures (details, tags, ...)
-  robot: string;
   tags: Tag[];
 }
 
@@ -72,6 +73,7 @@ export function convertToMissionData(
     notes: renderedMission.notes,
     total_duration: renderedMission.totalDuration,
     total_size: renderedMission.totalSize,
+    robots: renderedMission.robots,
   };
 }
 
