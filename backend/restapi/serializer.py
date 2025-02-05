@@ -18,12 +18,12 @@ class MissionSerializer(serializers.ModelSerializer):
     def get_total_duration(self, obj):
         # calculate the total duration of all files in the mission
         result = File.objects.filter(mission=obj).aggregate(Sum("duration"))
-        return result["duration__sum"]
+        return result["duration__sum"] or 0
 
     def get_total_size(self, obj):
         # calculate the total size of all files in the mission
         result = File.objects.filter(mission=obj).aggregate(Sum("size"))
-        return result["size__sum"]
+        return result["size__sum"] or 0
 
 
 class MissionWasModifiedSerializer(serializers.ModelSerializer):
