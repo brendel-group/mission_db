@@ -78,6 +78,9 @@ export function ShowDatasets({
             else if (file.startsWith("test/") || file.startsWith("test\\"))
               displayFile = file.replace("test/", "").replace("test\\", "");
 
+            //Remove the redundant folder extension with the same name:
+            displayFile = displayFile.replace(/^[^\\\/]+[\\\/]/, '')
+
             return displayFile;
           })()}
         </Table.Td>
