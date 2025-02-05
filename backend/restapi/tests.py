@@ -71,6 +71,8 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "total_duration": 0,
+                "total_size": 0,
                 "was_modified": False,
             },
         )
@@ -82,6 +84,8 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation2",
                 "notes": "TestOther2",
+                "total_duration": 0,
+                "total_size": 0,
                 "was_modified": False,
             },
         )
@@ -96,6 +100,8 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
             response.data,
             {
                 "id": self.firstMission.id,
+                "total_duration": 0,
+                "total_size": 0,
                 "name": "TestMission",
                 "date": "2024-10-29",
                 "location": "TestLocation",
@@ -125,6 +131,8 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "date": "2024-10-29",
                 "location": "TestLocation",
                 "notes": "TestOther",
+                "total_duration": 0,
+                "total_size": 0,
                 "was_modified": False,
             },
         )
