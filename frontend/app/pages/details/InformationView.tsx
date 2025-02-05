@@ -1,5 +1,17 @@
-import { Badge, Button, Group, Menu, Text, Textarea, Stack } from "@mantine/core";
-import { IconPencil } from "@tabler/icons-react";
+import {
+  Badge,
+  Button,
+  Group,
+  Menu,
+  Text,
+  Textarea,
+  Stack,
+  ThemeIcon,
+  UnstyledButton,
+} from "@mantine/core";
+import { useClipboard } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
+import { IconClipboard, IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 import { convertToMissionData, RenderedMission } from "~/data";
 import { updateMission } from "~/fetchapi/missions";
@@ -91,6 +103,7 @@ interface ShowInformationViewProps {
   setLocation_: (loc: string) => void;
   totalSize: string;
   totalDuration: string;
+  basePath: string;
 }
 
 export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
@@ -98,18 +111,26 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
   setLocation_,
   totalSize,
   totalDuration,
+  basePath,
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
   const [notes, setNotes] = useState<string>(missionData.notes);
+  const clipboard = useClipboard({ timeout: 500 });
 
   return (
     <div>
       <Text size="xl" mb="sm">
         Information
       </Text>
-      <Text><strong>Date:</strong> {missionData.date}</Text>
-      <Text><strong>Total Duration:</strong> {totalDuration}</Text>
-      <Text><strong>Total Size:</strong> {totalSize}</Text>
+      <Text>
+        <strong>Date:</strong> {missionData.date}
+      </Text>
+      <Text>
+        <strong>Total Duration:</strong> {totalDuration}
+      </Text>
+      <Text>
+        <strong>Total Size:</strong> {totalSize}
+      </Text>
 
       <EditableField
         fieldName="Location"
@@ -148,6 +169,38 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
           }
         }}
       />
+
+      <Group>
+        <Text>
+          <strong>Base path:</strong>
+        </Text>
+        <UnstyledButton
+          onClick={(e) => {
+            e.stopPropagation();
+            clipboard.copy(basePath);
+
+            notifications.clean();
+
+            notifications.show({
+              title: "Copied to clipboard!",
+              message: basePath,
+              color: "orange",
+              radius: "md",
+            });
+          }}
+        >
+          <Badge color="orange" variant="light" style={{ cursor: "pointer" }}>
+              <IconClipboard stroke={2} size={16} style={{ transform: "translateY(2px)" }} />
+            </Badge>
+          
+        </UnstyledButton>
+      </Group>
+
+      <Text>
+        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          {basePath === null ? "" : basePath}
+        </div>
+      </Text>
     </div>
   );
 };
