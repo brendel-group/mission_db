@@ -26,11 +26,16 @@ const DetailsView: React.FC<DetailsViewProps> = ({
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
 
+  let formattedRobotNames = "";
+
+  if (detailViewData?.robots) 
+    formattedRobotNames = formatRobotNames(detailViewData.robots);
+
   return (
     <AbstractPage
       headline={`${missionData.name}${location ? ` in ${location}` : ""}${
-        detailViewData?.robots && detailViewData?.robots.length > 0
-          ? ` with ${formatRobotNames(detailViewData.robots)}`
+        formattedRobotNames.length > 0
+          ? ` with ${formattedRobotNames}`
           : ""
       }`}
     >
@@ -65,6 +70,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({
             setLocation_={setLocation}
             totalSize={totalSize}
             totalDuration={totalDuration}
+            basePath={basePath}
           />
         </Grid.Col>
       </Grid>
