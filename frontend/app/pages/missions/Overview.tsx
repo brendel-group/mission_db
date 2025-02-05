@@ -42,10 +42,8 @@ import {
 } from "~/fetchapi/tags";
 import {
   getRobotNames,
-  getTotalDuration,
-  getTotalSize,
 } from "~/fetchapi/details";
-import { formatRobotNames } from "~/utilities/FormatHandler";
+import { formatRobotNames, transformDurations, transformSizes } from "~/utilities/FormatHandler";
 import { CookieSerializeOptions } from "@remix-run/node";
 
 interface ThProps {
@@ -192,25 +190,20 @@ export function Overview() {
           // Fetch tags for each mission
           const tags: Tag[] = await getTagsByMission(missions[i].id);
           tags.sort((a, b) => a.name.localeCompare(b.name));
-          // Fetch total duration for each mission
-          const totalDuration: string = await getTotalDuration(missions[i].id);
-          // Fetch total size for each mission
-          const totalSize: string = await getTotalSize(missions[i].id);
 
           // Fetch robot name for each mission
           const robots_formatted: string = formatRobotNames(
             await getRobotNames(missions[i].id),
             false
           );
-
           renderedMissions.push({
             id: missions[i].id,
             name: missions[i].name,
             location: missions[i].location,
             date: missions[i].date,
             notes: missions[i].notes,
-            totalDuration: totalDuration,
-            totalSize: totalSize,
+            totalDuration: transformDurations([missions[i].total_duration])[0],
+            totalSize: transformSizes([missions[i].total_size])[0],
             robot: robots_formatted || "",
             tags: tags || [],
           });

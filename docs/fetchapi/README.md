@@ -58,7 +58,7 @@ The `fetchapi.ts` file provides utility functions to interact with the Mission D
 - **Parameters**: `missionId` (number), `tagName` (string)
 - **Returns**: `Promise<{ mission_id: number; tag_name: string }>`
 - **Endpoint**: `POST /restapi/mission-tags/create/`
-`getFormattedDetails`, `getTotalDuration` and `getTotalSize`
+`getFormattedDetails`
 ### deleteTag(tagName)
 - Deletes a tag by its name.
 - **Parameters**: `tagName` (string)
@@ -88,20 +88,6 @@ The `fetchapi.ts` file provides utility functions to interact with the Mission D
 - Uses getDetailsByMission() to fetch the details.
 - **Parameters**: `missionID` (number)
 - **Returns**: `Promise<{ DetailViewData }> (duration and size formatted)`
-- **Endpoint**: `GET /restapi/missions/{missionID}/files/`
-
-### getTotalDuration(missionID)
-- Fetches total duration associated with a specific mission and formats it.
-- Uses getDetailsByMission() to fetch the details.
-- **Parameters**: `missionID` (number)
-- **Returns**: `Promise<{ string }> (formatted)`
-- **Endpoint**: `GET /restapi/missions/{missionID}/files/`
-
-### getTotalSize(missionID)
-- Fetches total size associated with a specific mission and formats it.
-- Uses getDetailsByMission() to fetch the details.
-- **Parameters**: `missionID` (number)
-- **Returns**: `Promise<{ string }> (formatted)`
 - **Endpoint**: `GET /restapi/missions/{missionID}/files/`
 
 ### getTopicsByFile(file_path)

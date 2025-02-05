@@ -9,14 +9,12 @@ import { useEffect, useState } from "react";
 import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
 import {
   getFormattedDetails,
-  getTotalDuration,
-  getTotalSize,
 } from "~/fetchapi/details";
 import { getMission } from "~/fetchapi/missions";
 import { getTagsByMission, getTags } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
-import { transformFilePaths } from "~/utilities/FormatHandler";
+import { transformDurations, transformFilePaths, transformSizes } from "~/utilities/FormatHandler";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -98,10 +96,10 @@ function Detail() {
         setDetailViewData(detailViewData);
 
         // data for the information view (size)
-        setTotalSize(await getTotalSize(mission.id));
+        setTotalSize(transformSizes([mission.total_size])[0]);
 
         // data for the information view (duration)
-        setTotalDuration(await getTotalDuration(mission.id));
+        setTotalDuration(transformDurations([mission.total_duration])[0]);
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);

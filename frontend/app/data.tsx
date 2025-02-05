@@ -20,6 +20,8 @@ export interface MissionData {
   location: string;
   date: string;
   notes: string;
+  total_duration: string;
+  total_size: string;
 }
 
 //This is a local representation used for mission table and details view
@@ -30,10 +32,10 @@ export interface RenderedMission {
   location: string;
   date: string;
   notes: string;
-
-  // Inherited from other data structures (details, tags, ...)
   totalDuration: string;
   totalSize: string;
+
+  // Inherited from other data structures (details, tags, ...)
   robot: string;
   tags: Tag[];
 }
@@ -68,6 +70,8 @@ export function convertToMissionData(
     location: renderedMission.location,
     date: renderedMission.date,
     notes: renderedMission.notes,
+    total_duration: renderedMission.totalDuration,
+    total_size: renderedMission.totalSize,
   };
 }
 

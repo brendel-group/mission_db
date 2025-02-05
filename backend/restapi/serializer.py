@@ -7,9 +7,28 @@ from .models import Mission_tags
 
 
 class MissionSerializer(serializers.ModelSerializer):
+    total_duration = serializers.SerializerMethodField()
+    total_size = serializers.SerializerMethodField()
+
     class Meta:  # definition of which data to serialize
         model = Mission
         fields = "__all__"
+
+    def get_total_duration(self, obj):
+        # calculate the total duration of all files in the mission
+        files = File.objects.filter(mission=obj)
+        total_duration = 0
+        for file in files:
+            total_duration += file.duration
+        return total_duration
+
+    def get_total_size(self, obj):
+        # calculate the total size of all files in the mission
+        files = File.objects.filter(mission=obj)
+        total_size = 0
+        for file in files:
+            total_size += file.size
+        return total_size
 
 
 class MissionWasModifiedSerializer(serializers.ModelSerializer):
