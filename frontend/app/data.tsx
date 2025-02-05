@@ -75,7 +75,7 @@ export interface FileData {
   filePath: string;
   fileUrl: URL;
   videoPath: string;
-  videoUrl: URL;
+  videoUrl: URL | null;
   duration: string;
   size: string;
   robot: string;

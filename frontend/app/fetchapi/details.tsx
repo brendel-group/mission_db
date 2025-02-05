@@ -113,7 +113,7 @@ export const getFileData = async (filePath: string): Promise<FileData> => {
     filePath: data.file_path,
     fileUrl: new URL(data.file_url),
     videoPath: data.video_path,
-    videoUrl: new URL(data.video_url),
+    videoUrl: data.video_url ? new URL(data.video_url) : null,
     duration: transformDurations([data.duration])[0],
     size: transformSizes([data.size])[0],
     robot: data.robot,
