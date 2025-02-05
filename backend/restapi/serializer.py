@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from django.db.models import Sum
 from .models import Allowed_topic_names, Mission, Topic
 from .models import File
 from .models import Tag
@@ -16,19 +17,13 @@ class MissionSerializer(serializers.ModelSerializer):
 
     def get_total_duration(self, obj):
         # calculate the total duration of all files in the mission
-        files = File.objects.filter(mission=obj)
-        total_duration = 0
-        for file in files:
-            total_duration += file.duration
-        return total_duration
+        result = File.objects.filter(mission=obj).aggregate(Sum("duration"))
+        return result["duration__sum"]
 
     def get_total_size(self, obj):
         # calculate the total size of all files in the mission
-        files = File.objects.filter(mission=obj)
-        total_size = 0
-        for file in files:
-            total_size += file.size
-        return total_size
+        result = File.objects.filter(mission=obj).aggregate(Sum("size"))
+        return result["size__sum"]
 
 
 class MissionWasModifiedSerializer(serializers.ModelSerializer):
