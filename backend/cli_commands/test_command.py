@@ -39,9 +39,9 @@ class TableTests(TestCase):
             self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
             "id│total_duration│total_size│robots│name│date│location│notes│was_modified\n"
             + "┼┼┼┼┼┼┼┼\n"
-            + f"{missions[0].id}│0│0│<QuerySet[]>│Test0│2024-12-02│None│None│False\n"
-            + f"{missions[1].id}│0│0│<QuerySet[]>│Test1│2024-12-02│None│None│False\n"
-            + f"{missions[2].id}│0│0│<QuerySet[]>│Test2│2024-12-02│None│None│False",
+            + f"{missions[0].id}│0│0││Test0│2024-12-02│None│None│False\n"
+            + f"{missions[1].id}│0│0││Test1│2024-12-02│None│None│False\n"
+            + f"{missions[2].id}│0│0││Test2│2024-12-02│None│None│False",
         )
 
     def test_print_tag_table(self):
@@ -71,7 +71,7 @@ class TableTests(TestCase):
             self.captured_output.getvalue().strip().replace(" ", "").replace("─", ""),
             "id│total_duration│total_size│robots│name│date│location│notes│was_modified\n"
             + "┼┼┼┼┼┼┼┼\n"
-            + f"{mission[0].id}│0│0│<QuerySet[]>│Test│2024-12-26│None│Test│False\n"
+            + f"{mission[0].id}│0│0││Test│2024-12-26│None│Test│False\n"
             + "││││linebreak│││with│\n"
             + "│││││││newline│",
         )

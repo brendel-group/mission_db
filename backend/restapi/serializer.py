@@ -28,9 +28,12 @@ class MissionSerializer(serializers.ModelSerializer):
 
     def get_robots(self, obj):
         # get all robot names in the mission
-        result = (
+        result = list(
             File.objects.filter(mission=obj).values_list("robot", flat=True).distinct()
         )
+        if None in result:
+            result.remove(None)
+        result = ", ".join(result)
         return result
 
 

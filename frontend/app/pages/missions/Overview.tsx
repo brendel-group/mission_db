@@ -40,7 +40,7 @@ import {
   getTagsByMission,
   removeTagFromMission,
 } from "~/fetchapi/tags";
-import { formatRobotNames, transformDurations, transformSizes } from "~/utilities/FormatHandler";
+import { transformDurations, transformSizes } from "~/utilities/FormatHandler";
 import { CookieSerializeOptions } from "@remix-run/node";
 
 interface ThProps {
@@ -287,7 +287,7 @@ export function Overview() {
       </Table.Td>
       <Table.Td>{row.totalDuration}</Table.Td>
       <Table.Td>{row.totalSize}</Table.Td>
-      <Table.Td>{formatRobotNames(row.robots, false)}</Table.Td>
+      <Table.Td>{row.robots}</Table.Td>
       <Table.Td>{row.date}</Table.Td>
       <Table.Td>
         <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>

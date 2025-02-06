@@ -63,14 +63,8 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
-
-        # Convert the robots QuerySet to a list in the first item of response.data
-        response_data_0 = response.data[0]
-        response_data_0["robots"] = list(response_data_0["robots"])
-
-        # Compare the first mission
         self.assertEqual(
-            response_data_0,
+            response.data[0],
             {
                 "id": self.firstMission.id,
                 "name": "TestMission",
@@ -79,18 +73,12 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "notes": "TestOther",
                 "total_duration": 0,
                 "total_size": 0,
-                "robots": [],
+                "robots": "",
                 "was_modified": False,
             },
         )
-
-        # Convert the robots QuerySet to a list in the second item of response.data
-        response_data_1 = response.data[1]
-        response_data_1["robots"] = list(response_data_1["robots"])
-
-        # Compare the second mission
         self.assertEqual(
-            response_data_1,
+            response.data[1],
             {
                 "id": self.secondMission.id,
                 "name": "TestMission2",
@@ -99,7 +87,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "notes": "TestOther2",
                 "total_duration": 0,
                 "total_size": 0,
-                "robots": [],
+                "robots": "",
                 "was_modified": False,
             },
         )
@@ -110,18 +98,13 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Convert the robots QuerySet to a list
-        response_data = response.data
-        response_data["robots"] = list(response_data["robots"])
-
         self.assertEqual(
             response.data,
             {
                 "id": self.firstMission.id,
                 "total_duration": 0,
                 "total_size": 0,
-                "robots": [],
+                "robots": "",
                 "name": "TestMission",
                 "date": "2024-10-29",
                 "location": "TestLocation",
@@ -143,11 +126,6 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Convert the robots QuerySet to a list
-        response_data = response.data
-        response_data["robots"] = list(response_data["robots"])
-
         self.assertEqual(
             response.data,
             {
@@ -158,7 +136,7 @@ class RestApiPostMissionTestCase(APIAuthTestCase):
                 "notes": "TestOther",
                 "total_duration": 0,
                 "total_size": 0,
-                "robots": [],
+                "robots": "",
                 "was_modified": False,
             },
         )
