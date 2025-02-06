@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from django.db.models import Sum
 from .models import Allowed_topic_names, Mission, Topic
 from .models import File
 from .models import Tag
@@ -7,9 +8,33 @@ from .models import Mission_tags
 
 
 class MissionSerializer(serializers.ModelSerializer):
+    total_duration = serializers.SerializerMethodField()
+    total_size = serializers.SerializerMethodField()
+    robots = serializers.SerializerMethodField()
+
     class Meta:  # definition of which data to serialize
         model = Mission
         fields = "__all__"
+
+    def get_total_duration(self, obj):
+        # calculate the total duration of all files in the mission
+        result = File.objects.filter(mission=obj).aggregate(Sum("duration"))
+        return result["duration__sum"] or 0
+
+    def get_total_size(self, obj):
+        # calculate the total size of all files in the mission
+        result = File.objects.filter(mission=obj).aggregate(Sum("size"))
+        return result["size__sum"] or 0
+
+    def get_robots(self, obj):
+        # get all robot names in the mission
+        result = list(
+            File.objects.filter(mission=obj).values_list("robot", flat=True).distinct()
+        )
+        if None in result:
+            result.remove(None)
+        result = ", ".join(result)
+        return result
 
 
 class MissionWasModifiedSerializer(serializers.ModelSerializer):

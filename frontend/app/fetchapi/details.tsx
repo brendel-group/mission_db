@@ -56,39 +56,6 @@ export const getFormattedDetails = async (
   return { files, videos, durations, sizes, robots };
 };
 
-// Get total duration of all files in a mission by ID
-export const getTotalDuration = async (missionId: number): Promise<string> => {
-  const details = await getDetailsByMission(missionId);
-
-  let total = 0;
-  for (const duration in details.durations) {
-    total += parseInt(details.durations[duration], 10);
-  }
-  const stringTotal = [`${total}`];
-
-  return transformDurations(stringTotal)[0];
-};
-
-// Get total duration of all files in a mission by ID
-export const getTotalSize = async (missionId: number): Promise<string> => {
-  const details = await getDetailsByMission(missionId);
-
-  let total = 0;
-  for (const size in details.sizes) {
-    total += parseInt(details.sizes[size], 10);
-  }
-  const stringTotal = [`${total}`];
-
-  return transformSizes(stringTotal)[0];
-};
-
-// Get all robot names of a mission
-export const getRobotNames = async (missionId: number): Promise<string[]> => {
-  const details = await getDetailsByMission(missionId);
-
-  return details.robots;
-};
-
 /**
  * Get details about a file by path
  * @param filePath file path

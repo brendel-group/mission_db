@@ -40,12 +40,7 @@ import {
   getTagsByMission,
   removeTagFromMission,
 } from "~/fetchapi/tags";
-import {
-  getRobotNames,
-  getTotalDuration,
-  getTotalSize,
-} from "~/fetchapi/details";
-import { formatRobotNames } from "~/utilities/FormatHandler";
+import { transformDurations, transformSizes } from "~/utilities/FormatHandler";
 import { CookieSerializeOptions } from "@remix-run/node";
 
 interface ThProps {
@@ -92,7 +87,7 @@ function filterData(
     const matchesSearch = keys(data[0]).some((key) => {
       const value = item[key];
       if (Array.isArray(value)) {
-        return value.some((tag) => tag.name.toLowerCase().includes(query));
+        return value.some((tag) => typeof tag !== "string" && tag.name.toLowerCase().includes(query));
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
     });
@@ -192,16 +187,6 @@ export function Overview() {
           // Fetch tags for each mission
           const tags: Tag[] = await getTagsByMission(missions[i].id);
           tags.sort((a, b) => a.name.localeCompare(b.name));
-          // Fetch total duration for each mission
-          const totalDuration: string = await getTotalDuration(missions[i].id);
-          // Fetch total size for each mission
-          const totalSize: string = await getTotalSize(missions[i].id);
-
-          // Fetch robot name for each mission
-          const robots_formatted: string = formatRobotNames(
-            await getRobotNames(missions[i].id),
-            false
-          );
 
           renderedMissions.push({
             id: missions[i].id,
@@ -209,9 +194,9 @@ export function Overview() {
             location: missions[i].location,
             date: missions[i].date,
             notes: missions[i].notes,
-            totalDuration: totalDuration,
-            totalSize: totalSize,
-            robot: robots_formatted || "",
+            totalDuration: transformDurations([missions[i].total_duration])[0],
+            totalSize: transformSizes([missions[i].total_size])[0],
+            robots: missions[i].robots,
             tags: tags || [],
           });
         }
@@ -302,7 +287,7 @@ export function Overview() {
       </Table.Td>
       <Table.Td>{row.totalDuration}</Table.Td>
       <Table.Td>{row.totalSize}</Table.Td>
-      <Table.Td>{row.robot}</Table.Td>
+      <Table.Td>{row.robots}</Table.Td>
       <Table.Td>{row.date}</Table.Td>
       <Table.Td>
         <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
@@ -485,7 +470,7 @@ export function Overview() {
     { key: "location", label: "Location" },
     { key: "totalDuration", label: "Duration" },
     { key: "totalSize", label: "Size" },
-    { key: "robot", label: "Robot" },
+    { key: "robots", label: "Robot" },
     { key: "date", label: "Date" },
     { key: "notes", label: "Notes" },
     { key: "tags", label: "Tags" },

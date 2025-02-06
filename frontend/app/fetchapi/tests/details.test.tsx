@@ -3,9 +3,6 @@ import { DetailViewData, FileData } from "~/data";
 import {
   getDetailsByMission,
   getFormattedDetails,
-  getRobotNames,
-  getTotalDuration,
-  getTotalSize,
   getFileData,
 } from "../details";
 
@@ -102,107 +99,6 @@ describe("Fetch API Functions", () => {
       });
 
       const details = await getFormattedDetails(1);
-      expect(details).toEqual(expectedResponse);
-      expect(fetch).toHaveBeenCalledWith(
-        `${FETCH_API_BASE_URL}/missions/1/files/`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    });
-
-    test("getTotalDuration should fetch total duration of all files of a mission and format them", async () => {
-      const mockResponse = [
-        {
-          file_path: "file1.mcap",
-          duration: "60000",
-          size: "1024",
-        },
-        {
-          file_path: "file2.mcap",
-          duration: "1200",
-          size: "2621440",
-        },
-      ];
-
-      const expectedResponse: string = "17:00:00";
-
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
-      });
-
-      const details = await getTotalDuration(1);
-      expect(details).toEqual(expectedResponse);
-      expect(fetch).toHaveBeenCalledWith(
-        `${FETCH_API_BASE_URL}/missions/1/files/`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    });
-
-    test("getTotalSize should fetch total size of all files of a mission and format them", async () => {
-      const mockResponse = [
-        {
-          file_path: "file1.mcap",
-          duration: "60000",
-          size: "1024",
-        },
-        {
-          file_path: "file2.mcap",
-          duration: "1200",
-          size: "2621440",
-        },
-      ];
-
-      const expectedResponse: string = "2.50 MB";
-
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
-      });
-
-      const details = await getTotalSize(1);
-      expect(details).toEqual(expectedResponse);
-      expect(fetch).toHaveBeenCalledWith(
-        `${FETCH_API_BASE_URL}/missions/1/files/`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    });
-
-    test("getRobotNames", async () => {
-      const mockResponse = [
-        {
-          file_path: "file1.mcap",
-          robot: "hihi",
-          duration: "60000",
-          size: "1024",
-        },
-        {
-          file_path: "file2.mcap",
-          robot: "haha",
-          duration: "1200",
-          size: "2621440",
-        },
-      ];
-
-      const expectedResponse: string[] = ["hihi", "haha"];
-
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
-      });
-
-      const details = await getRobotNames(1);
       expect(details).toEqual(expectedResponse);
       expect(fetch).toHaveBeenCalledWith(
         `${FETCH_API_BASE_URL}/missions/1/files/`,

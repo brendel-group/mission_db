@@ -35,6 +35,9 @@ describe("Fetch API Functions", () => {
           location: "Test Location",
           date: "2023-01-01",
           notes: "Test remarks",
+          total_duration: "60000",
+          total_size: "1024",
+          robots: [],
         },
       ];
 
@@ -58,6 +61,9 @@ describe("Fetch API Functions", () => {
         location: "New Location",
         date: "2023-02-01",
         notes: "New remarks",
+        total_duration: "60000",
+        total_size: "1024",
+        robots: []
       };
 
       const mockResponse: MissionData = {
@@ -66,6 +72,9 @@ describe("Fetch API Functions", () => {
         location: "New Location",
         date: "2023-02-01",
         notes: "New remarks",
+        total_duration: "60000",
+        total_size: "1024",
+        robots: []
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -93,6 +102,9 @@ describe("Fetch API Functions", () => {
         location: "Single Location",
         date: "2023-03-01",
         notes: "Single remarks",
+        total_duration: "60000",
+        total_size: "1024",
+        robots: []
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -116,6 +128,9 @@ describe("Fetch API Functions", () => {
         location: "Updated Location",
         date: "2023-04-01",
         notes: "Updated remarks",
+        total_duration: "60000",
+        total_size: "1024",
+        robots: []
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
