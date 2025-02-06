@@ -1,20 +1,18 @@
 import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
-import {
-  MetaFunction,
-  redirect,
-  useLoaderData,
-} from "@remix-run/react";
+import { MetaFunction, redirect, useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
-import {
-  getFormattedDetails,
-} from "~/fetchapi/details";
+import { getFormattedDetails } from "~/fetchapi/details";
 import { getMission } from "~/fetchapi/missions";
 import { getTagsByMission, getTags } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
 import DetailsView from "~/pages/details/DetailsView";
-import { transformDurations, transformFilePaths, transformSizes } from "~/utilities/FormatHandler";
+import {
+  transformDurations,
+  transformFilePaths,
+  transformSizes,
+} from "~/utilities/FormatHandler";
 import { sessionStorage } from "~/utilities/LoginHandler";
 
 export const meta: MetaFunction = () => {
@@ -45,7 +43,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 function Detail() {
-  const { numberId } = useLoaderData<typeof loader>();
+  const { numberId: missionId } = useLoaderData<typeof loader>();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,52 +52,55 @@ function Detail() {
   const [missionData, setMissionData] = useState<any | null>(null);
 
   // Tags
+  const [tags, setTags] = useState<Tag[]>([]);
   const [allTags, setAllTags] = useState<any | null>(null);
 
   // Detail View data
   const [detailViewData, setDetailViewData] = useState<DetailViewData>();
-  const [totalSize, setTotalSize] = useState<string>("0 GB");
-  const [totalDuration, setTotalDuration] = useState<string>("00:00:00");
   const [basePath, setBasePath] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const mission: MissionData = await getMission(numberId); // Fetch mission
-        const tags: Tag[] = await getTagsByMission(numberId); //Fetch the tags for the mission
-        const allTags: Tag[] = await getTags(); //Fetch all tags
-        tags.sort((a, b) => a.name.localeCompare(b.name));
-
-        const transformedMission: RenderedMission = {
-          id: mission.id,
-          name: mission.name,
-          location: mission.location,
-          date: mission.date,
-          notes: mission.notes,
-          totalDuration: "00:00:00",
-          totalSize: "0",
-          robot: "?",
-          tags: tags || [],
+        // Create three independent async tasks:
+        const fetchMission = async () => {
+          const mission: MissionData = await getMission(missionId);
+          const transformedMission: RenderedMission = {
+            id: mission.id,
+            name: mission.name,
+            location: mission.location,
+            date: mission.date,
+            notes: mission.notes,
+            totalDuration: transformDurations([mission.total_duration])[0],
+            totalSize: transformSizes([mission.total_size])[0],
+            robots: [],
+            tags: [],
+          };
+          setMissionData(transformedMission);
         };
-
-        setMissionData(transformedMission);
-        setAllTags(allTags);
-        
-        // data for the detail view
-        let detailViewData = await getFormattedDetails(mission.id);
-
-        // transform files manually, to obtain the correct base path
-        const { commonPath, files } = transformFilePaths(detailViewData.files);
-        detailViewData.files = files;
-        
-        setBasePath(commonPath);
-        setDetailViewData(detailViewData);
-
-        // data for the information view (size)
-        setTotalSize(transformSizes([mission.total_size])[0]);
-
-        // data for the information view (duration)
-        setTotalDuration(transformDurations([mission.total_duration])[0]);
+  
+        const fetchTags = async () => {
+          const tags: Tag[] = await getTagsByMission(missionId);
+          const allTags: Tag[] = await getTags();
+          tags.sort((a, b) => a.name.localeCompare(b.name));
+          setAllTags(allTags);
+          setTags(tags);
+        };
+  
+        const fetchDetailView = async () => {
+          const detailViewData = await getFormattedDetails(missionId);
+          const { commonPath, files } = transformFilePaths(detailViewData.files);
+          detailViewData.files = files;
+          setBasePath(commonPath);
+          setDetailViewData(detailViewData);
+        };
+  
+        // Run all three tasks concurrently:
+        await Promise.all([
+          fetchMission(),
+          fetchTags(),
+          fetchDetailView(),
+        ]);
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);
@@ -110,9 +111,9 @@ function Detail() {
         setLoading(false);
       }
     };
-
+  
     fetchData();
-  }, [numberId]);
+  }, [missionId]);
 
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
@@ -122,8 +123,7 @@ function Detail() {
     <DetailsView
       missionData={missionData}
       detailViewData={detailViewData}
-      totalSize={totalSize}
-      totalDuration={totalDuration}
+      tags={tags}
       allTags={allTags}
       basePath={basePath}
     ></DetailsView>
