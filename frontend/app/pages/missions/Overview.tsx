@@ -87,7 +87,10 @@ function filterData(
     const matchesSearch = keys(data[0]).some((key) => {
       const value = item[key];
       if (Array.isArray(value)) {
-        return value.some((tag) => typeof tag !== "string" && tag.name.toLowerCase().includes(query));
+        return value.some(
+          (tag) =>
+            typeof tag !== "string" && tag.name.toLowerCase().includes(query)
+        );
       }
       return typeof value === "string" && value.toLowerCase().includes(query);
     });
@@ -179,50 +182,54 @@ export function Overview() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const missions: MissionData[] = await getMissions(); // Fetch the missions using the REST API
+        // Fetch missions and their related tags
+        const fetchMissionsAndRelatedTags = async () => {
+          const missions: MissionData[] = await getMissions();
 
-        // Map BackendMissionData missions to MissionData
-        let renderedMissions: RenderedMission[] = [];
-        for (let i = 0; i < missions.length; i++) {
-          // Fetch tags for each mission
-          const tags: Tag[] = await getTagsByMission(missions[i].id);
-          tags.sort((a, b) => a.name.localeCompare(b.name));
+          // For each mission, fetch its tags concurrently using Promise.all
+          const renderedMissions: RenderedMission[] = await Promise.all(
+            missions.map(async (mission) => {
+              const tags: Tag[] = await getTagsByMission(mission.id);
+              tags.sort((a, b) => a.name.localeCompare(b.name));
 
-          renderedMissions.push({
-            id: missions[i].id,
-            name: missions[i].name,
-            location: missions[i].location,
-            date: missions[i].date,
-            notes: missions[i].notes,
-            totalDuration: transformDurations([missions[i].total_duration])[0],
-            totalSize: transformSizes([missions[i].total_size])[0],
-            robots: missions[i].robots,
-            tags: tags || [],
-          });
-        }
+              return {
+                id: mission.id,
+                name: mission.name,
+                location: mission.location,
+                date: mission.date,
+                notes: mission.notes,
+                totalDuration: transformDurations([mission.total_duration])[0],
+                totalSize: transformSizes([mission.total_size])[0],
+                robots: mission.robots,
+                tags: tags || [],
+              };
+            })
+          );
 
-        if (renderedMissions.length <= 0) {
-          throw new Error("Data is empty");
-        }
+          if (renderedMissions.length <= 0) throw new Error("Data is empty");
 
-        setFetchedData(renderedMissions);
-        setRenderedData(
-          sortData(renderedMissions, {
-            sortBy: "name",
-            reversed: false,
-            search,
-            searchedTags,
-          })
-        );
+          setFetchedData(renderedMissions);
+          setRenderedData(
+            sortData(renderedMissions, {
+              sortBy: "name",
+              reversed: false,
+              search,
+              searchedTags,
+            })
+          );
+        };
 
-        const tags = await getTags();
-        setAllTags(tags);
+        // Fetch all tags
+        const fetchAllTags = async () => {
+          const tags = await getTags();
+          setAllTags(tags);
+        };
+
+        // Run both tasks concurrently
+        await Promise.all([fetchMissionsAndRelatedTags(), fetchAllTags()]);
       } catch (e: any) {
-        if (e instanceof Error) {
-          setError(e.message); // Display Error information
-        } else {
-          setError("An unknown error occurred"); // For non-Error types
-        }
+        if (e instanceof Error) setError(e.message);
+        else setError("An unknown error occurred");
       } finally {
         setLoading(false);
       }

@@ -10,18 +10,16 @@ import { formatRobotNames } from "~/utilities/FormatHandler";
 interface DetailsViewProps {
   missionData: RenderedMission;
   detailViewData: DetailViewData | undefined;
-  totalSize: string;
-  totalDuration: string;
   allTags: Tag[];
+  tags: Tag[];
   basePath: string;
 }
 
 const DetailsView: React.FC<DetailsViewProps> = ({
   missionData,
   detailViewData,
-  totalSize,
-  totalDuration,
   allTags,
+  tags,
   basePath
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
@@ -48,7 +46,7 @@ const DetailsView: React.FC<DetailsViewProps> = ({
             <Grid.Col span={12}>
               {missionData && (
                 <RenderTagsDetailView
-                  tags_={missionData.tags}
+                  tags_={tags}
                   missionId={missionData.id}
                   allTags_={allTags}
                 />
@@ -68,8 +66,6 @@ const DetailsView: React.FC<DetailsViewProps> = ({
           <ShowInformationView
             missionData={missionData}
             setLocation_={setLocation}
-            totalSize={totalSize}
-            totalDuration={totalDuration}
             basePath={basePath}
           />
         </Grid.Col>
