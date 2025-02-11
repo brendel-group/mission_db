@@ -11,6 +11,30 @@ import { Form } from "@remix-run/react";
 import { IconInfoCircle } from "@tabler/icons-react";
 
 export function LoginView({ error }: { error?: string }) {
+
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget;
+    button.innerHTML = 'Signing in&nbsp;.&nbsp;.&nbsp;.'; // Set the button text to "Signing in . . ." to indicate loading
+
+    const delay = 300; // Change the dots every 300ms
+    const numberOfDots = 3; // Number of dots to be shown
+    let dots = 0;
+    let spaces = numberOfDots;
+
+    const interval = setInterval(() => {
+      dots = (dots + 1) % (numberOfDots + 1);
+      spaces = numberOfDots - dots;
+      button.innerHTML = `Signing in${'&nbsp;.'.repeat(dots)}${'&nbsp;&nbsp;'.repeat(spaces)}`; // Animate the dots
+
+      const alert = document.querySelector('.mantine-Alert-root');
+      if (!button.closest('form')?.checkValidity() || alert !== null) { // End if the form is invalid or an alert is shown
+        clearInterval(interval); // Stop the animation
+        button.innerText = 'Sign in'; // Reset the button text
+      }
+
+    }, delay);
+  };
+
   return (
     <Form method="post">
       <div
@@ -70,6 +94,8 @@ export function LoginView({ error }: { error?: string }) {
               mt="xl"
               variant="gradient"
               gradient={{ from: "yellow", to: "orange", deg: 269 }}
+              className={classes.login_button}
+              onClick={handleSubmit}
             >
               Sign in
             </Button>
