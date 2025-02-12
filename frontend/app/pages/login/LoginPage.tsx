@@ -13,10 +13,11 @@ import { IconInfoCircle } from "@tabler/icons-react";
 export function LoginView({ error }: { error?: string }) {
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Prevent the form from submitting immediately
-    document.querySelector('.mantine-Alert-root')?.remove(); // Remove any existing alerts
     const button = e.currentTarget; // Get the button that was clicked
     const form = button.closest('form');
+    
+    e.preventDefault(); // Prevent the form from submitting immediately
+    document.querySelector('.mantine-Alert-root')?.remove(); // Remove any existing alerts
     form?.submit(); // Submit the form
 
     button.innerHTML = 'Logging in&nbsp;.&nbsp;.&nbsp;.'; // Set the button text to "Logging in . . ." to indicate loading
