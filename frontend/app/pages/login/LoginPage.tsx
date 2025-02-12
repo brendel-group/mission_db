@@ -26,10 +26,10 @@ export function LoginView({ error }: { error?: string }) {
       spaces = numberOfDots - dots;
       button.innerHTML = `Logging in${'&nbsp;.'.repeat(dots)}${'&nbsp;&nbsp;'.repeat(spaces)}`; // Animate the dots
 
-      const alert = document.querySelector('.mantine-Alert-root');
       const isValid = button.closest('form')?.checkValidity();
+      const alert = document.querySelector('.mantine-Alert-root');
       
-      if (!isValid || alert !== null) { // End if the form is invalid or an alert is shown
+      if (!isValid || (alert !== null) || error) { // End if the form is invalid or an alert or error is shown
         clearInterval(interval); // Stop the animation
         button.innerText = 'Log in'; // Reset the button text
       }
