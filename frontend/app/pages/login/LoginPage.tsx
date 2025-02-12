@@ -13,7 +13,12 @@ import { IconInfoCircle } from "@tabler/icons-react";
 export function LoginView({ error }: { error?: string }) {
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const button = e.currentTarget;
+    e.preventDefault(); // Prevent the form from submitting immediately
+    document.querySelector('.mantine-Alert-root')?.remove(); // Remove any existing alerts
+    const button = e.currentTarget; // Get the button that was clicked
+    const form = button.closest('form');
+    form?.submit(); // Submit the form
+
     button.innerHTML = 'Logging in&nbsp;.&nbsp;.&nbsp;.'; // Set the button text to "Logging in . . ." to indicate loading
 
     const delay = 300; // Change the dots every 300ms
@@ -26,10 +31,10 @@ export function LoginView({ error }: { error?: string }) {
       spaces = numberOfDots - dots;
       button.innerHTML = `Logging in${'&nbsp;.'.repeat(dots)}${'&nbsp;&nbsp;'.repeat(spaces)}`; // Animate the dots
 
-      const isValid = button.closest('form')?.checkValidity();
+      const isValid = form?.checkValidity();
       const alert = document.querySelector('.mantine-Alert-root');
       
-      if (!isValid || (alert !== null) || error) { // End if the form is invalid or an alert or error is shown
+      if (!isValid || (alert !== null)) { // End if the form is invalid or an alert is shown
         clearInterval(interval); // Stop the animation
         button.innerText = 'Log in'; // Reset the button text
       }
