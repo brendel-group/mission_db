@@ -14,7 +14,7 @@ export function LoginView({ error }: { error?: string }) {
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     const button = e.currentTarget;
-    button.innerHTML = 'Signing in&nbsp;.&nbsp;.&nbsp;.'; // Set the button text to "Signing in . . ." to indicate loading
+    button.innerHTML = 'Logging in&nbsp;.&nbsp;.&nbsp;.'; // Set the button text to "Logging in . . ." to indicate loading
 
     const delay = 300; // Change the dots every 300ms
     const numberOfDots = 3; // Number of dots to be shown
@@ -24,12 +24,14 @@ export function LoginView({ error }: { error?: string }) {
     const interval = setInterval(() => {
       dots = (dots + 1) % (numberOfDots + 1);
       spaces = numberOfDots - dots;
-      button.innerHTML = `Signing in${'&nbsp;.'.repeat(dots)}${'&nbsp;&nbsp;'.repeat(spaces)}`; // Animate the dots
+      button.innerHTML = `Logging in${'&nbsp;.'.repeat(dots)}${'&nbsp;&nbsp;'.repeat(spaces)}`; // Animate the dots
 
       const alert = document.querySelector('.mantine-Alert-root');
-      if (!button.closest('form')?.checkValidity() || alert !== null) { // End if the form is invalid or an alert is shown
+      const isValid = button.closest('form')?.checkValidity();
+      
+      if (!isValid || alert !== null) { // End if the form is invalid or an alert is shown
         clearInterval(interval); // Stop the animation
-        button.innerText = 'Sign in'; // Reset the button text
+        button.innerText = 'Log in'; // Reset the button text
       }
 
     }, delay);
@@ -97,7 +99,7 @@ export function LoginView({ error }: { error?: string }) {
               className={classes.login_button}
               onClick={handleSubmit}
             >
-              Sign in
+              Log in
             </Button>
           </Paper>
         </div>
