@@ -10,6 +10,7 @@ interface DatasetViewProps {
   duration: string | null;
   size: string | null;
   robot: string | null;
+  topics: string[] | null;
 }
 
 export function DatasetView(data: DatasetViewProps) {
@@ -31,6 +32,7 @@ export function DatasetView(data: DatasetViewProps) {
           <Text size="lg">Duration: {data.duration}</Text>
           <Text size="lg">Size: {data.size}</Text>
           <Text size="lg">Robot: {data.robot}</Text>
+          <Text size="lg">Topics: {data.topics ? data.topics.join(", ") : "No topics available"}</Text>
           <Text size="lg">Video:</Text>
           {data.video ? (
             <iframe
