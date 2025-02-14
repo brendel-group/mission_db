@@ -6,8 +6,9 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { FileData } from "~/data";
+import { FileData, Topic } from "~/data";
 import { getFileData } from "~/fetchapi/details";
+import { getTopicsByFile } from "~/fetchapi/topics";
 import { CreateAppShell } from "~/layout/AppShell";
 import { DatasetView } from "~/pages/dataset/DatasetView";
 import { sessionStorage } from "~/utilities/LoginHandler";
@@ -44,12 +45,15 @@ function Dataset() {
 
   // File
   const [fileData, setFileData] = useState<FileData>();
+  const [fileTopics, setFileTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const file: FileData = await getFileData(fileName);
         setFileData(file);
+        const topics: Topic[] = await getTopicsByFile(fileName);
+        setFileTopics(topics);
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);
@@ -77,6 +81,7 @@ function Dataset() {
       duration={fileData.duration}
       size={fileData.size}
       robot={fileData.robot}
+      topics={fileTopics.map((topic) => topic.name)}
     ></DatasetView>
   );
 }
