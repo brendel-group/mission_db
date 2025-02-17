@@ -64,7 +64,7 @@ class Denied_topics(models.Model):
 def validate_topic_allowed(name: str):
     """A topic is allowed if the name is not in the Denied_topics table"""
     if Denied_topics.objects.filter(name=name).exists():
-        raise ValidationError("topic not allowed by Denied_topics table")
+        raise ValidationError(f"topic name '{name}' not allowed by Denied_topics table")
 
 
 class Topic(models.Model):
