@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from colorfield.fields import ColorField
 
 
@@ -54,10 +55,16 @@ class Mission_tags(models.Model):
         unique_together = ["mission", "tag"]
 
 
-class Allowed_topic_names(models.Model):
-    """A table to limit the allowed topic types"""
+class Denied_topics(models.Model):
+    """A table to limit the allowed topics"""
 
-    name = models.CharField(primary_key=True)
+    name = models.CharField(unique=True)
+
+
+def validate_topic_allowed(name: str):
+    """A topic is allowed if the name is not in the Denied_topics table"""
+    if Denied_topics.objects.filter(name=name).exists():
+        raise ValidationError("topic not allowed by Denied_topics table")
 
 
 class Topic(models.Model):
@@ -65,7 +72,7 @@ class Topic(models.Model):
 
     id = models.AutoField(primary_key=True)
     file = models.ForeignKey(File, on_delete=models.CASCADE)
-    name = models.ForeignKey(Allowed_topic_names, on_delete=models.CASCADE)
+    name = models.CharField(validators=[validate_topic_allowed])
     type = models.CharField()
     message_count = models.IntegerField()
     frequency = models.FloatField()
