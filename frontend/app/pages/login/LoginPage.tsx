@@ -107,10 +107,12 @@ export function LoginView({ error }: { error?: string }) {
               onClick={handleSubmit}
               disabled={!buttonClickable}
             >
-              <span style={{ marginLeft: "1.3em" }}>{buttonText}</span> // Add space to center the text
-              <span style={{ display: "inline-block", textAlign: "left", marginLeft: "0.3em", width: "1.3em" }}> // Add a space to separate the text from the dots
+              <span style={{ marginLeft: "1.3em" }}>{buttonText} </span>
+              {/* Add space to center the text */}
+              <span style={{ display: "inline-block", textAlign: "left", marginLeft: "0.3em", width: "1.3em" }}>
                 {". ".repeat(dots)}
               </span>
+              {/* Add space to separate the text from the dots */}
             </Button>
           </Paper>
         </div>
