@@ -295,7 +295,8 @@ Allow or Deny topics by name
 
 ### `cli.py topic deny <name>`
 Deny a topic with the specified name to be added to the database.\
-Also removes all already added topics with that name.
+Also removes all already added topics with that name.\
+By default all topic names are allowed.
 
 ### `cli.py topic allow <name>`
 Allow a topic with that name again in the future.
