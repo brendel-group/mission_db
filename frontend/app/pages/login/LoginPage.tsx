@@ -14,38 +14,33 @@ import { useState } from "react";
 export function LoginView({ error }: { error?: string }) {
 
   const [buttonClickable, setButtonClickable] = useState(true); // State to control button clickability
+  const [buttonText, setButtonText] = useState("Log in"); // State to control button text
+  const [dots, setDots] = useState(0); // State to control the number of dots
+  const numberOfDots = 3; // Number of dots to be shown
 
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevent the form from submitting immediately
     setButtonClickable(false); // Disable the button to prevent multiple submissions
+    document.querySelector('.mantine-Alert-root')?.remove(); // Remove any existing alerts
+    setButtonText("Logging in"); // Change the button text to "Logging in"
 
     const button = e.currentTarget; // Get the button that was clicked
     const form = button.closest('form');
-    
-    e.preventDefault(); // Prevent the form from submitting immediately
-    document.querySelector('.mantine-Alert-root')?.remove(); // Remove any existing alerts
     form?.submit(); // Submit the form
 
-    button.innerHTML = 'Logging in&nbsp;.&nbsp;.&nbsp;.'; // Set the button text to "Logging in . . ." to indicate loading
-
     const delay = 300; // Change the dots every 300ms
-    const numberOfDots = 3; // Number of dots to be shown
-    let dots = 0;
-    let spaces = numberOfDots;
 
     const interval = setInterval(() => {
-      dots = (dots + 1) % (numberOfDots + 1);
-      spaces = numberOfDots - dots;
-      button.innerHTML = `Logging in${'&nbsp;.'.repeat(dots)}${'&nbsp;&nbsp;'.repeat(spaces)}`; // Animate the dots
+      setDots((dot) => (dot + 1) % (numberOfDots + 1)); // Animate the dots
 
       const isValid = form?.checkValidity();
       const alert = document.querySelector('.mantine-Alert-root');
       
       if (!isValid || (alert !== null)) { // End if the form is invalid or an alert is shown
         clearInterval(interval); // Stop the animation
-        button.innerText = 'Log in'; // Reset the button text
-        setButtonClickable(false); // Enable the button
+        setButtonText("Log in"); // Reset the button text
+        setButtonClickable(true); // Enable the button
       }
-
     }, delay);
   };
 
@@ -112,7 +107,10 @@ export function LoginView({ error }: { error?: string }) {
               onClick={handleSubmit}
               disabled={!buttonClickable}
             >
-              Log in
+              <span style={{ marginLeft: "1.3em" }}>{buttonText}</span> // Add space to center the text
+              <span style={{ display: "inline-block", textAlign: "left", marginLeft: "0.3em", width: "1.3em" }}> // Add a space to separate the text from the dots
+                {". ".repeat(dots)}
+              </span>
             </Button>
           </Paper>
         </div>
