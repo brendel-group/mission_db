@@ -1,8 +1,8 @@
 from django.urls import include, path
 from .views import (
-    allowed_topic_names,
-    allowed_topic_names_create,
-    allowed_topic_names_delete,
+    denied_topics,
+    denied_topics_create,
+    denied_topics_delete,
     get_missions,
     create_mission,
     get_topics_from_files,
@@ -55,18 +55,18 @@ urlpatterns = [
     ),
     path(
         "topics-names",
-        allowed_topic_names,
-        name="allowed_topic_names",
+        denied_topics,
+        name="Denied_topics",
     ),
     path(
         "topics-names/create/",
-        allowed_topic_names_create,
-        name="allowed_topic_names_create",
+        denied_topics_create,
+        name="Denied_topics_create",
     ),
     path(
         "topics-names/<str:name>",
-        allowed_topic_names_delete,
-        name="allowed_topic_names_delete",
+        denied_topics_delete,
+        name="Denied_topics_delete",
     ),
     path(
         "missions/<int:pk>/was_modified",
