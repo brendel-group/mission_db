@@ -9,10 +9,15 @@ import {
 import classes from "./LoginPage.module.css";
 import { Form } from "@remix-run/react";
 import { IconInfoCircle } from "@tabler/icons-react";
+import { useState } from "react";
 
 export function LoginView({ error }: { error?: string }) {
 
+  const [buttonClickable, setButtonClickable] = useState(true); // State to control button clickability
+
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setButtonClickable(false); // Disable the button to prevent multiple submissions
+
     const button = e.currentTarget; // Get the button that was clicked
     const form = button.closest('form');
     
@@ -38,6 +43,7 @@ export function LoginView({ error }: { error?: string }) {
       if (!isValid || (alert !== null)) { // End if the form is invalid or an alert is shown
         clearInterval(interval); // Stop the animation
         button.innerText = 'Log in'; // Reset the button text
+        setButtonClickable(false); // Enable the button
       }
 
     }, delay);
@@ -104,6 +110,7 @@ export function LoginView({ error }: { error?: string }) {
               gradient={{ from: "yellow", to: "orange", deg: 269 }}
               className={classes.login_button}
               onClick={handleSubmit}
+              disabled={!buttonClickable}
             >
               Log in
             </Button>
