@@ -1,5 +1,5 @@
 from .Command import Command
-from restapi.models import Denied_topics
+from restapi.models import Denied_topics, Topic
 import logging
 
 
@@ -38,6 +38,11 @@ class TopicCommand(Command):
 
 
 def remove_denied_topic(name: str):
+    """remove a topic from the Denied_topics table
+
+    Args:
+        name (str): topic name
+    """
     try:
         denied_topic = Denied_topics.objects.get(name=name)
     except Denied_topics.DoesNotExist:
@@ -49,10 +54,24 @@ def remove_denied_topic(name: str):
 
 
 def add_denied_topic(name: str):
+    """add a topic to the Denied_topics table and remove all topics with that name
+
+    Args:
+        name (str): topic name
+    """
     try:
         denied_topic = Denied_topics.objects.create(name=name)
         denied_topic.full_clean()
     except Exception as e:
         logging.error(e)
         return
+
+    # remove all topics that have this name
+    topics = Topic.objects.filter(name=name)
+
+    if topics.exists():
+        try:
+            topics.delete()
+        except Exception as e:
+            logging.error(e)
     logging.info(f"Topic name '{name}' will be denied from now on")
