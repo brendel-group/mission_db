@@ -1,16 +1,13 @@
 from .Command import Command
 from restapi.models import Denied_topics
 import logging
-import argparse
 
 
 class TopicCommand(Command):
     name = "topic"
 
     def parser_setup(self, subparser):
-        self.topic_parser: argparse.ArgumentParser = subparser.add_parser(
-            self.name, help="Modify denied topics"
-        )
+        self.topic_parser = subparser.add_parser(self.name, help="Modify denied topics")
         topic_subparser = self.topic_parser.add_subparsers(dest=self.name)
 
         # list-denied command
