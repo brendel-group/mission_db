@@ -117,7 +117,7 @@ export function ShowDatasets({
           </Tooltip>
 
           {/* Download bottom */}
-          <Tooltip label="Download">
+          <Tooltip label="Download file">
             <UnstyledButton
               onClick={(e) => {
                 e.stopPropagation();
