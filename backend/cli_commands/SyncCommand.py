@@ -8,6 +8,7 @@ from .AddFolderCommand import add_mission_from_folder
 from .DeleteFolderCommand import delete_mission_from_folder
 from restapi.models import Mission, Tag, File
 import json
+from mcap.reader import make_reader
 
 
 # Create a custom logging handler to track if any log message was emitted
@@ -172,3 +173,33 @@ def sync_folder():
     if not log_tracker.log_occurred:
         logging.info("Nothing was modified, no new metadata was saved")
     logger.removeHandler(log_tracker)
+
+
+def extract_topics_from_mcap(mcap_path: str) -> dict[str:dict]:
+    with storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        schema_map = {
+            schema.id: schema.name for schema in reader.get_summary().schemas.values()
+        }
+        channel_message_counts = reader.get_summary().statistics.channel_message_counts
+        duration = get_duration_from_mcap(mcap_path)
+        topic_info = {}
+        for channel in reader.get_summary().channels.values():
+            topic = channel.topic
+            topic_type = schema_map.get(channel.schema_id, "Unknown")
+            message_count = channel_message_counts.get(channel.id, 0)
+            topic_info[topic] = {
+                "type": topic_type,
+                "message_count": message_count,
+                "frequency": 0
+                if duration == 0
+                else message_count / (duration * 10**-9),
+            }
+        return topic_info
+
+
+def get_duration_from_mcap(mcap_path: str) -> int:
+    with storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        statistics = reader.get_summary().statistics
+        return statistics.message_end_time - statistics.message_start_time
