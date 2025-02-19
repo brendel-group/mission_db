@@ -1,4 +1,10 @@
-import { Badge, Table, ThemeIcon, UnstyledButton } from "@mantine/core";
+import {
+  Badge,
+  Table,
+  ThemeIcon,
+  Tooltip,
+  UnstyledButton,
+} from "@mantine/core";
 import { DetailViewData } from "~/data";
 import { useNavigate } from "@remix-run/react";
 import { IconClipboard, IconDownload } from "@tabler/icons-react";
@@ -83,75 +89,82 @@ export function ShowDatasets({
         {/* Inserts data from DetailViewData, see data.tsx */}
         <Table.Td>
           {/* Copy buttom */}
-          <UnstyledButton
-            onClick={(e) => {
-              e.stopPropagation();
-              clipboard.copy(basePath + file);
+          <Tooltip label="Copy path">
+            <UnstyledButton
+              onClick={(e) => {
+                e.stopPropagation();
+                clipboard.copy(basePath + file);
 
-              notifications.clean();
+                notifications.clean();
 
-              notifications.show({
-                title: "Copied to clipboard!",
-                message: basePath + file,
-                color: "orange",
-                radius: "md",
-              });
-            }}
-            style={{ marginRight: "1px" }}
-          >
-            <ThemeIcon variant="white">
-              <IconClipboard
-                stroke={2}
-                color="#fd7e14"
-                style={{ width: "50%", height: "50%" }}
-              />
-            </ThemeIcon>
-          </UnstyledButton>
+                notifications.show({
+                  title: "Copied to clipboard!",
+                  message: basePath + file,
+                  color: "orange",
+                  radius: "md",
+                });
+              }}
+              style={{ marginRight: "1px" }}
+            >
+              <ThemeIcon variant="white">
+                <IconClipboard
+                  stroke={2}
+                  color="#fd7e14"
+                  style={{ width: "50%", height: "50%" }}
+                />
+              </ThemeIcon>
+            </UnstyledButton>
+          </Tooltip>
 
           {/* Download bottom */}
-          <UnstyledButton
-            onClick={(e) => {
-              e.stopPropagation();
+          <Tooltip label="Download">
+            <UnstyledButton
+              onClick={(e) => {
+                e.stopPropagation();
 
-              const link = document.createElement("a");
-              link.href = url.toString();
-              link.download = displayFile;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }}
-            style={{ marginRight: "1px" }}
-          >
-            <ThemeIcon variant="white">
-              <IconDownload
-                stroke={2}
-                color="#fd7e14"
-                style={{ width: "50%", height: "50%" }}
-              />
-            </ThemeIcon>
-          </UnstyledButton>
+                const link = document.createElement("a");
+                link.href = url.toString();
+                link.download = displayFile;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              style={{ marginRight: "1px" }}
+            >
+              <ThemeIcon variant="white">
+                <IconDownload
+                  stroke={2}
+                  color="#fd7e14"
+                  style={{ width: "50%", height: "50%" }}
+                />
+              </ThemeIcon>
+            </UnstyledButton>
+          </Tooltip>
 
           {/* Foxglove bottom */}
-          <UnstyledButton
-            onClick={(e) => {
-              e.stopPropagation();
+          <Tooltip label="Open in Foxglove">
+            <UnstyledButton
+              onClick={(e) => {
+                e.stopPropagation();
 
-              const link = document.createElement("a");
-              link.href = "foxglove://open?ds=remote-file&ds.url=" + String(url)
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }}
-            style={{ marginRight: "1px" }}
-          >
-            <ThemeIcon variant="white">
-              <img
-                src="/fox_glove.svg"
-                alt="Fox Glove Icon"
-                style={{ width: "50%", height: "50%" }}
-              />
-            </ThemeIcon>
-          </UnstyledButton>
+                const link = document.createElement("a");
+                link.href =
+                  "foxglove://open?ds=remote-file&ds.url=" + String(url);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              style={{ marginRight: "1px" }}
+            >
+              <ThemeIcon variant="white">
+                <img
+                  src="/fox_glove.svg"
+                  alt="Fox Glove Icon"
+                  style={{ width: "50%", height: "50%" }}
+                />
+              </ThemeIcon>
+            </UnstyledButton>
+          </Tooltip>
           {displayFile}
         </Table.Td>
         <Table.Td>{data.durations[index]}</Table.Td>
