@@ -14,6 +14,17 @@ export interface DetailViewData {
   types: string[];
 }
 
+export interface FileData {
+  filePath: string;
+  fileUrl: URL;
+  videoPath: string;
+  videoUrl: URL | null;
+  duration: string;
+  size: string;
+  robot: string;
+  type: string;
+}
+
 //Represents a mission in the backend
 export interface MissionData {
   id: number;
@@ -38,7 +49,7 @@ export interface RenderedMission {
   totalDuration: string;
   totalSize: string;
   robots: string[];
-
+  
   // Inherited from other data structures (details, tags, ...)
   tags: Tag[];
 }
@@ -100,13 +111,3 @@ export function convertToDetailViewData(fileData: FileData[]) : DetailViewData {
   return { files, fileUrls, durations, sizes, robots, types };
 }
 
-export interface FileData {
-  filePath: string;
-  fileUrl: URL;
-  videoPath: string;
-  videoUrl: URL | null;
-  duration: string;
-  size: string;
-  robot: string;
-  type: string;
-}
