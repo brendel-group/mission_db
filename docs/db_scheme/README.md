@@ -36,4 +36,5 @@ The fourth table is the `topic` table. It has the columns `id`, `file_id`, `name
 - `message_count` is an integer and the number of messages in this topic
 - `frequency` is a float and the frequency of messages. It can be calculated by dividing the `message_count` by the `duration` of the file in seconds and round it to 2 decimal places. It's unit is `Hz`
 
-To limit the allowed topic types another table called `allowed_topic_types` is used. It's only field is the `type` field which is a string and the primary key.
+It's possible to explicitly deny topic names to be stored to the database with the `denied_topics`table.\
+It has only the `name` field and contains topic names that should not be added to the database. All other topic names are allowed.
