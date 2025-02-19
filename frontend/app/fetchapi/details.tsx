@@ -3,9 +3,9 @@ import { FETCH_API_BASE_URL } from "~/config";
 import { getHeaders } from "./headers";
 import { transformDurations, transformSizes } from "~/utilities/FormatHandler";
 
-export const getDetailsByMission = async (
+export const GetFilesByMission = async (
   missionId: number,
-): Promise<DetailViewData> => {
+): Promise<FileData[]> => {
   const response = await fetch(
     `${FETCH_API_BASE_URL}/missions/${missionId}/files/`,
     {
@@ -23,37 +23,23 @@ export const getDetailsByMission = async (
 
   const data = await response.json();
 
-  const files: string[] = [];
-  const videos: string[] = [];
-  const durations: string[] = [];
-  const sizes: string[] = [];
-  const robots: string[] = [];
+  const files: FileData[] = [];
 
   for (const d in data) {
-    files.push(data[d].file_path);
-    videos.push(data[d].video_path);
-    durations.push(data[d].duration);
-    sizes.push(data[d].size);
-    robots.push(data[d].robot);
+    files.push({
+      filePath: data[d].file_path,
+      fileUrl: new URL(data[d].file_url),
+      videoPath: data[d].video_path,
+      videoUrl: data[d].video_url ? new URL(data[d].video_url) : null,
+      duration: transformDurations([data[d].duration])[0],
+      size: transformSizes([data[d].size])[0],
+      robot: data[d].robot,
+      type: data[d].type,
+    });
+
   }
 
-  return { files, videos, durations, sizes, robots };
-};
-
-// Get details by mission in correct format
-export const getFormattedDetails = async (
-  missionId: number,
-): Promise<DetailViewData> => {
-  const details = await getDetailsByMission(missionId);
-
-  const files = details.files;
-  const videos = details.videos;
-  // transform durations and sizes to correct form
-  const durations = transformDurations(details.durations);
-  const sizes = transformSizes(details.sizes);
-  const robots = details.robots;
-
-  return { files, videos, durations, sizes, robots };
+  return files;
 };
 
 /**

@@ -4,12 +4,13 @@ export interface Tag {
 }
 
 //Fetch this data by mission_id from MissionTableData
+//This is essentially the FileData, but a seperate type is used to make the handling more easier.
 export interface DetailViewData {
   files: string[];
-  videos: string[];
   durations: string[];
   sizes: string[];
   robots: string[];
+  types: string[];
 }
 
 //Represents a mission in the backend
@@ -75,6 +76,24 @@ export function convertToMissionData(
     total_size: renderedMission.totalSize,
     robots: renderedMission.robots,
   };
+}
+
+export function convertToDetailViewData(fileData: FileData[]) : DetailViewData {
+  const files: string[] = [];
+  const durations: string[] = [];
+  const sizes: string[] = [];
+  const robots: string[] = [];
+  const types: string[] = [];
+
+  for (const d in fileData) {
+    files.push(fileData[d].filePath);
+    durations.push(fileData[d].duration);
+    sizes.push(fileData[d].size);
+    robots.push(fileData[d].robot);
+    types.push(fileData[d].type);
+  }
+
+  return { files, durations, sizes, robots, types };
 }
 
 export interface FileData {

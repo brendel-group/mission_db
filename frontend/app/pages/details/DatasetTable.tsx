@@ -4,7 +4,7 @@ import { useNavigate } from "@remix-run/react";
 import { IconClipboard } from "@tabler/icons-react";
 import { useClipboard } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export function ShowDatasets({
   data,
@@ -19,12 +19,35 @@ export function ShowDatasets({
 
   const [searchFor, setSearchFor] = useState<string>("");
 
+  // Deterministic color management without the need of a database :))
+  const typeColorsRef = useRef<Record<string, string>>({});
+  const colorIndexRef = useRef<number>(0);
+
+  const colorList = [
+    "red",
+    "blue",
+    "green",
+    "orange",
+    "purple",
+    "yellow",
+    "cyan",
+    "magenta",
+    "teal",
+    "brown",
+  ];
+
+  const getColorForType = (type: string): string => {
+    if (!typeColorsRef.current[type]) {
+      typeColorsRef.current[type] =
+        colorList[colorIndexRef.current % colorList.length];
+      colorIndexRef.current += 1;
+    }
+    return typeColorsRef.current[type];
+  };
+
   // Creates rows of table
   const rows = data.files.map((file, index) => {
-    let type = "?";
-    if (file.startsWith("train/") || file.startsWith("train\\")) type = "train";
-    else if (file.startsWith("test/") || file.startsWith("test\\"))
-      type = "test";
+    let type = data.types[index];
 
     if (searchFor !== "" && searchFor !== type) return;
 
@@ -73,14 +96,14 @@ export function ShowDatasets({
           </UnstyledButton>
           {(() => {
             let displayFile = file;
-            if (file.startsWith("train/") || file.startsWith("train\\"))
-              displayFile = file.replace("train/", "").replace("train\\", "");
-            else if (file.startsWith("test/") || file.startsWith("test\\"))
-              displayFile = file.replace("test/", "").replace("test\\", "");
+            if (
+              type !== "?" &&
+              (displayFile.startsWith(type + "/") ||
+                displayFile.startsWith(type + "\\"))
+            )
+              displayFile = displayFile.slice(type.length + 1);
 
-            //Remove the redundant folder extension with the same name:
-            displayFile = displayFile.replace(/^[^\\\/]+[\\\/]/, '')
-
+            displayFile = displayFile.replace(/^[^\\\/]+[\\\/]/, "");
             return displayFile;
           })()}
         </Table.Td>
@@ -90,8 +113,7 @@ export function ShowDatasets({
           {(() => {
             let color = "gray";
 
-            if (type === "train") color = "green";
-            else if (type === "test") color = "red";
+            if (type !== "?") color = getColorForType(type);
 
             return (
               <Badge

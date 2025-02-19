@@ -2,8 +2,8 @@ import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { MetaFunction, redirect, useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
-import { getFormattedDetails } from "~/fetchapi/details";
+import { convertToDetailViewData, DetailViewData, MissionData, RenderedMission, Tag } from "~/data";
+import { GetFilesByMission } from "~/fetchapi/details";
 import { getMission } from "~/fetchapi/missions";
 import { getTagsByMission, getTags } from "~/fetchapi/tags";
 import { CreateAppShell } from "~/layout/AppShell";
@@ -88,7 +88,7 @@ function Detail() {
         };
   
         const fetchDetailView = async () => {
-          const detailViewData = await getFormattedDetails(missionId);
+          const detailViewData = convertToDetailViewData(await GetFilesByMission(missionId));
           const { commonPath, files } = transformFilePaths(detailViewData.files);
           detailViewData.files = files;
           setBasePath(commonPath);
