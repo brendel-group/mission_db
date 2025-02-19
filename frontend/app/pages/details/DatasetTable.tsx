@@ -1,7 +1,13 @@
-import { Badge, Table, ThemeIcon, UnstyledButton } from "@mantine/core";
+import {
+  Badge,
+  Table,
+  ThemeIcon,
+  Tooltip,
+  UnstyledButton,
+} from "@mantine/core";
 import { DetailViewData } from "~/data";
 import { useNavigate } from "@remix-run/react";
-import { IconClipboard } from "@tabler/icons-react";
+import { IconClipboard, IconDownload } from "@tabler/icons-react";
 import { useClipboard } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useRef, useState } from "react";
@@ -48,6 +54,17 @@ export function ShowDatasets({
   // Creates rows of table
   const rows = data.files.map((file, index) => {
     let type = data.types[index];
+    let url = data.fileUrls[index];
+
+    let displayFile = file;
+    if (
+      type !== "?" &&
+      (displayFile.startsWith(type + "/") ||
+        displayFile.startsWith(type + "\\"))
+    )
+      displayFile = displayFile.slice(type.length + 1);
+
+    displayFile = displayFile.replace(/^[^\\\/]+[\\\/]/, "");
 
     if (searchFor !== "" && searchFor !== type) return;
 
@@ -71,41 +88,84 @@ export function ShowDatasets({
       >
         {/* Inserts data from DetailViewData, see data.tsx */}
         <Table.Td>
-          <UnstyledButton
-            onClick={(e) => {
-              e.stopPropagation();
-              clipboard.copy(basePath + file);
+          {/* Copy buttom */}
+          <Tooltip label="Copy path">
+            <UnstyledButton
+              onClick={(e) => {
+                e.stopPropagation();
+                clipboard.copy(basePath + file);
 
-              notifications.clean();
+                notifications.clean();
 
-              notifications.show({
-                title: "Copied to clipboard!",
-                message: basePath + file,
-                color: "orange",
-                radius: "md",
-              });
-            }}
-          >
-            <ThemeIcon variant="white">
-              <IconClipboard
-                stroke={2}
-                color="orange"
-                style={{ width: "50%", height: "50%" }}
-              />
-            </ThemeIcon>
-          </UnstyledButton>
-          {(() => {
-            let displayFile = file;
-            if (
-              type !== "?" &&
-              (displayFile.startsWith(type + "/") ||
-                displayFile.startsWith(type + "\\"))
-            )
-              displayFile = displayFile.slice(type.length + 1);
+                notifications.show({
+                  title: "Copied to clipboard!",
+                  message: basePath + file,
+                  color: "orange",
+                  radius: "md",
+                });
+              }}
+              style={{ marginRight: "1px" }}
+            >
+              <ThemeIcon variant="white">
+                <IconClipboard
+                  stroke={2}
+                  color="#fd7e14"
+                  style={{ width: "50%", height: "50%" }}
+                />
+              </ThemeIcon>
+            </UnstyledButton>
+          </Tooltip>
 
-            displayFile = displayFile.replace(/^[^\\\/]+[\\\/]/, "");
-            return displayFile;
-          })()}
+          {/* Download bottom */}
+          <Tooltip label="Download file">
+            <UnstyledButton
+              onClick={(e) => {
+                e.stopPropagation();
+
+                const link = document.createElement("a");
+                link.href = url.toString();
+                link.download = displayFile;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              style={{ marginRight: "1px" }}
+            >
+              <ThemeIcon variant="white">
+                <IconDownload
+                  stroke={2}
+                  color="#fd7e14"
+                  style={{ width: "50%", height: "50%" }}
+                />
+              </ThemeIcon>
+            </UnstyledButton>
+          </Tooltip>
+
+          {/* Foxglove bottom */}
+          <Tooltip label="Open in Foxglove">
+            <UnstyledButton
+              onClick={(e) => {
+                e.stopPropagation();
+
+                const link = document.createElement("a");
+                link.href =
+                  "foxglove://open?ds=remote-file&ds.url=" + String(url);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              style={{ marginRight: "1px" }}
+            >
+              <ThemeIcon variant="white">
+                <img
+                  src="/fox_glove.svg"
+                  alt="Fox Glove Icon"
+                  style={{ width: "50%", height: "50%" }}
+                />
+              </ThemeIcon>
+            </UnstyledButton>
+          </Tooltip>
+          {displayFile}
         </Table.Td>
         <Table.Td>{data.durations[index]}</Table.Td>
         <Table.Td>{data.sizes[index]}</Table.Td>

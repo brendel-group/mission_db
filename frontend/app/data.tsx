@@ -7,6 +7,7 @@ export interface Tag {
 //This is essentially the FileData, but a seperate type is used to make the handling more easier.
 export interface DetailViewData {
   files: string[];
+  fileUrls: URL[];
   durations: string[];
   sizes: string[];
   robots: string[];
@@ -80,20 +81,23 @@ export function convertToMissionData(
 
 export function convertToDetailViewData(fileData: FileData[]) : DetailViewData {
   const files: string[] = [];
+  const fileUrls: URL[] = [];
   const durations: string[] = [];
   const sizes: string[] = [];
   const robots: string[] = [];
   const types: string[] = [];
 
+
   for (const d in fileData) {
     files.push(fileData[d].filePath);
+    fileUrls.push(fileData[d].fileUrl);
     durations.push(fileData[d].duration);
     sizes.push(fileData[d].size);
     robots.push(fileData[d].robot);
     types.push(fileData[d].type);
   }
 
-  return { files, durations, sizes, robots, types };
+  return { files, fileUrls, durations, sizes, robots, types };
 }
 
 export interface FileData {
