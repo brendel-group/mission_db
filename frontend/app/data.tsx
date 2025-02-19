@@ -10,6 +10,7 @@ export interface DetailViewData {
   durations: string[];
   sizes: string[];
   robots: string[];
+  types: string[];
 }
 
 //Represents a mission in the backend

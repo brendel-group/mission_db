@@ -1,8 +1,8 @@
 import { FETCH_API_BASE_URL } from "~/config";
 import { DetailViewData, FileData } from "~/data";
 import {
-  getDetailsByMission,
-  getFormattedDetails,
+  GetFilesByMission,
+  getFormattedFiles,
   getFileData,
 } from "../details";
 
@@ -32,6 +32,7 @@ describe("Fetch API Functions", () => {
           duration: "60000",
           size: "1024",
           robot: "hihi",
+          type: "train",
         },
         {
           file_path: "file2.mcap",
@@ -39,6 +40,7 @@ describe("Fetch API Functions", () => {
           duration: "1200",
           size: "2621440",
           robot: "haha",
+          type: "test",
         },
       ];
 
@@ -48,6 +50,7 @@ describe("Fetch API Functions", () => {
         durations: ["60000", "1200"],
         sizes: ["1024", "2621440"],
         robots: ["hihi", "haha"],
+        types: ["train", "test"],
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -55,7 +58,7 @@ describe("Fetch API Functions", () => {
         json: jest.fn().mockResolvedValueOnce(mockResponse),
       });
 
-      const details = await getDetailsByMission(1);
+      const details = await GetFilesByMission(1);
       expect(details).toEqual(expectedResponse);
       expect(fetch).toHaveBeenCalledWith(
         `${FETCH_API_BASE_URL}/missions/1/files/`,
@@ -75,6 +78,7 @@ describe("Fetch API Functions", () => {
           duration: "60000",
           size: "1024",
           robot: "hihi",
+          type: "hello",
         },
         {
           file_path: "file2.mcap",
@@ -82,6 +86,7 @@ describe("Fetch API Functions", () => {
           duration: "1200",
           size: "2621440",
           robot: "haha",
+          type: "world",
         },
       ];
 
@@ -91,6 +96,7 @@ describe("Fetch API Functions", () => {
         durations: ["16:40:00", "00:20:00"],
         sizes: ["1.00 KB", "2.50 MB"],
         robots: ["hihi", "haha"],
+        types: ["hello", "world"],
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -98,7 +104,7 @@ describe("Fetch API Functions", () => {
         json: jest.fn().mockResolvedValueOnce(mockResponse),
       });
 
-      const details = await getFormattedDetails(1);
+      const details = await getFormattedFiles(1);
       expect(details).toEqual(expectedResponse);
       expect(fetch).toHaveBeenCalledWith(
         `${FETCH_API_BASE_URL}/missions/1/files/`,

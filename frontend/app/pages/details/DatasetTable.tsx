@@ -47,10 +47,7 @@ export function ShowDatasets({
 
   // Creates rows of table
   const rows = data.files.map((file, index) => {
-    const parts = file.split(/[\/\\]/);
-    let type = "?";
-    if (parts.length > 1 && !parts[parts.length - 1].startsWith(parts[0]))
-      type = parts[0];
+    let type = data.types[index];
 
     if (searchFor !== "" && searchFor !== type) return;
 
