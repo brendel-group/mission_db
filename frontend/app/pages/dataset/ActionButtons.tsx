@@ -18,6 +18,29 @@ export function ActionButtons({
 
   return (
     <Group>
+      {filePath.length > 0 && (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            clipboard.copy(filePath);
+
+            notifications.clean();
+
+            notifications.show({
+              title: "Copied to clipboard!",
+              message: filePath,
+              color: "orange",
+              radius: "md",
+            });
+          }}
+          variant="light"
+          color="orange"
+          leftSection={<IconClipboard stroke={2} size={14} color="#fd7e14" />}
+        >
+          Copy to clipboard
+        </Button>
+      )}
+
       <Button
         onClick={(e) => {
           e.stopPropagation();
@@ -59,29 +82,6 @@ export function ActionButtons({
       >
         Open in Foxglove
       </Button>
-
-      {filePath.length > 0 && (
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            clipboard.copy(filePath);
-
-            notifications.clean();
-
-            notifications.show({
-              title: "Copied to clipboard!",
-              message: filePath,
-              color: "orange",
-              radius: "md",
-            });
-          }}
-          variant="light"
-          color="orange"
-          leftSection={<IconClipboard stroke={2} size={14} color="#fd7e14" />}
-        >
-          Copy to clipboard
-        </Button>
-      )}
     </Group>
   );
 }
