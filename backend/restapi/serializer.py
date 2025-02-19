@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from django.db.models import Sum
-from .models import Allowed_topic_names, Mission, Topic
+from .models import Denied_topics, Mission, Topic
 from .models import File
 from .models import Tag
 from .models import Mission_tags
@@ -132,7 +132,7 @@ class TopicSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "type", "message_count", "frequency"]
 
 
-class AllowedTopicNameSerializer(serializers.ModelSerializer):
+class DeniedTopicNameSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Allowed_topic_names
+        model = Denied_topics
         fields = ["name"]
