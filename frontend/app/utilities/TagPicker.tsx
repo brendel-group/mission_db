@@ -158,6 +158,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         {/*button to add tag*/}
         <Button
           onClick={handleAddTag}
+          variant="light"
+          color="orange"
           style={{ flex: 0.11, alignSelf: "flex-start" }}
           disabled={!newTagName || !isValidHexColor(selectedColor)}
         >
@@ -258,7 +260,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                   {/* save button */}
                   <Button
                     size="xs"
-                    color="blue"
+                    variant="light"
+                    color="orange"
                     onClick={() =>
                       handleTagEdit(tag.name, changedTagName, newColor)
                     }
@@ -293,7 +296,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         <Popover withArrow withinPortal={false}>
           <Popover.Target>
             <Button
-              color="blue"
+              color="orange"
+              variant="light"
               size="xs"
               style={{ textTransform: "none", width: "48%" }}
               disabled={otherExistingTags.length === 0}
@@ -343,6 +347,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
         {/* delete all tags */}
         <Button
           color="red"
+          variant="light"
           size="xs"
           style={{ textTransform: "none", width: "48%" }}
           disabled={tags.length === 0}

@@ -75,8 +75,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
             />
             <div style={{ display: "flex", justifyContent: "center" }}>
               <Button
-                variant="gradient"
-                gradient={{ from: "yellow", to: "orange", deg: 269 }}
+                variant="light"
+                color="orange"
                 onClick={() => {
                   setMenuOpened(false);
                   onValueChange(fieldValue);
