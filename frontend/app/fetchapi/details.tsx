@@ -5,7 +5,7 @@ import { transformDurations, transformSizes } from "~/utilities/FormatHandler";
 
 export const GetFilesByMission = async (
   missionId: number,
-): Promise<DetailViewData> => {
+): Promise<FileData[]> => {
   const response = await fetch(
     `${FETCH_API_BASE_URL}/missions/${missionId}/files/`,
     {
@@ -23,40 +23,23 @@ export const GetFilesByMission = async (
 
   const data = await response.json();
 
-  const files: string[] = [];
-  const videos: string[] = [];
-  const durations: string[] = [];
-  const sizes: string[] = [];
-  const robots: string[] = [];
-  const types: string[] = [];
+  const files: FileData[] = [];
 
   for (const d in data) {
-    files.push(data[d].file_path);
-    videos.push(data[d].video_path);
-    durations.push(data[d].duration);
-    sizes.push(data[d].size);
-    robots.push(data[d].robot);
-    types.push(data[d].type);
+    files.push({
+      filePath: data[d].file_path,
+      fileUrl: new URL(data[d].file_url),
+      videoPath: data[d].video_path,
+      videoUrl: data[d].video_url ? new URL(data[d].video_url) : null,
+      duration: transformDurations([data[d].duration])[0],
+      size: transformSizes([data[d].size])[0],
+      robot: data[d].robot,
+      type: data[d].type,
+    });
+
   }
 
-  return { files, videos, durations, sizes, robots, types };
-};
-
-// Get details by mission in correct format
-export const getFormattedFiles = async (
-  missionId: number,
-): Promise<DetailViewData> => {
-  const details = await GetFilesByMission(missionId);
-
-  const files = details.files;
-  const videos = details.videos;
-  // transform durations and sizes to correct form
-  const durations = transformDurations(details.durations);
-  const sizes = transformSizes(details.sizes);
-  const robots = details.robots;
-  const types = details.types;
-
-  return { files, videos, durations, sizes, robots, types };
+  return files;
 };
 
 /**
