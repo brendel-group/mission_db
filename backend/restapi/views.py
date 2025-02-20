@@ -126,7 +126,7 @@ def get_topics_from_files(request, file_path):
     except File.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     topics = Topic.objects.filter(file=file)
-    serializer = TopicSerializer(topics, many=True)
+    serializer = TopicSerializer(topics, many=True, context={"request": request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
