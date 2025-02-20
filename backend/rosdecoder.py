@@ -20,7 +20,6 @@ def get_video_topics(path):
 
 def get_video_data(path, topic):
     data = []
-    encoding = ""
     width = 0
     height = 0
     step = 0
@@ -28,7 +27,6 @@ def get_video_data(path, topic):
         connections = [x for x in reader.connections if x.topic == topic]
         for connection, timestamp, rawdata in reader.messages(connections=connections):
             msg = reader.deserialize(rawdata, connection.msgtype)
-            encoding = msg.encoding
             width = msg.width
             height = msg.height
             step = msg.step
