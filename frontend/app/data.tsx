@@ -4,12 +4,25 @@ export interface Tag {
 }
 
 //Fetch this data by mission_id from MissionTableData
+//This is essentially the FileData, but a seperate type is used to make the handling more easier.
 export interface DetailViewData {
   files: string[];
-  videos: string[];
+  fileUrls: URL[];
   durations: string[];
   sizes: string[];
   robots: string[];
+  types: string[];
+}
+
+export interface FileData {
+  filePath: string;
+  fileUrl: URL;
+  videoPath: string;
+  videoUrl: URL | null;
+  duration: string;
+  size: string;
+  robot: string;
+  type: string;
 }
 
 //Represents a mission in the backend
@@ -36,7 +49,7 @@ export interface RenderedMission {
   totalDuration: string;
   totalSize: string;
   robots: string[];
-
+  
   // Inherited from other data structures (details, tags, ...)
   tags: Tag[];
 }
@@ -77,13 +90,24 @@ export function convertToMissionData(
   };
 }
 
-export interface FileData {
-  filePath: string;
-  fileUrl: URL;
-  videoPath: string;
-  videoUrl: URL | null;
-  duration: string;
-  size: string;
-  robot: string;
-  type: string;
+export function convertToDetailViewData(fileData: FileData[]) : DetailViewData {
+  const files: string[] = [];
+  const fileUrls: URL[] = [];
+  const durations: string[] = [];
+  const sizes: string[] = [];
+  const robots: string[] = [];
+  const types: string[] = [];
+
+
+  for (const d in fileData) {
+    files.push(fileData[d].filePath);
+    fileUrls.push(fileData[d].fileUrl);
+    durations.push(fileData[d].duration);
+    sizes.push(fileData[d].size);
+    robots.push(fileData[d].robot);
+    types.push(fileData[d].type);
+  }
+
+  return { files, fileUrls, durations, sizes, robots, types };
 }
+

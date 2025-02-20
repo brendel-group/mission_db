@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from django.db.models import Sum
-from .models import Allowed_topic_names, Mission, Topic
+from .models import Denied_topics, Mission, Topic
 from .models import File
 from .models import Tag
 from .models import Mission_tags
@@ -44,7 +44,7 @@ class MissionWasModifiedSerializer(serializers.ModelSerializer):
 
 
 class FileSerializer(serializers.ModelSerializer):
-    file_path = serializers.CharField(source="file.path", initial=None)
+    file_path = serializers.CharField(source="file.name", initial=None)
     video_path = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
@@ -83,7 +83,7 @@ class FileSerializer(serializers.ModelSerializer):
 
     def get_video_path(self, obj):
         if obj.video:
-            return obj.video.path
+            return obj.video.name
         return None
 
 
@@ -132,7 +132,7 @@ class TopicSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "type", "message_count", "frequency"]
 
 
-class AllowedTopicNameSerializer(serializers.ModelSerializer):
+class DeniedTopicNameSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Allowed_topic_names
+        model = Denied_topics
         fields = ["name"]

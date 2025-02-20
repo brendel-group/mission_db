@@ -1,10 +1,6 @@
 import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
-import {
-  MetaFunction,
-  redirect,
-  useLoaderData,
-} from "@remix-run/react";
+import { MetaFunction, redirect, useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { FileData, Topic } from "~/data";
 import { getFileData } from "~/fetchapi/details";
@@ -72,18 +68,7 @@ function Dataset() {
   if (error) return <p>Error: {error}</p>;
   if (!fileData) return <p>No data available</p>;
 
-  return (
-    <DatasetView
-      file={fileData.filePath}
-      fileUrl={fileData.fileUrl}
-      video={fileData.videoPath}
-      videoUrl={fileData.videoUrl}
-      duration={fileData.duration}
-      size={fileData.size}
-      robot={fileData.robot}
-      topics={fileTopics.map((topic) => topic.name)}
-    ></DatasetView>
-  );
+  return <DatasetView {...fileData}></DatasetView>;
 }
 
 const App = () => {

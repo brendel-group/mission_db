@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 from .models import (
-    Allowed_topic_names,
+    Denied_topics,
     File,
     Tag,
     Mission,
@@ -12,7 +12,7 @@ from .models import (
     Topic,
 )
 from .serializer import (
-    AllowedTopicNameSerializer,
+    DeniedTopicNameSerializer,
     FileSerializer,
     TagSerializer,
     MissionSerializer,
@@ -131,28 +131,28 @@ def get_topics_from_files(request, file_path):
 
 
 @api_view(["GET"])
-def allowed_topic_names(request):
+def denied_topics(request):
     """
-    List all allowed topic names
+    List all denied topic names
     ### Returns
-    List of allowed topic names in json format
+    List of denied topic names in json format
     """
-    topic_names = Allowed_topic_names.objects.all()
-    serializer = AllowedTopicNameSerializer(topic_names, many=True)
+    topic_names = Denied_topics.objects.all()
+    serializer = DeniedTopicNameSerializer(topic_names, many=True)
     return Response(serializer.data)
 
 
 @api_view(["POST"])
-def allowed_topic_names_create(request):
+def denied_topics_create(request):
     """
-    Creates a new allowed topic name
+    Creates a new denied topic name
     ### Parameters
-    request: POST Request containing name of the allowed topic name
+    request: POST Request containing name of the denied topic name
     ### Returns
-    Response with data of created allowed topic name object containing name\
+    Response with data of created denied topic name object containing name\
     Or HTTP_400_BAD_REQUEST Response
     """
-    serializer = AllowedTopicNameSerializer(data=request.data)
+    serializer = DeniedTopicNameSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -160,21 +160,21 @@ def allowed_topic_names_create(request):
 
 
 @api_view(["DELETE"])
-def allowed_topic_names_delete(request, name):
+def denied_topics_delete(request, name):
     """
-    Delete an allowed topic name
+    Delete an denied topic name
     ### Parameters
-    name: name of the allowed topic name
+    name: name of the denied topic name
     ### Returns
     success response or
-    HTTP_404_NOT_FOUND if allowed topic name not found
+    HTTP_404_NOT_FOUND if denied topic name not found
     """
     name = urllib.parse.unquote(name)
     try:
-        allowed_topic_name = Allowed_topic_names.objects.get(name=name)
-    except Allowed_topic_names.DoesNotExist:
+        denied_topic_name = Denied_topics.objects.get(name=name)
+    except Denied_topics.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    allowed_topic_name.delete()
+    denied_topic_name.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 

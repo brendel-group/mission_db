@@ -4,3 +4,12 @@
       var(--mantine-font-family);
     font-weight: 700;
   }
+
+.login_button:hover {
+    opacity: 0.8;
+  }
+
+.login_button:disabled {
+    cursor: inherit;
+    color: #000000;
+  }

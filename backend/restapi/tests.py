@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core.files.storage.memory import InMemoryStorage
 from django.core.files.base import ContentFile
 from .models import (
-    Allowed_topic_names,
+    Denied_topics,
     Tag,
     Mission,
     Mission_tags,
@@ -646,18 +646,18 @@ class SpecialTagNameTest(APIAuthTestCase):
         self.assertFalse(Tag.objects.filter(name="create/").exists())
 
 
-class RestAPIAllowedTopicNamesTestCases(APIAuthTestCase):
+class RestAPIDeniedTopicNamesTestCases(APIAuthTestCase):
     def setUp(self):
         super().setUp()
-        Allowed_topic_names.objects.create(name="Car1")
-        Allowed_topic_names.objects.create(name="Car2")
+        Denied_topics.objects.create(name="Car1")
+        Denied_topics.objects.create(name="Car2")
 
     def tearDown(self):
         super().tearDown()
 
-    def test_get_allowed_topic_names(self):
+    def test_get_Denied_topics(self):
         response = self.client.get(
-            reverse("allowed_topic_names"),
+            reverse("Denied_topics"),
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -665,22 +665,22 @@ class RestAPIAllowedTopicNamesTestCases(APIAuthTestCase):
         self.assertEqual(response.data[0]["name"], "Car1")
         self.assertEqual(response.data[1]["name"], "Car2")
 
-    def test_create_allowed_topic_name(self):
+    def test_create_denied_topic_name(self):
         response = self.client.post(
-            reverse("allowed_topic_names_create"),
+            reverse("Denied_topics_create"),
             {"name": "Car3"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["name"], "Car3")
-        self.assertTrue(Allowed_topic_names.objects.filter(name="Car3").exists())
+        self.assertTrue(Denied_topics.objects.filter(name="Car3").exists())
 
-    def test_delete_allowed_topic_name(self):
+    def test_delete_denied_topic_name(self):
         response = self.client.delete(
-            reverse("allowed_topic_names_delete", kwargs={"name": "Car1"}),
+            reverse("Denied_topics_delete", kwargs={"name": "Car1"}),
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Allowed_topic_names.objects.filter(name="Car1").exists())
+        self.assertFalse(Denied_topics.objects.filter(name="Car1").exists())
 
 
 class RestAPITopicsByFile(APIAuthTestCase):
@@ -716,22 +716,9 @@ class RestAPITopicsByFile(APIAuthTestCase):
             size=1024,
         )
 
-        # Create allowed topic names
-        car1 = Allowed_topic_names(name="Car1")
-        car1.full_clean()
-        car1.save()
-
-        car2 = Allowed_topic_names(name="Car2")
-        car2.full_clean()
-        car2.save()
-
-        car3 = Allowed_topic_names(name="Car3")
-        car3.full_clean()
-        car3.save()
-
         # Create topics
         Topic.objects.create(
-            name=car1,
+            name="Car1",
             file=self.file1,
             type="sensor",
             message_count=124,
@@ -739,7 +726,7 @@ class RestAPITopicsByFile(APIAuthTestCase):
         )
 
         Topic.objects.create(
-            name=car2,
+            name="Car2",
             file=self.file1,
             type="camera",
             message_count=1024,
@@ -747,7 +734,7 @@ class RestAPITopicsByFile(APIAuthTestCase):
         )
 
         Topic.objects.create(
-            name=car3,
+            name="Car3",
             file=self.file1,
             type="imu",
             message_count=10000,

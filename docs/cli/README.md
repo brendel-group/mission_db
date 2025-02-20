@@ -290,6 +290,20 @@ The password is not stored in clear-text but as a hash value.
 Adds all missions to the database that are in the Default Storage but not in the database.\
 Saves the metadata stored in the json files into the database.
 
+### `cli.py topic`
+Allow or Deny topics by name
+
+### `cli.py topic deny <name>`
+Deny a topic with the specified name to be added to the database.\
+Also removes all already added topics with that name.\
+By default all topic names are allowed.
+
+### `cli.py topic allow <name>`
+Allow a topic with that name again in the future.
+
+### `cli.py topic list-denied`
+lists all currently denied topics
+
 ## Troubleshooting
 
 - ### `Error adding mission: duplicate key value violates unique constraint "restapi_mission_pkey"`
