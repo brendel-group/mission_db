@@ -67,8 +67,9 @@ function Dataset() {
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
   if (!fileData) return <p>No data available</p>;
+  if (!fileTopics) return <p>No topics available</p>;
 
-  return <DatasetView {...fileData}></DatasetView>;
+  return <DatasetView data={fileData} topics={fileTopics}></DatasetView>;
 }
 
 const App = () => {

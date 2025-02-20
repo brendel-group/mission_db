@@ -1,9 +1,15 @@
-import { Badge, Group, Grid } from "@mantine/core";
-import { FileData } from "~/data";
+import { Badge, Group, Grid, Text } from "@mantine/core";
+import { FileData, Topic } from "~/data";
 import { ActionButtons } from "./ActionButtons";
 import { DatasetDetails } from "./DatasetDetailsView";
+import { TopicTableArea } from "./TopicTable";
 
-export function DatasetView(data: FileData) {
+interface DatasetViewProps {
+  data: FileData;
+  topics: Topic[];
+}
+
+export const DatasetView = ({ data, topics }: DatasetViewProps) => {
   const displayFile = (data.filePath ?? "").split(/[\\/]/).pop() ?? "";
 
   return (
@@ -30,7 +36,10 @@ export function DatasetView(data: FileData) {
                 displayFile={displayFile}
               />
             </Grid.Col>
-            <Grid.Col span={12}>Some table</Grid.Col>
+            <Grid.Col span={12}>
+              <Text size = "xl" mb = "sm"> Topics </Text>
+              <TopicTableArea topics={topics} />
+            </Grid.Col>
           </Grid>
         </Grid.Col>
 
