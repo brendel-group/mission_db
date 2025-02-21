@@ -34,6 +34,7 @@ export function ShowDatasets({
 
   // robot menu
   const [robotMenuOpened, setRobotMenuOpened] = useState<number>(-1);
+  const [fieldValue, setFieldValue] = useState<string>("");
 
   const colorList = [
     "red",
@@ -206,8 +207,14 @@ export function ShowDatasets({
         <Table.Td>
           <Menu
             opened={robotMenuOpened === index}
-            onClose={() => setRobotMenuOpened(-1)}
-            onOpen={() => setRobotMenuOpened(index)}
+            onClose={() => {
+              setFieldValue("")
+              setRobotMenuOpened(-1)
+            }}
+            onOpen={() => {
+              setFieldValue(data.robots[index])
+              setRobotMenuOpened(index)
+            }}
           >
             <Menu.Target>
               <Badge color="orange" variant="light" style={{ cursor: "pointer" }} onClick={(e) => e.stopPropagation()}>
@@ -219,29 +226,31 @@ export function ShowDatasets({
                 variant="filled"
                 placeholder={data.robots[index]}
                 autosize
-                defaultValue={data.robots[index]}
+                value={fieldValue}
+                error={fieldValue.length > 65536 ? "Name too long" : ""}
                 onClick={(e) => e.stopPropagation()}
+                onChange={(event) => setFieldValue(event.currentTarget.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault(); // Prevent newline
                     setRobotMenuOpened(-1);
-                    // onValueChange(value);
+                    // onValueChange(fieldValue);
                   }
                 }}
               />
-              <Button
-                style={{ marginTop: "10px", display: "flex", justifyContent: "center" }}
-                variant="light"
-                color="orange"
-                fullWidth
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setRobotMenuOpened(-1)
-                  // onValueChange(value);
-                }}
-              >
-                Update
-              </Button>
+              <div style={{ marginTop: "10px", display: "flex", justifyContent: "center" }}>
+                <Button
+                  variant="light"
+                  color="orange"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setRobotMenuOpened(-1)
+                    // onValueChange(fieldValue);
+                  }}
+                >
+                  Update
+                </Button>
+              </div>
             </Menu.Dropdown>
 
           </Menu>
