@@ -6,7 +6,6 @@ import {
   Text,
   Textarea,
   Stack,
-  ThemeIcon,
   UnstyledButton,
 } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";

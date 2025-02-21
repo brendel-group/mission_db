@@ -4,10 +4,13 @@ import {
   ThemeIcon,
   Tooltip,
   UnstyledButton,
+  Menu,
+  Textarea,
+  Button,
 } from "@mantine/core";
 import { DetailViewData } from "~/data";
 import { useNavigate } from "@remix-run/react";
-import { IconClipboard, IconDownload } from "@tabler/icons-react";
+import { IconClipboard, IconDownload, IconPencil } from "@tabler/icons-react";
 import { useClipboard } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useRef, useState } from "react";
@@ -28,6 +31,9 @@ export function ShowDatasets({
   // Deterministic color management without the need of a database :))
   const typeColorsRef = useRef<Record<string, string>>({});
   const colorIndexRef = useRef<number>(0);
+
+  // robot menu
+  const [robotMenuOpened, setRobotMenuOpened] = useState<number>(-1);
 
   const colorList = [
     "red",
@@ -88,7 +94,7 @@ export function ShowDatasets({
       >
         {/* Inserts data from DetailViewData, see data.tsx */}
         <Table.Td>
-          {/* Copy buttom */}
+          {/* Copy button */}
           <Tooltip label="Copy path">
             <UnstyledButton
               onClick={(e) => {
@@ -116,7 +122,7 @@ export function ShowDatasets({
             </UnstyledButton>
           </Tooltip>
 
-          {/* Download bottom */}
+          {/* Download button */}
           <Tooltip label="Download file">
             <UnstyledButton
               onClick={(e) => {
@@ -141,7 +147,7 @@ export function ShowDatasets({
             </UnstyledButton>
           </Tooltip>
 
-          {/* Foxglove bottom */}
+          {/* Foxglove button */}
           <Tooltip label="Open in Foxglove">
             <UnstyledButton
               onClick={(e) => {
@@ -165,7 +171,7 @@ export function ShowDatasets({
               </ThemeIcon>
             </UnstyledButton>
           </Tooltip>
-          {displayFile}
+          {" " + displayFile}
         </Table.Td>
         <Table.Td>{data.durations[index]}</Table.Td>
         <Table.Td>{data.sizes[index]}</Table.Td>
@@ -197,7 +203,50 @@ export function ShowDatasets({
             );
           })()}
         </Table.Td>
-        <Table.Td>{data.robots[index]}</Table.Td>
+        <Table.Td>
+          <Menu
+            opened={robotMenuOpened === index}
+            onClose={() => setRobotMenuOpened(-1)}
+            onOpen={() => setRobotMenuOpened(index)}
+          >
+            <Menu.Target>
+              <Badge color="orange" variant="light" style={{ cursor: "pointer" }} onClick={(e) => e.stopPropagation()}>
+                <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
+              </Badge>
+            </Menu.Target>
+            <Menu.Dropdown style={{ padding: "10px" }}>
+              <Textarea
+                variant="filled"
+                placeholder={data.robots[index]}
+                autosize
+                defaultValue={data.robots[index]}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault(); // Prevent newline
+                    setRobotMenuOpened(-1);
+                    // onValueChange(value);
+                  }
+                }}
+              />
+              <Button
+                style={{ marginTop: "10px", display: "flex", justifyContent: "center" }}
+                variant="light"
+                color="orange"
+                fullWidth
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setRobotMenuOpened(-1)
+                  // onValueChange(value);
+                }}
+              >
+                Update
+              </Button>
+            </Menu.Dropdown>
+
+          </Menu>
+          {" " + data.robots[index]}
+        </Table.Td>
       </Table.Tr>
     );
   });
