@@ -3,6 +3,7 @@ import cv2
 from rosbags.highlevel import AnyReader
 from rosbags.typesys import Stores, get_typestore
 import numpy as np
+import os
 
 bagpath = Path(r"")
 
@@ -58,12 +59,11 @@ def get_video_data(path, topic):
     return data, topic
 
 
-def create_video(data, topic):
+def create_video(data, topic, save_dir=str(bagpath)):
     # Print data and shape of the first frame for debugging
     height, width, channels = data[0].shape
     # Create a filename based on the topic name
-    filename = str(topic).replace("/", "-") + ".mp4"
-    # Initialize the video writer
+    filename = os.path.join(save_dir, str(topic).replace("/", "-") + ".mp4")    # Initialize the video writer
     video = cv2.VideoWriter(
         filename,
         cv2.VideoWriter_fourcc(*"mp4v"),
