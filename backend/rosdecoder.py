@@ -63,7 +63,9 @@ def create_video(data, topic, save_dir=str(bagpath)):
     # Print data and shape of the first frame for debugging
     height, width, channels = data[0].shape
     # Create a filename based on the topic name
-    filename = os.path.join(save_dir, str(topic).replace("/", "-") + ".mp4")    # Initialize the video writer
+    filename = os.path.join(
+        save_dir, str(topic).replace("/", "-") + ".mp4"
+    )  # Initialize the video writer
     video = cv2.VideoWriter(
         filename,
         cv2.VideoWriter_fourcc(*"mp4v"),
