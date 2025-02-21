@@ -212,7 +212,7 @@ export function ShowDatasets({
               setRobotMenuOpened(-1)
             }}
             onOpen={() => {
-              setFieldValue(data.robots[index])
+              setFieldValue(data.robots[index] ? data.robots[index] : "")
               setRobotMenuOpened(index)
             }}
           >
@@ -254,7 +254,7 @@ export function ShowDatasets({
             </Menu.Dropdown>
 
           </Menu>
-          {" " + data.robots[index]}
+          {" " + data.robots[index] ? data.robots[index] : ""}
         </Table.Td>
       </Table.Tr>
     );
