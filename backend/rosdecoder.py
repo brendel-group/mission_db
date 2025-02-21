@@ -39,7 +39,9 @@ def get_video_data(path, topic):
             step = msg.step
             if msg.encoding == "mono16":
                 # Convert raw bytes to numpy 16-bit grayscale image
-                tmp = np.frombuffer(msg.data, dtype=np.uint16).reshape((height, width, 1))
+                tmp = np.frombuffer(msg.data, dtype=np.uint16).reshape(
+                    (height, width, 1)
+                )
 
                 # Normalize to 8-bit range (0-255) for visualization
                 normalized = (tmp / 256).astype(np.uint8)
@@ -47,7 +49,11 @@ def get_video_data(path, topic):
                 data.append(normalized)
             else:
                 # Normal RGB or Mono8 case
-                data.append(np.frombuffer(msg.data, dtype=np.uint8).reshape(height, width, int(step / width)))
+                data.append(
+                    np.frombuffer(msg.data, dtype=np.uint8).reshape(
+                        height, width, int(step / width)
+                    )
+                )
 
     return data, topic
 
