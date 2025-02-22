@@ -70,6 +70,12 @@ if (!sortBy) {
 
 return filterData(
   [...data].sort((a, b) => {
+    if (typeof a[sortBy] === 'number' && typeof b[sortBy] === 'number') {
+      return payload.reversed
+        ? (b[sortBy] as number) - (a[sortBy] as number)
+        : (a[sortBy] as number) - (b[sortBy] as number);
+    }
+
     if (payload.reversed) {
       return b[sortBy].toString().localeCompare(a[sortBy].toString());
     }
