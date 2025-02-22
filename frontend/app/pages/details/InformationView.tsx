@@ -89,10 +89,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
         </Menu>
       </Group>
       {/* Field Data */}
-      <Text>
-        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-          {data === null ? "" : data}
-        </div>
+      <Text style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {data === null ? "" : data}
       </Text>
     </Stack>
   );
@@ -186,16 +184,17 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
           }}
         >
           <Badge color="orange" variant="light" style={{ cursor: "pointer" }}>
-              <IconClipboard stroke={2} size={16} style={{ transform: "translateY(2px)" }} />
-            </Badge>
-          
+            <IconClipboard
+              stroke={2}
+              size={16}
+              style={{ transform: "translateY(2px)" }}
+            />
+          </Badge>
         </UnstyledButton>
       </Group>
 
-      <Text>
-        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-          {basePath === null ? "" : basePath}
-        </div>
+      <Text style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {basePath === null ? "" : basePath}
       </Text>
     </div>
   );

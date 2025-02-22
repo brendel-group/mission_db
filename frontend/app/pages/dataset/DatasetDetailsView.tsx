@@ -1,5 +1,5 @@
 import { Text } from "@mantine/core";
-import { VideoComponent } from "./VideoView";
+import { VideoComponent } from "./video/VideoView";
 
 export function DatasetDetails({
   size,
