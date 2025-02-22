@@ -6,7 +6,6 @@ import {
   Text,
   Textarea,
   Stack,
-  ThemeIcon,
   UnstyledButton,
 } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
@@ -89,10 +88,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
         </Menu>
       </Group>
       {/* Field Data */}
-      <Text>
-        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-          {data === null ? "" : data}
-        </div>
+      <Text style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {data === null ? "" : data}
       </Text>
     </Stack>
   );
@@ -192,11 +189,9 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
         </UnstyledButton>
       </Group>
 
-      <Text>
-        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-          {basePath === null ? "" : basePath}
-        </div>
-      </Text>
+    <Text style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+      {basePath === null ? "" : basePath}
+    </Text>
     </div>
   );
 };

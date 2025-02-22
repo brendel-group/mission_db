@@ -27,7 +27,6 @@ class File(models.Model):
     id = models.AutoField(primary_key=True)
     mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
     file = models.FileField(max_length=65536)
-    video = models.FileField(blank=True, null=True, max_length=65536)
     robot = models.CharField(max_length=65536, null=True, blank=True)  # can be optional
     duration = models.BigIntegerField()  # unit: seconds
     size = models.BigIntegerField()  # unit: bytes
@@ -76,6 +75,7 @@ class Topic(models.Model):
     type = models.CharField()
     message_count = models.IntegerField()
     frequency = models.FloatField()
+    video = models.FileField(blank=True, null=True, max_length=65536)
 
     class Meta:
         unique_together = ["file", "type", "name"]

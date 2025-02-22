@@ -4,20 +4,26 @@ import {
   ThemeIcon,
   Tooltip,
   UnstyledButton,
+  Menu,
+  Textarea,
+  Button,
 } from "@mantine/core";
 import { DetailViewData } from "~/data";
 import { useNavigate } from "@remix-run/react";
-import { IconClipboard, IconDownload } from "@tabler/icons-react";
+import { IconClipboard, IconDownload, IconPencil } from "@tabler/icons-react";
 import { useClipboard } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useRef, useState } from "react";
+import { updateRobotField } from "~/fetchapi/details";
 
 export function ShowDatasets({
   data,
   basePath,
+  onRobotsUpdate,
 }: {
   data: DetailViewData;
   basePath: string;
+  onRobotsUpdate: (updatedRobots: string[]) => void;
 }) {
   const navigate = useNavigate();
   const clipboard = useClipboard({ timeout: 500 });
@@ -28,6 +34,10 @@ export function ShowDatasets({
   // Deterministic color management without the need of a database :))
   const typeColorsRef = useRef<Record<string, string>>({});
   const colorIndexRef = useRef<number>(0);
+
+  // robot menu
+  const [robotMenuOpened, setRobotMenuOpened] = useState<number>(-1);
+  const [fieldValue, setFieldValue] = useState<string>("");
 
   const colorList = [
     "red",
@@ -88,7 +98,7 @@ export function ShowDatasets({
       >
         {/* Inserts data from DetailViewData, see data.tsx */}
         <Table.Td>
-          {/* Copy buttom */}
+          {/* Copy button */}
           <Tooltip label="Copy path">
             <UnstyledButton
               onClick={(e) => {
@@ -116,7 +126,7 @@ export function ShowDatasets({
             </UnstyledButton>
           </Tooltip>
 
-          {/* Download bottom */}
+          {/* Download button */}
           <Tooltip label="Download file">
             <UnstyledButton
               onClick={(e) => {
@@ -141,7 +151,7 @@ export function ShowDatasets({
             </UnstyledButton>
           </Tooltip>
 
-          {/* Foxglove bottom */}
+          {/* Foxglove button */}
           <Tooltip label="Open in Foxglove">
             <UnstyledButton
               onClick={(e) => {
@@ -165,7 +175,7 @@ export function ShowDatasets({
               </ThemeIcon>
             </UnstyledButton>
           </Tooltip>
-          {displayFile}
+          {" " + displayFile}
         </Table.Td>
         <Table.Td>{data.durations[index]}</Table.Td>
         <Table.Td>{data.sizes[index]}</Table.Td>
@@ -197,7 +207,62 @@ export function ShowDatasets({
             );
           })()}
         </Table.Td>
-        <Table.Td>{data.robots[index]}</Table.Td>
+        <Table.Td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>
+          <Menu
+            opened={robotMenuOpened === index}
+            onClose={() => {
+              setFieldValue("")
+              setRobotMenuOpened(-1)
+            }}
+            onOpen={() => {
+              setFieldValue(data.robots[index] ? data.robots[index] : "")
+              setRobotMenuOpened(index)
+            }}
+          >
+            <Menu.Target>
+              <Badge color="orange" variant="light" style={{ cursor: "pointer" }} onClick={(e) => e.stopPropagation()}>
+                <IconPencil size={16} style={{ transform: "translateY(2px)" }} />
+              </Badge>
+            </Menu.Target>
+            <Menu.Dropdown style={{ padding: "10px" }}>
+              <Textarea
+                variant="filled"
+                placeholder={data.robots[index]}
+                autosize
+                value={fieldValue}
+                error={fieldValue.length > 65536 ? "Name too long" : ""}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(event) => setFieldValue(event.currentTarget.value)}
+                onKeyDown={async (event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault(); // Prevent newline
+                    setRobotMenuOpened(-1);
+                    data.robots[index] = fieldValue
+                    onRobotsUpdate(data.robots)
+                    await updateRobotField(basePath + file, fieldValue)
+                  }
+                }}
+              />
+              <div style={{ marginTop: "10px", display: "flex", justifyContent: "center" }}>
+                <Button
+                  variant="light"
+                  color="orange"
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    setRobotMenuOpened(-1)
+                    data.robots[index] = fieldValue
+                    onRobotsUpdate(data.robots)
+                    await updateRobotField(basePath + file, fieldValue)
+                  }}
+                >
+                  Update
+                </Button>
+              </div>
+            </Menu.Dropdown>
+
+          </Menu>
+          {" " + (data.robots[index] ? data.robots[index] : "")}
+        </Table.Td>
       </Table.Tr>
     );
   });
