@@ -132,6 +132,7 @@ For more details about how to use the endpoints refer to the [dj-rest-auth docum
   - Using a [GET Request](http://localhost:8000/restapi/topics/yourpathhere) the topics from a file path can be listed.
   - The URL is of the format `restapi/topics/<path:file_path>`
   - The result will be a list of topics.
+  - If the topic is a video topic the response contains the video_path and video_url
 
 - GET request to list all allowed topic names
   - Using a [GET Request](http://localhost:8000/restapi/topics-names/) the allowed topic names can be listed.
