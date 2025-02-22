@@ -73,3 +73,18 @@ export const getFileData = async (filePath: string): Promise<FileData> => {
     type: data.type,
   };
 };
+
+export const updateRobotField = async (filePath: string, robotName: string): Promise<void> => {
+  const response = await fetch(`${FETCH_API_BASE_URL}/file/${filePath}/update-robot/`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      ...getHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ robot: robotName }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to update robot field for file ${filePath}`);
+  }
+};

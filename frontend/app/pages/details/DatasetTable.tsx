@@ -14,6 +14,7 @@ import { IconClipboard, IconDownload, IconPencil } from "@tabler/icons-react";
 import { useClipboard } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { useRef, useState } from "react";
+import { updateRobotField } from "~/fetchapi/details";
 
 export function ShowDatasets({
   data,
@@ -230,11 +231,12 @@ export function ShowDatasets({
                 error={fieldValue.length > 65536 ? "Name too long" : ""}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(event) => setFieldValue(event.currentTarget.value)}
-                onKeyDown={(event) => {
+                onKeyDown={async (event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault(); // Prevent newline
                     setRobotMenuOpened(-1);
-                    // onValueChange(fieldValue);
+                    data.robots[index] = fieldValue
+                    await updateRobotField(basePath + file, fieldValue)
                   }
                 }}
               />
@@ -242,10 +244,11 @@ export function ShowDatasets({
                 <Button
                   variant="light"
                   color="orange"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation()
                     setRobotMenuOpened(-1)
-                    // onValueChange(fieldValue);
+                    data.robots[index] = fieldValue
+                    await updateRobotField(basePath + file, fieldValue)
                   }}
                 >
                   Update
@@ -254,7 +257,7 @@ export function ShowDatasets({
             </Menu.Dropdown>
 
           </Menu>
-          {" " + data.robots[index] ? data.robots[index] : ""}
+          {" " + (data.robots[index] ? data.robots[index] : "")}
         </Table.Td>
       </Table.Tr>
     );
