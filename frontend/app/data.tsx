@@ -56,7 +56,6 @@ export interface RenderedMission {
 
 //Topic
 export interface Topic {
-  id: number;
   file: string;
   name: string;
   type: string;

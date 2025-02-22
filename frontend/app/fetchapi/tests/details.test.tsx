@@ -1,9 +1,7 @@
 import { FETCH_API_BASE_URL } from "~/config";
 import { DetailViewData, FileData } from "~/data";
-import {
-  GetFilesByMission,
-  getFileData,
-} from "../details";
+import { GetFilesByMission, getFileData } from "../details";
+import { getTopicsByFile } from "../topics";
 
 /*
 How to run the tests:
@@ -99,6 +97,18 @@ describe("Fetch API Functions", () => {
         type: "test",
       };
 
+      const mockResponse2 = [
+        {
+          file: "test",
+          name: "test",
+          type: "test",
+          video_path: "file1.mp4",
+          video_url: "http://example.com/file/stream/file1.mcap",
+          frequency: 123,
+          mesage_count: 123,
+        },
+      ];
+
       const expectedResponse: FileData = {
         filePath: "file1.mcap",
         fileUrl: new URL("http://example.com/file/download/file1.mcap"),
@@ -110,10 +120,15 @@ describe("Fetch API Functions", () => {
         type: "test",
       };
 
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
-      });
+      (fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: jest.fn().mockResolvedValueOnce(mockResponse),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: jest.fn().mockResolvedValueOnce(mockResponse2),
+        });
 
       const details = await getFileData("file1.mcap");
       expect(details).toEqual(expectedResponse);
