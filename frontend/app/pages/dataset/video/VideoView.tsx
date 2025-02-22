@@ -5,16 +5,38 @@ import { BottomControls } from "./controls/BottomControls";
 import { CenterControls } from "./controls/CenterControls";
 
 interface VideoComponentProps {
+  topicName: string | null;
   videoUrl: URL | null;
   onLeftClick?: () => void;
   onRightClick?: () => void;
 }
 
 export function VideoComponent({
+  topicName,
   videoUrl,
   onLeftClick,
   onRightClick,
 }: VideoComponentProps) {
+  // If no video is available, show a placeholder
+  if (!topicName || !videoUrl) {
+    return (
+      <div
+        style={{
+          width: "320px",
+          height: "320px",
+          backgroundColor: "#e0e0e0",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text size="lg" color="gray">
+          Not available
+        </Text>
+      </div>
+    );
+  }
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
@@ -23,7 +45,16 @@ export function VideoComponent({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  // Fetch the video as a blob and create an object URL
+  // Reset state when videoUrl changes
+  useEffect(() => {
+    setBlobUrl(null);
+    setIsHovered(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+  }, [videoUrl]);
+
+  // Video fetching
   useEffect(() => {
     if (!videoUrl) return;
     const controller = new AbortController();
@@ -39,9 +70,7 @@ export function VideoComponent({
         const url = URL.createObjectURL(blob);
         setBlobUrl(url);
       })
-      .catch((error) => {
-        //console.error("Failed to load video blob:", error);
-      });
+      .catch(() => {});
 
     return () => {
       controller.abort();
@@ -90,26 +119,6 @@ export function VideoComponent({
       document.exitFullscreen();
     }
   };
-
-  // If no video is available, show a placeholder
-  if (!videoUrl) {
-    return (
-      <div
-        style={{
-          width: "320px",
-          height: "320px",
-          backgroundColor: "#e0e0e0",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text size="lg" color="gray">
-          Not available
-        </Text>
-      </div>
-    );
-  }
 
   if (!blobUrl) {
     return (
@@ -188,10 +197,10 @@ export function VideoComponent({
               color: "#fff",
             }}
           >
-            <Text size="xs">File name</Text>
+            <Text size="xs">{topicName}</Text>
             <Text size="xs">
-              {transformDurations([currentTime.toString()])[0]} /{" "}
-              {transformDurations([duration.toString()])[0]}
+              {transformDurations([currentTime.toString()], true)[0]} /{" "}
+              {transformDurations([duration.toString()], true)[0]}
             </Text>
           </Box>
         </Box>

@@ -1,7 +1,5 @@
 import { Box, Slider, UnstyledButton } from "@mantine/core";
 import {
-  IconCaretLeftFilled,
-  IconCaretRightFilled,
   IconMaximize,
   IconPlayerPauseFilled,
   IconPlayerPlayFilled,

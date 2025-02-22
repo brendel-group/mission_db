@@ -17,8 +17,6 @@ export interface DetailViewData {
 export interface FileData {
   filePath: string;
   fileUrl: URL;
-  videoPath: string | null;
-  videoUrl: URL | null;
   duration: string;
   size: string;
   robot: string;

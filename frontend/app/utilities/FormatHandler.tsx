@@ -1,13 +1,19 @@
 // Helper function to transform durations from seconds to hh:mm:ss
-export function transformDurations(durations: string[]): string[] {
+export function transformDurations(
+  durations: string[],
+  short_format: boolean = false
+): string[] {
   return durations.map((duration) => {
     const totalSeconds = parseInt(duration, 10);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    if (hours === 0) {
-      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    if (short_format && hours === 0) {
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+        2,
+        "0"
+      )}`;
     }
 
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
@@ -151,4 +157,3 @@ export function transformFilePaths(filePaths: string[]): {
     files: files.map((f) => convertSlash(f, usesBackslashes)),
   };
 }
-
