@@ -126,8 +126,30 @@ def get_topics_from_files(request, file_path):
     except File.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     topics = Topic.objects.filter(file=file)
-    serializer = TopicSerializer(topics, many=True)
+    serializer = TopicSerializer(topics, many=True, context={"request": request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["PUT"])
+def update_robot(request, file_path):
+    """
+    Update the robot field of a file
+    ### Parameters
+    request: PUT request with no data
+    file_path: path of the file
+    robot_name: name of the robot
+    ### Returns
+    success response or
+    HTTP_404_NOT_FOUND if file not found
+    """
+    try:
+        file = File.objects.get(file=file_path)
+    except File.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    file.robot = request.data["robot"]
+    file.save()
+    return Response(status=status.HTTP_200_OK)
 
 
 @api_view(["GET"])

@@ -17,6 +17,7 @@ from .views import (
     get_files_by_mission_id,
     set_was_modified,
     get_file_by_path,
+    update_robot,
 )
 
 urlpatterns = [
@@ -73,5 +74,6 @@ urlpatterns = [
         set_was_modified,
         name="set_was_modified",
     ),
+    path("file/<path:file_path>/update-robot/", update_robot, name="update_robot"),
     path("file/<path:file_path>", get_file_by_path, name="get_file_by_path"),
 ]
