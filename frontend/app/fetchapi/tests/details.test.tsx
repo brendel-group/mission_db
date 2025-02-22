@@ -1,7 +1,6 @@
 import { FETCH_API_BASE_URL } from "~/config";
-import { DetailViewData, FileData } from "~/data";
-import { GetFilesByMission, getFileData } from "../details";
-import { getTopicsByFile } from "../topics";
+import { FileData } from "~/data";
+import { GetFilesByMission, getFileData, updateRobotField } from "../details";
 
 /*
 How to run the tests:
@@ -138,6 +137,25 @@ describe("Fetch API Functions", () => {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
+        },
+      );
+    });
+
+    test("updateRobotField should update robot field of a file", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+      });
+
+      await updateRobotField("file1.mcap", "newRobot");
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/file/file1.mcap/update-robot/`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ robot: "newRobot" }),
         },
       );
     });
