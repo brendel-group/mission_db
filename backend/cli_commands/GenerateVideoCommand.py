@@ -4,8 +4,27 @@ from rosbags.highlevel import AnyReader
 from rosbags.typesys import Stores, get_typestore
 import numpy as np
 import os
+from .Command import Command
 
-bagpath = Path(r"")
+
+class GenerateVideosCommand(Command):
+    name = "generate-videos"
+
+    def parser_setup(self, subparser):
+        parser = subparser.add_parser(
+            self.name, help="Generate Videos of all Topics with videos in a file"
+        )
+
+        parser.add_argument(
+            "--path", required=True, type=Path, help="Path to folder with mcap file"
+        )
+
+    def command(self, args):
+        topics = get_video_topics(args.path)
+        for topic in topics:
+            data = get_video_data(args.path, topic)
+            create_video(data, topic, args.path)
+
 
 # Create a type store to use if the bag has no message definitions.
 typestore = get_typestore(Stores.ROS2_FOXY)
@@ -28,7 +47,7 @@ def get_video_data(path, topic):
     height = 0
     step = 0
     # Open the bag file using AnyReader
-    with AnyReader([bagpath], default_typestore=typestore) as reader:
+    with AnyReader([path], default_typestore=typestore) as reader:
         # Filter connections for the specified topic
         connections = [x for x in reader.connections if x.topic == topic]
         # Iterate through messages in the filtered connections
@@ -56,10 +75,10 @@ def get_video_data(path, topic):
                     )
                 )
 
-    return data, topic
+    return data
 
 
-def create_video(data, topic, save_dir=str(bagpath)):
+def create_video(data, topic, save_dir):
     # Print data and shape of the first frame for debugging
     height, width, channels = data[0].shape
     # Create a filename based on the topic name
@@ -80,10 +99,3 @@ def create_video(data, topic, save_dir=str(bagpath)):
 
     # Release the video writer
     video.release()
-
-
-if __name__ == "__main__":
-    topics = get_video_topics(bagpath)
-    for topic in topics:
-        data = get_video_data(bagpath, topic)
-        create_video(data[0], data[1])
