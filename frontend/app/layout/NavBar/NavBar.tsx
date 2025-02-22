@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tooltip, UnstyledButton, Stack, rem } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { IconHome2, IconSettings, IconLogout } from "@tabler/icons-react";
+import { IconHome2, IconLogout, IconInfoCircle } from "@tabler/icons-react";
 import classes from "./NavBar.module.css";
 
 interface NavbarLinkProps {
@@ -36,7 +36,7 @@ function NavbarLink({
 
 const entries = [
   { icon: IconHome2, label: "Missions", to: "/"},
-  { icon: IconSettings, label: "Settings", to: "/settings" },
+  { icon: IconInfoCircle, label: "About", to: "/about" },
 ];
 
 export function Navbar() {
