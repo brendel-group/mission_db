@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Text } from "@mantine/core";
+import { Box, Skeleton, Text } from "@mantine/core";
 import { transformDurations } from "~/utilities/FormatHandler";
 import { BottomControls } from "./controls/BottomControls";
 import { CenterControls } from "./controls/CenterControls";
@@ -92,7 +92,7 @@ export function VideoComponent({
   };
 
   // If no video is available, show a placeholder
-  if (!blobUrl) {
+  if (!videoUrl) {
     return (
       <div
         style={{
@@ -110,7 +110,7 @@ export function VideoComponent({
       </div>
     );
   }
-
+  
   return (
     <Box
       style={{
