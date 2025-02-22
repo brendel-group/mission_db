@@ -45,9 +45,7 @@ class MissionWasModifiedSerializer(serializers.ModelSerializer):
 
 class FileSerializer(serializers.ModelSerializer):
     file_path = serializers.CharField(source="file.name", initial=None)
-    video_path = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
-    video_url = serializers.SerializerMethodField()
 
     class Meta:
         model = File
@@ -55,8 +53,6 @@ class FileSerializer(serializers.ModelSerializer):
             "id",
             "file_path",
             "file_url",
-            "video_path",
-            "video_url",
             "robot",
             "duration",
             "size",
@@ -65,26 +61,11 @@ class FileSerializer(serializers.ModelSerializer):
 
     def get_file_url(self, obj):
         request = self.context.get("request")
+        url = obj.file.url
         if request and hasattr(request, "session"):
             sessionid = request.session.session_key
-        if sessionid:
-            url = f"{obj.file.url}?sessionid={sessionid}"
-            return url
-        return None
-
-    def get_video_url(self, obj):
-        request = self.context.get("request")
-        if request and hasattr(request, "session"):
-            sessionid = request.session.session_key
-        if sessionid and obj.video:
-            url = f"{obj.video.url.replace('/download/', '/stream/')}?sessionid={sessionid}"
-            return url
-        return None
-
-    def get_video_path(self, obj):
-        if obj.video:
-            return obj.video.name
-        return None
+            url += f"?sessionid={sessionid}"
+        return url
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -127,9 +108,35 @@ class MissionTagSerializer(serializers.ModelSerializer):
 
 
 class TopicSerializer(serializers.ModelSerializer):
+    video_path = serializers.SerializerMethodField()
+    video_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Topic
-        fields = ["id", "name", "type", "message_count", "frequency"]
+        fields = [
+            "name",
+            "type",
+            "message_count",
+            "frequency",
+            "video_path",
+            "video_url",
+        ]
+
+    def get_video_url(self, obj):
+        if not obj.video:
+            return None
+
+        request = self.context.get("request")
+        url = obj.video.url.replace("/download/", "/stream/")
+        if request and hasattr(request, "session"):
+            sessionid = request.session.session_key
+            url += f"?sessionid={sessionid}"
+        return url
+
+    def get_video_path(self, obj):
+        if obj.video:
+            return obj.video.name
+        return None
 
 
 class DeniedTopicNameSerializer(serializers.ModelSerializer):

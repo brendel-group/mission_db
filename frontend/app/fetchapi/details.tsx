@@ -1,7 +1,8 @@
-import { DetailViewData, FileData } from "~/data";
+import { DetailViewData, FileData, Topic } from "~/data";
 import { FETCH_API_BASE_URL } from "~/config";
 import { getHeaders } from "./headers";
 import { transformDurations, transformSizes } from "~/utilities/FormatHandler";
+import { getTopicsByFile } from "./topics";
 
 export const GetFilesByMission = async (
   missionId: number,
@@ -36,7 +37,6 @@ export const GetFilesByMission = async (
       robot: data[d].robot,
       type: data[d].type,
     });
-
   }
 
   return files;
@@ -62,11 +62,24 @@ export const getFileData = async (filePath: string): Promise<FileData> => {
 
   const data = await response.json();
 
+  const topics: Topic[] = await getTopicsByFile(filePath);
+
+  var videoPath: string | null = null;
+  var videoUrl: URL | null = null;
+
+  for (const topic of topics) {
+    if (topic.video_path && topic.video_url) {
+      videoPath = topic.video_path;
+      videoUrl = new URL(topic.video_url);
+      break;
+    }
+  }
+
   return {
     filePath: data.file_path,
     fileUrl: new URL(data.file_url),
-    videoPath: data.video_path,
-    videoUrl: data.video_url ? new URL(data.video_url) : null,
+    videoPath: videoPath,
+    videoUrl: videoUrl,
     duration: transformDurations([data.duration])[0],
     size: transformSizes([data.size])[0],
     robot: data.robot,
@@ -74,16 +87,22 @@ export const getFileData = async (filePath: string): Promise<FileData> => {
   };
 };
 
-export const updateRobotField = async (filePath: string, robotName: string): Promise<void> => {
-  const response = await fetch(`${FETCH_API_BASE_URL}/file/${filePath}/update-robot/`, {
-    method: "PUT",
-    credentials: "include",
-    headers: {
-      ...getHeaders(),
-      "Content-Type": "application/json",
+export const updateRobotField = async (
+  filePath: string,
+  robotName: string,
+): Promise<void> => {
+  const response = await fetch(
+    `${FETCH_API_BASE_URL}/file/${filePath}/update-robot/`,
+    {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        ...getHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ robot: robotName }),
     },
-    body: JSON.stringify({ robot: robotName }),
-  });
+  );
   if (!response.ok) {
     throw new Error(`Failed to update robot field for file ${filePath}`);
   }

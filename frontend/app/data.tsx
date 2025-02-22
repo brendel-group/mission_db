@@ -17,7 +17,7 @@ export interface DetailViewData {
 export interface FileData {
   filePath: string;
   fileUrl: URL;
-  videoPath: string;
+  videoPath: string | null;
   videoUrl: URL | null;
   duration: string;
   size: string;
@@ -49,19 +49,20 @@ export interface RenderedMission {
   totalDuration: string;
   totalSize: string;
   robots: string[];
-  
+
   // Inherited from other data structures (details, tags, ...)
   tags: Tag[];
 }
 
 //Topic
 export interface Topic {
-  id: number;
   file: string;
   name: string;
   type: string;
   message_count: number;
   frequency: number;
+  video_path: string | null;
+  video_url: string | null;
 }
 
 //User interface
@@ -90,14 +91,13 @@ export function convertToMissionData(
   };
 }
 
-export function convertToDetailViewData(fileData: FileData[]) : DetailViewData {
+export function convertToDetailViewData(fileData: FileData[]): DetailViewData {
   const files: string[] = [];
   const fileUrls: URL[] = [];
   const durations: string[] = [];
   const sizes: string[] = [];
   const robots: string[] = [];
   const types: string[] = [];
-
 
   for (const d in fileData) {
     files.push(fileData[d].filePath);
@@ -110,4 +110,3 @@ export function convertToDetailViewData(fileData: FileData[]) : DetailViewData {
 
   return { files, fileUrls, durations, sizes, robots, types };
 }
-
