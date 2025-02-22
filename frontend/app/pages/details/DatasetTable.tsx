@@ -251,7 +251,7 @@ export function ShowDatasets({
                     e.stopPropagation()
                     setRobotMenuOpened(-1)
                     data.robots[index] = fieldValue
-                    await onRobotsUpdate(data.robots)
+                    onRobotsUpdate(data.robots)
                     await updateRobotField(basePath + file, fieldValue)
                   }}
                 >
