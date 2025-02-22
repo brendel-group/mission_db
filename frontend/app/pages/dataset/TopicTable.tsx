@@ -40,10 +40,21 @@ return (
 
 function filterData(data: Topic[], search: string) {
 const query = search.toLowerCase().trim();
+
 return data.filter((item) =>
-  keys(data[0]).some((key) => 
-    (item[key] || item[key] === 0) && item[key].toString().toLowerCase().includes(query)
-  )
+  keys(data[0]).some((key) => {
+    if (key === 'id') {
+      return false;
+    }
+    const value = item[key];
+    if (typeof value === 'number') {
+      return value.toString() === query;
+    }
+    return (
+      value !== null &&
+      value !== undefined &&
+      value.toString().toLowerCase().includes(query));
+  })
 );
 }
 
