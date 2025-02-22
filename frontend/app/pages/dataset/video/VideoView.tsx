@@ -110,7 +110,15 @@ export function VideoComponent({
       </div>
     );
   }
-  
+
+  if (!blobUrl) {
+    return (
+      <Box style={{ width: 320, height: 320 }}>
+        <Skeleton height={320} width={320} />
+      </Box>
+    );
+  }
+
   return (
     <Box
       style={{
