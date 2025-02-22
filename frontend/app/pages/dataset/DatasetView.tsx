@@ -2,7 +2,7 @@ import { Badge, Group, Grid, Text } from "@mantine/core";
 import { FileData, Topic } from "~/data";
 import { ActionButtons } from "./ActionButtons";
 import { DatasetDetails } from "./DatasetDetailsView";
-import { TopicTableArea } from "./TopicTable";
+import { TableSort } from "./TableSort";
 
 interface DatasetViewProps {
   data: FileData;
@@ -38,7 +38,7 @@ export const DatasetView = ({ data, topics }: DatasetViewProps) => {
             </Grid.Col>
             <Grid.Col span={12}>
               <Text size = "xl" mb = "sm"> Topics </Text>
-              <TopicTableArea topics={topics} />
+              <TableSort topics={topics} />
             </Grid.Col>
           </Grid>
         </Grid.Col>
