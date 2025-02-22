@@ -46,9 +46,11 @@ function Dataset() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const file: FileData = await getFileData(fileName);
+        const [file, topics] = await Promise.all([
+          getFileData(fileName),
+          getTopicsByFile(fileName),
+        ]);
         setFileData(file);
-        const topics: Topic[] = await getTopicsByFile(fileName);
         setFileTopics(topics);
       } catch (e: any) {
         if (e instanceof Error) {
