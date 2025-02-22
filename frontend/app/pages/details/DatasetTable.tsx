@@ -238,7 +238,7 @@ export function ShowDatasets({
                     event.preventDefault(); // Prevent newline
                     setRobotMenuOpened(-1);
                     data.robots[index] = fieldValue
-                    await onRobotsUpdate(data.robots)
+                    onRobotsUpdate(data.robots)
                     await updateRobotField(basePath + file, fieldValue)
                   }
                 }}
