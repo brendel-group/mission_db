@@ -4,43 +4,39 @@ from rosbags.highlevel import AnyReader
 from rosbags.typesys import Stores, get_typestore
 import numpy as np
 import os
-import yaml
+from mcap.reader import make_reader
 
-bagpath = Path(r"")
+bagpath = r"C:\Users\felix\uni\teamprojekt\mission_db\backend\media\2024.10.15_picking_even_more_apples\train\bag_1728916632.3249676\bag_1728916632.3249676_0.mcap"
 
 # Create a type store to use if the bag has no message definitions.
 typestore = get_typestore(Stores.ROS2_FOXY)
 
 
-def read_yaml_file(file_path):
-    file_path = str(file_path) + r"\metadata.yaml"
-    with open(file_path, "r") as file:
-        return yaml.safe_load(file)
+def extract_topics_from_mcap(mcap_path):
+    with open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        summary = reader.get_summary()
+        schema_map = {schema.id: schema.name for schema in summary.schemas.values()}
+        channel_message_counts = summary.statistics.channel_message_counts
+        duration = get_duration_from_mcap(mcap_path)
+        topic_info = {
+            channel.topic: {
+                "type": schema_map.get(channel.schema_id, "Unknown"),
+                "message_count": channel_message_counts.get(channel.id, 0),
+                "frequency": 0
+                if duration == 0
+                else channel_message_counts.get(channel.id, 0) / (duration * 10**-9),
+            }
+            for channel in summary.channels.values()
+        }
+        return topic_info
 
 
-def parse_rosbag_info(file_path):
-    data = read_yaml_file(file_path)
-    duration_ns = (
-        data.get("rosbag2_bagfile_information", {})
-        .get("duration", {})
-        .get("nanoseconds", 0)
-    )
-    topics = data.get("rosbag2_bagfile_information", {}).get(
-        "topics_with_message_count", []
-    )
-
-    topic_msgcount = {}
-    for topic in topics:
-        topic_name = topic.get("topic_metadata", {}).get("name", "Unknown")
-        message_count = topic.get("message_count", 0)
-        topic_msgcount[topic_name] = message_count
-
-    duration_s = duration_ns / 1e9
-    topic_frequency = {}
-    for topic in topic_msgcount:
-        topic_frequency[topic] = round(topic_msgcount[topic] / duration_s, 2)
-    print(duration_s, topic_msgcount, topic_frequency)
-    return duration_s, topic_msgcount, topic_frequency
+def get_duration_from_mcap(mcap_path):
+    with open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        statistics = reader.get_summary().statistics
+        return statistics.message_end_time - statistics.message_start_time
 
 
 def get_video_topics(path):
@@ -115,8 +111,9 @@ def create_video(data, topic, save_dir=str(bagpath)):
 
 
 if __name__ == "__main__":
-    topics = get_video_topics(bagpath)
-    parse_rosbag_info(bagpath)
+    base_path = Path("\\".join(bagpath.split("\\")[:-1]))
+    print(extract_topics_from_mcap(bagpath))
+    topics = get_video_topics(base_path)
     for topic in topics:
         data = get_video_data(bagpath, topic)
         create_video(data[0], data[1])
