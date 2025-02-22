@@ -5,6 +5,10 @@ from rosbags.typesys import Stores, get_typestore
 import numpy as np
 import os
 from .Command import Command
+from django.core.files.storage import FileSystemStorage, Storage
+from restapi.models import File
+from django.conf import settings
+import logging
 
 
 class GenerateVideosCommand(Command):
@@ -20,10 +24,70 @@ class GenerateVideosCommand(Command):
         )
 
     def command(self, args):
-        topics = get_video_topics(args.path)
+        generate_videos(args.path)
+
+
+def generate_videos(path):
+    file = File.objects.get(file=path).file
+    storage = File.file.field.storage
+
+    if isinstance(storage, FileSystemStorage):
+        local_path = Path(os.path.dirname(file.path))
+        local_storage = storage
+    else:
+        local_storage = FileSystemStorage(settings.TEMP_FOLDER)
+        metadata_path = os.path.dirname(file.name) + "/metadata.yaml"
+
+        logger = logging.getLogger("botocore.httpchecksum")
+        logger.disabled = True  # Disable checksum messages
+
+        # Move files from remote storage to local filesystem
+        with file.open() and storage.open(metadata_path) as metadata_file:
+            local_storage.save(file.name, file)
+            local_storage.save(metadata_path, metadata_file)
+        logger.disabled = False
+
+        local_path = Path(os.path.dirname(local_storage.path(file.name)))
+
+    try:
+        topics = get_video_topics(local_path)
+        video_paths: list[str] = []
         for topic in topics:
-            data = get_video_data(args.path, topic)
-            create_video(data, topic, args.path)
+            data = get_video_data(local_path, topic)
+            video_path = create_video(data, topic, local_path)
+            video_paths.append(video_path)
+
+    finally:
+        if isinstance(storage, FileSystemStorage):
+            return
+        # Move videos to remote storage
+        for video_path in video_paths:
+            video_path = video_path[len(str(local_storage.location)) + 1 :]
+            with local_storage.open(video_path) as file:
+                storage.save(video_path, file)
+        delete_all(local_storage, path)
+
+
+def delete_all(storage: Storage, path: Path):
+    """Delete all files and folders created by video generation
+    Starts by deleting all files in the folder where the videos where created
+    Moves up and deletes the folder until it hits a non empty folder or base folder.
+
+    Args:
+        storage (Storage): the storage where to delete files from
+        path (Path): the path to the deepest file (ex: example/test/bag123/bag123.mcap)
+    """
+    parent = os.path.dirname(str(path))
+    _, files = storage.listdir(parent)
+    for file in files:
+        storage.delete(os.path.join(parent, file))
+
+    while parent:
+        try:
+            storage.delete(parent)
+        except OSError:
+            return
+        parent = os.path.dirname(parent)
 
 
 # Create a type store to use if the bag has no message definitions.
@@ -99,3 +163,5 @@ def create_video(data, topic, save_dir):
 
     # Release the video writer
     video.release()
+
+    return filename

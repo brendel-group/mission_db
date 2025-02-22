@@ -186,6 +186,8 @@ STATIC_URL = "static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+TEMP_FOLDER = env("TEMP_FOLDER", default="tmp")
+
 USE_S3 = env("USE_S3", bool, False)
 
 if USE_S3:
