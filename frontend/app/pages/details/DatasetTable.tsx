@@ -19,9 +19,11 @@ import { updateRobotField } from "~/fetchapi/details";
 export function ShowDatasets({
   data,
   basePath,
+  onRobotsUpdate,
 }: {
   data: DetailViewData;
   basePath: string;
+  onRobotsUpdate: (updatedRobots: string[]) => void;
 }) {
   const navigate = useNavigate();
   const clipboard = useClipboard({ timeout: 500 });
@@ -236,6 +238,7 @@ export function ShowDatasets({
                     event.preventDefault(); // Prevent newline
                     setRobotMenuOpened(-1);
                     data.robots[index] = fieldValue
+                    onRobotsUpdate(data.robots)
                     await updateRobotField(basePath + file, fieldValue)
                   }
                 }}
@@ -248,6 +251,7 @@ export function ShowDatasets({
                     e.stopPropagation()
                     setRobotMenuOpened(-1)
                     data.robots[index] = fieldValue
+                    onRobotsUpdate(data.robots)
                     await updateRobotField(basePath + file, fieldValue)
                   }}
                 >
