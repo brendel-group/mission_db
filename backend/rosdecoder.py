@@ -6,9 +6,7 @@ import numpy as np
 import os
 import yaml
 
-bagpath = Path(
-    r"C:\Users\felix\uni\teamprojekt\mission_db\backend\media\2024.10.15_picking_even_more_apples\train\bag_1728916632.3249676"
-)
+bagpath = Path(r"")
 
 # Create a type store to use if the bag has no message definitions.
 typestore = get_typestore(Stores.ROS2_FOXY)
@@ -117,8 +115,8 @@ def create_video(data, topic, save_dir=str(bagpath)):
 
 
 if __name__ == "__main__":
-    # topics = get_video_topics(bagpath)
+    topics = get_video_topics(bagpath)
     parse_rosbag_info(bagpath)
-    # for topic in topics:
-    #     data = get_video_data(bagpath, topic)
-    #     create_video(data[0], data[1])
+    for topic in topics:
+        data = get_video_data(bagpath, topic)
+        create_video(data[0], data[1])
