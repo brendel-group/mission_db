@@ -205,7 +205,7 @@ export function ShowDatasets({
             );
           })()}
         </Table.Td>
-        <Table.Td>
+        <Table.Td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>
           <Menu
             opened={robotMenuOpened === index}
             onClose={() => {
