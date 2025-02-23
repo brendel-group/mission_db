@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from colorfield.fields import ColorField
+from django.core.files.storage import FileSystemStorage, default_storage
+from django.conf import settings
 
 
 # Create your models here.
@@ -75,7 +77,14 @@ class Topic(models.Model):
     type = models.CharField()
     message_count = models.IntegerField()
     frequency = models.FloatField()
-    video = models.FileField(blank=True, null=True, max_length=65536)
+    video = models.FileField(
+        blank=True,
+        null=True,
+        max_length=65536,
+        storage=FileSystemStorage(settings.VIDEO_ROOT)
+        if settings.STORE_VIDEO_LOCALLY
+        else default_storage,
+    )
 
     class Meta:
         unique_together = ["file", "type", "name"]

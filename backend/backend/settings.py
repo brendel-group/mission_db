@@ -188,6 +188,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 TEMP_FOLDER = env("TEMP_FOLDER", default="tmp")
 
+STORE_VIDEO_LOCALLY = env("STORE_VIDEO_LOCALLY", bool, default=False)
+
+if STORE_VIDEO_LOCALLY:
+    VIDEO_ROOT = "media"
+
 USE_S3 = env("USE_S3", bool, False)
 
 if USE_S3:

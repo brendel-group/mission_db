@@ -6,7 +6,7 @@ import numpy as np
 import os
 from .Command import Command
 from django.core.files.storage import FileSystemStorage, Storage
-from restapi.models import File
+from restapi.models import File, Topic
 from django.conf import settings
 import logging
 
@@ -20,36 +20,70 @@ class GenerateVideosCommand(Command):
         )
 
         parser.add_argument(
-            "--path", required=True, type=Path, help="Path to folder with mcap file"
+            "--path",
+            required=True,
+            help="Path to a mcap file",
+            choices=File.objects.values_list("file", flat=True),
         )
 
     def command(self, args):
         generate_videos(args.path)
 
 
-def generate_videos(path):
-    file = File.objects.get(file=path).file
+logger = logging.getLogger()
+
+
+def generate_videos(path: str):
+    """wrapper for generating videos and use django storages\\
+    If the files are stored in the local filesystem, videos are directly generated there.\\
+    If the files are in a remote storage (like S3) the files are copied to the TEMP_FOLDER,
+    videos are generated there and are moved to the remote storage afterwards, cleans the TEMP_FOLDER.\\
+    If it is preferred that the videos are kept in the local filesystem that can be achieved with the env var
+    STORE_VIDEO_LOCALLY. They will be stored in the folder declared by VIDEO_ROOT.    
+
+    Args:
+        path (str): path to the mcap file
+    """
+    try:
+        file = File.objects.get(file=path).file
+    except File.DoesNotExist:
+        logger.error(f"File not found: '{path}'")
+        return
+
     storage = File.file.field.storage
 
+    # find absolute path of file
     if isinstance(storage, FileSystemStorage):
         local_path = Path(os.path.dirname(file.path))
         local_storage = storage
     else:
-        local_storage = FileSystemStorage(settings.TEMP_FOLDER)
+        if settings.STORE_VIDEO_LOCALLY:
+            # generate videos directly in local folder
+            local_storage = Topic.video.field.storage
+        else:
+            # generate videos in folder for temporary files
+            local_storage = FileSystemStorage(settings.TEMP_FOLDER)
+
         metadata_path = os.path.dirname(file.name) + "/metadata.yaml"
 
-        logger = logging.getLogger("botocore.httpchecksum")
-        logger.disabled = True  # Disable checksum messages
+        checksum_logger = logging.getLogger("botocore.httpchecksum")
+        checksum_logger.disabled = True  # Disable checksum messages
 
         # Move files from remote storage to local filesystem
-        with file.open() and storage.open(metadata_path) as metadata_file:
-            local_storage.save(file.name, file)
-            local_storage.save(metadata_path, metadata_file)
-        logger.disabled = False
+        try:
+            with file.open() and storage.open(metadata_path) as metadata_file:
+                local_storage.save(file.name, file)
+                local_storage.save(metadata_path, metadata_file)
+        except (FileNotFoundError, IsADirectoryError):
+            logger.error(f"File not found: '{path}'")
+            return
+
+        checksum_logger.disabled = False
 
         local_path = Path(os.path.dirname(local_storage.path(file.name)))
 
     try:
+        # generate videos
         topics = get_video_topics(local_path)
         video_paths: list[str] = []
         for topic in topics:
@@ -57,9 +91,19 @@ def generate_videos(path):
             video_path = create_video(data, topic, local_path)
             video_paths.append(video_path)
 
+    except (FileNotFoundError, IsADirectoryError):
+        logger.error(f"File not found: '{path}'")
+        return
     finally:
         if isinstance(storage, FileSystemStorage):
             return
+
+        if settings.STORE_VIDEO_LOCALLY:
+            # Delete mcap and metadata.yaml from local_storage
+            local_storage.delete(path)
+            local_storage.delete(local_path / "metadata.yaml")
+            return
+
         # Move videos to remote storage
         for video_path in video_paths:
             video_path = video_path[len(str(local_storage.location)) + 1 :]
