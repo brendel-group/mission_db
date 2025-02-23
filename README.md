@@ -60,7 +60,7 @@ SECRET_KEY=your_secret_key # django secret key
 ```
 
 ### Create an user
-For authentication purposes, you need to create an user:
+For authentication purposes, you need to create a user:
 ```sh
 cd backend
 python cli.py
