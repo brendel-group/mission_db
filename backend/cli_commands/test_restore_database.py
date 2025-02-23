@@ -1,4 +1,7 @@
 import json
+import os
+import shutil
+from django.conf import settings
 from django.test import TestCase
 from cli_commands.RestoreDatabaseCommand import restore_database
 import cli_commands.RestoreDatabaseCommand as RestoreDatabaseCommand
@@ -37,6 +40,18 @@ class RestoreDatabaseCommandTests(TestCase):
     def tearDown(self):
         # Re-enable logging
         self.logger.disabled = False
+
+        # Clean up the test files and directory
+        file_path = "2024.12.02_test_mission/test_mission_metadata.json"
+        if self.test_storage.exists(file_path):
+            self.test_storage.delete(file_path)
+        
+        # Delete the mission directory
+        dir_path = os.path.join(settings.MEDIA_ROOT, "2024.12.02_test_mission")
+        if os.path.exists(dir_path):
+            shutil.rmtree(dir_path)
+
+        
 
     def test_restore_database(self):
         # Verify mission details before restoration
