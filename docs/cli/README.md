@@ -304,6 +304,15 @@ Allow a topic with that name again in the future.
 ### `cli.py topic list-denied`
 lists all currently denied topics
 
+### `cli.py generate-videos`
+Generate/extract videos for a mcap file already in the database.\
+If the mcap file is in a remote storage (like S3) it will copy it to a local Folder (determined by TEMP_FOLDER). It will then generate the videos in that folder and move them to the remote storage.\
+If the mcap files are stored in the local Filesystem it will generate the videos there.\
+It's possible to keep the videos in a different local folder than the mcap files (and not move them to a remote storage) with the environmental variable `STORE_VIDEO_LOCALLY`. The folder is set by `VIDEO_ROOT` in `settings.py`.
+
+Arguments:
+ - `--path` Path to the mcap file
+
 ## Troubleshooting
 
 - ### `Error adding mission: duplicate key value violates unique constraint "restapi_mission_pkey"`
