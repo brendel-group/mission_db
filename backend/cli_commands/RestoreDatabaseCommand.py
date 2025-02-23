@@ -39,7 +39,7 @@ def restore_database():
             if f"{mission_name}_metadata.json" not in storage.listdir(folder)[1]:
                 continue
             metadata_file = f"{folder}/{mission_name}_metadata.json"
-            with DefaultStorage().open(metadata_file, "r") as f:
+            with storage.open(metadata_file, "r") as f:
                 metadata = json.load(f)
 
             if not Mission.objects.filter(
