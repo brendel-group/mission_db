@@ -48,14 +48,46 @@ def generate_videos(path: str):
         file = File.objects.get(file=path).file
     except File.DoesNotExist:
         logger.error(f"File not found: '{path}'")
-        return
+        return []
 
     storage = File.file.field.storage
 
-    # find absolute path of file
-    if isinstance(storage, FileSystemStorage):
+    local_storage, local_path = _get_file_from_external(storage, file)
+
+    try:
+        # generate videos
+        topics = get_video_topics(local_path)
+        video_paths: list[str] = []
+        for topic in topics:
+            data = get_video_data(local_path, topic)
+            video_path = create_video(data, topic, local_path)
+            video_paths.append(video_path)
+
+    except (FileNotFoundError, IsADirectoryError):
+        logger.error(f"File not found: '{path}'")
+        return []
+    finally:
+        _move_file_to_external(storage, local_storage, path, local_path, video_paths)
+
+    return video_paths
+
+
+def _get_file_from_external(
+    external_storage: Storage, file: File
+) -> tuple[Storage, Path]:
+    """Checks if files are stored in a remote storage and moves them to
+    the local Filesystem
+
+    Args:
+        external_storage (Storage): storage where to look for files
+        file (File): File model object
+
+    Returns:
+        tuple[Storage, Path]: The storage where the files are accessible locally and the path to the folder
+    """
+    if isinstance(external_storage, FileSystemStorage):
         local_path = Path(os.path.dirname(file.path))
-        local_storage = storage
+        local_storage = external_storage
     else:
         if settings.STORE_VIDEO_LOCALLY:
             # generate videos directly in local folder
@@ -70,49 +102,51 @@ def generate_videos(path: str):
         checksum_logger.disabled = True  # Disable checksum messages
 
         # Move files from remote storage to local filesystem
-        try:
-            with file.open() and storage.open(metadata_path) as metadata_file:
-                local_storage.save(file.name, file)
-                local_storage.save(metadata_path, metadata_file)
-        except (FileNotFoundError, IsADirectoryError):
-            logger.error(f"File not found: '{path}'")
-            return
+        with file.open() and external_storage.open(metadata_path) as metadata_file:
+            local_storage.save(file.name, file)
+            local_storage.save(metadata_path, metadata_file)
 
         checksum_logger.disabled = False
 
         local_path = Path(os.path.dirname(local_storage.path(file.name)))
 
-    try:
-        # generate videos
-        topics = get_video_topics(local_path)
-        video_paths: list[str] = []
-        for topic in topics:
-            data = get_video_data(local_path, topic)
-            video_path = create_video(data, topic, local_path)
-            video_paths.append(video_path)
+        return local_storage, local_path
 
-    except (FileNotFoundError, IsADirectoryError):
-        logger.error(f"File not found: '{path}'")
+
+def _move_file_to_external(
+    external_storage: Storage,
+    local_storage: Storage,
+    path: str,
+    local_path: Path,
+    video_paths: list[Path],
+):
+    """Moves the videos back to the remote storage if necessary and cleans the local Filesystem
+
+    Args:
+        external_storage (Storage): Where to move files to
+        local_storage (Storage): Where to move files from
+        path (str): Path to mcap file to delete
+        local_path (Path): Path to local folder
+        video_paths (list[Path]): videos which should be moved
+    """
+    if isinstance(external_storage, FileSystemStorage):
         return
-    finally:
-        if isinstance(storage, FileSystemStorage):
-            return
 
-        if settings.STORE_VIDEO_LOCALLY:
-            # Delete mcap and metadata.yaml from local_storage
-            local_storage.delete(path)
-            local_storage.delete(local_path / "metadata.yaml")
-            return
+    if settings.STORE_VIDEO_LOCALLY:
+        # Delete mcap and metadata.yaml from local_storage
+        local_storage.delete(path)
+        local_storage.delete(local_path / "metadata.yaml")
+        return
 
-        # Move videos to remote storage
-        for video_path in video_paths:
-            video_path = video_path[len(str(local_storage.location)) + 1 :]
-            with local_storage.open(video_path) as file:
-                storage.save(video_path, file)
-        delete_all(local_storage, path)
+    # Move videos to remote storage
+    for video_path in video_paths:
+        video_path = video_path[len(str(local_storage.location)) + 1 :]
+        with local_storage.open(video_path) as file:
+            external_storage.save(video_path, file)
+    _delete_all(local_storage, path)
 
 
-def delete_all(storage: Storage, path: Path):
+def _delete_all(storage: Storage, path: Path):
     """Delete all files and folders created by video generation
     Starts by deleting all files in the folder where the videos where created
     Moves up and deletes the folder until it hits a non empty folder or base folder.
