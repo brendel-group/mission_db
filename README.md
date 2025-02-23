@@ -68,6 +68,10 @@ user add --name <username>
 ```
 You will then be asked to define your password and confirm it afterwards. These credentials will then be used when loggin in.
 
+### Set cookie domain
+In order that logging in on the frontend also authenticates you to access the database, we need to set the cookie domain accordingly.
+You can either set an environment variable `COOKIE_DOMAIN` in the previously created `.env` file, or change the default value of the `COOKIE_DOMAIN` variable in the `backend/backend/settings.py` file. If you are using the mission explorer locally, the domain should be `localhost`, if it's deployed externally, it should be the corresponding domain.
+ 
 ### Using the application
 ### Syncing your local mission files with the database
 
