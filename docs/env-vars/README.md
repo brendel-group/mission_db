@@ -10,6 +10,11 @@ Allows more detailed information about errors and disables authentication. See [
 #### Default: No default
 Variable by django. See [django settings](https://docs.djangoproject.com/en/5.1/ref/settings/#secret-key) for more.
 
+## `DATABASE_URL`
+#### Default: No default
+The url to access the database in the format:\
+`postgres://<user>:<password>@<hostname>:<port>/<database_name>`
+
 ## `COOKIE_DOMAIN`
 #### Default: `.mission-explorer.xyz`
 Allows setting the cookie domain sent with the CSRF- and Session-Cookie. Should be set to the domain part shared by frontend and backend.
