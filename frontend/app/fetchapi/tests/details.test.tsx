@@ -24,8 +24,6 @@ describe("Fetch API Functions", () => {
       const mockResponse = [
         {
           file_url: "http://example.com/file/download/file1.mcap",
-          video_path: "file1.mp4",
-          video_url: "http://example.com/file/stream/file1.mcap",
           file_path: "file1.mcap",
           duration: "3600",
           size: "1024",
@@ -34,8 +32,6 @@ describe("Fetch API Functions", () => {
         },
         {
           file_url: "http://example.com/file/download/file2.mcap",
-          video_path: "file2.mp4",
-          video_url: "http://example.com/file/stream/file2.mcap",
           file_path: "file2.mcap",
           duration: "1200",
           size: "2621440",
@@ -48,8 +44,6 @@ describe("Fetch API Functions", () => {
         {
           filePath: "file1.mcap",
           fileUrl: new URL("http://example.com/file/download/file1.mcap"),
-          videoPath: "file1.mp4",
-          videoUrl: new URL("http://example.com/file/stream/file1.mcap"),
           duration: "01:00:00",
           size: "1.00 KB",
           robot: "hihi",
@@ -58,8 +52,6 @@ describe("Fetch API Functions", () => {
         {
           filePath: "file2.mcap",
           fileUrl: new URL("http://example.com/file/download/file2.mcap"),
-          videoPath: "file2.mp4",
-          videoUrl: new URL("http://example.com/file/stream/file2.mcap"),
           duration: "00:20:00",
           size: "2.50 MB",
           robot: "haha",
@@ -88,31 +80,15 @@ describe("Fetch API Functions", () => {
       const mockResponse = {
         file_path: "file1.mcap",
         file_url: "http://example.com/file/download/file1.mcap",
-        video_path: "file1.mp4",
-        video_url: "http://example.com/file/stream/file1.mcap",
         duration: "60",
         size: "1024",
         robot: "hihi",
         type: "test",
       };
 
-      const mockResponse2 = [
-        {
-          file: "test",
-          name: "test",
-          type: "test",
-          video_path: "file1.mp4",
-          video_url: "http://example.com/file/stream/file1.mcap",
-          frequency: 123,
-          mesage_count: 123,
-        },
-      ];
-
       const expectedResponse: FileData = {
         filePath: "file1.mcap",
         fileUrl: new URL("http://example.com/file/download/file1.mcap"),
-        videoPath: "file1.mp4",
-        videoUrl: new URL("http://example.com/file/stream/file1.mcap"),
         duration: "00:01:00",
         size: "1.00 KB",
         robot: "hihi",
@@ -123,10 +99,6 @@ describe("Fetch API Functions", () => {
         .mockResolvedValueOnce({
           ok: true,
           json: jest.fn().mockResolvedValueOnce(mockResponse),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: jest.fn().mockResolvedValueOnce(mockResponse2),
         });
 
       const details = await getFileData("file1.mcap");

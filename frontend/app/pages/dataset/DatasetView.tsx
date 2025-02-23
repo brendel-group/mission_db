@@ -47,7 +47,7 @@ export const DatasetView = ({ data, topics }: DatasetViewProps) => {
           <DatasetDetails
             duration={data.duration}
             size={data.size}
-            videoUrl={data.videoUrl}
+            topics={topics}
           />
         </Grid.Col>
       </Grid>

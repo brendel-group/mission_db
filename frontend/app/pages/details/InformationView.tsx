@@ -183,15 +183,18 @@ export const ShowInformationView: React.FC<ShowInformationViewProps> = ({
           }}
         >
           <Badge color="orange" variant="light" style={{ cursor: "pointer" }}>
-              <IconClipboard stroke={2} size={16} style={{ transform: "translateY(2px)" }} />
-            </Badge>
-          
+            <IconClipboard
+              stroke={2}
+              size={16}
+              style={{ transform: "translateY(2px)" }}
+            />
+          </Badge>
         </UnstyledButton>
       </Group>
 
-    <Text style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-      {basePath === null ? "" : basePath}
-    </Text>
+      <Text style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {basePath === null ? "" : basePath}
+      </Text>
     </div>
   );
 };
