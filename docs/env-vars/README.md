@@ -13,7 +13,8 @@ Variable by django. See [django settings](https://docs.djangoproject.com/en/5.1/
 ## `DATABASE_URL`
 #### Default: No default
 The url to access the database in the format:\
-`postgres://<user>:<password>@<hostname>:<port>/<database_name>`
+`postgres://<user>:<password>@<hostname>:<port>/<database_name>`\
+See [env.db_url](https://django-environ.readthedocs.io/en/latest/types.html#term-PostgreSQL) for more information and other supported databases.
 
 ## `COOKIE_DOMAIN`
 #### Default: `.mission-explorer.xyz`
