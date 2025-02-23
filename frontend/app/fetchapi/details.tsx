@@ -2,7 +2,6 @@ import { DetailViewData, FileData, Topic } from "~/data";
 import { FETCH_API_BASE_URL } from "~/config";
 import { getHeaders } from "./headers";
 import { transformDurations, transformSizes } from "~/utilities/FormatHandler";
-import { getTopicsByFile } from "./topics";
 
 export const GetFilesByMission = async (
   missionId: number,
@@ -59,8 +58,6 @@ export const getFileData = async (filePath: string): Promise<FileData> => {
   }
 
   const data = await response.json();
-
-  const topics: Topic[] = await getTopicsByFile(filePath);
 
   return {
     filePath: data.file_path,
