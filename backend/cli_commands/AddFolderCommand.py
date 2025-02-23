@@ -28,6 +28,7 @@ class AddFolderCommand(Command):
 
 storage = DefaultStorage()
 
+
 def check_mission(name, date):
     """
     Checks if Mission with the same name and date exists
@@ -54,6 +55,7 @@ def extract_info_from_folder(folder_name):
         )
         return None, None
 
+
 def add_mission_from_folder(folder_path, location=None, notes=None):
     """
     Add mission to DB with data from filesystem
@@ -79,4 +81,3 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
             logging.warning("skipping because this mission has already been added")
     else:
         logging.warning("Skipping folder due to naming issues.")
-
