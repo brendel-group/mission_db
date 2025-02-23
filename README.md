@@ -94,6 +94,7 @@ python manage.py runserver
 
 ```sh
 cd frontend
+npm run build
 npm start  
 ```
 
