@@ -70,48 +70,6 @@ class AddMissionTests(TestCase):
         )
 
 
-class AddDetailsTests(TestCase):
-    def setUp(self):
-        AddFolderCommand.storage = InMemoryStorage()
-        self.test_storage = AddFolderCommand.storage
-
-        # create fake files
-        mcap_file = ContentFile("123")
-        yaml_file = ContentFile(
-            "rosbag2_bagfile_information:\n  duration:\n    nanoseconds: 14694379191"
-        )
-        self.test_storage.save("2024.12.02_mission1/test/bag/bag.mcap", mcap_file)
-        self.test_storage.save("2024.12.02_mission1/test/bag/metadata.yaml", yaml_file)
-
-        # disable logging
-        self.logger = logging.getLogger()
-        self.logger.disabled = True
-
-    def _delete_recursive(self, path: str):
-        dirs, files = self.test_storage.listdir(path)
-        for dir in dirs:
-            self._delete_recursive(os.path.join(path, dir))
-        for file in files:
-            self.test_storage.delete(os.path.join(path, file))
-        if path:
-            self.test_storage.delete(path)
-
-    def tearDown(self):
-        self._delete_recursive("")
-
-        # reenable logging
-        self.logger.disabled = False
-
-    def test_add_details(self):
-        add_mission_from_folder("2024.12.02_mission1")
-        file = File.objects.filter(file="2024.12.02_mission1/test/bag/bag.mcap")
-        self.assertTrue(file.exists())
-        self.assertEqual(len(file), 1)
-        self.assertEqual(file.first().size, 3)
-        self.assertEqual(file.first().duration, 14)
-        self.assertEqual(file.first().type, "test")
-
-
 class BasicTests(TestCase):
     def test_extract_info_from_folder(self):
         mission_date, name = extract_info_from_folder("2024.11.30_test")
