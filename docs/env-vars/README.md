@@ -4,7 +4,7 @@ Many things in the backend can be controlled by environmental variables. Here is
 ## `DEBUG`
 #### Default: `False`
 Variable by django.
-Allows more detailed information about errors and disables Authentication. See [django settings](https://docs.djangoproject.com/en/5.1/ref/settings/#debug) for more.
+Allows more detailed information about errors and disables authentication. See [django settings](https://docs.djangoproject.com/en/5.1/ref/settings/#debug) for more.
 
 ## `SECRET_KEY`
 #### Default: No default
@@ -20,12 +20,12 @@ The domain on which the backend is hosted.
 
 ## `TEMP_FOLDER`
 #### Default: `tmp`
-Path to folder for temporary files. Used when extraction videos from a mcap file.\
+Path to folder for temporary files. Used when extracting videos from a mcap file.\
 Can be a path relative to the backend root folder (`backend/`).
 
 ## `STORE_VIDEO_LOCALLY`
 #### Default: `False`
-Enforces storing the extracted Videos in a different Folder and locally (instead of in S3). The folder can be selected with the `VIDEO_ROOT` in settings.py
+Enforces storing the extracted videos in a different folder and locally (instead of in S3). The folder can be selected with the `VIDEO_ROOT` in settings.py
 
 ## `USE_S3`
 #### Default: `False`
