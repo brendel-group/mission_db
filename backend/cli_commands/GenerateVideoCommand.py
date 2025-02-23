@@ -59,6 +59,16 @@ def generate_videos(path: str):
         topics = get_video_topics(local_path)
         video_paths: list[str] = []
         for topic in topics:
+            filename = create_video_filename(topic, local_path)
+            # skip existing videos
+            if settings.STORE_VIDEO_LOCALLY:
+                if local_storage.exists(filename):
+                    continue
+            else:
+                if storage.exits(filename):
+                    continue
+
+            logger.info(f"Generating video for topic '{topic}'")
             data = get_video_data(local_path, topic)
             video_path = create_video(data, topic, local_path)
             video_paths.append(video_path)
@@ -69,6 +79,7 @@ def generate_videos(path: str):
     finally:
         _move_file_to_external(storage, local_storage, path, local_path, video_paths)
 
+    logger.info("Succesfully generated all videos and moved files")
     return video_paths
 
 
@@ -101,6 +112,7 @@ def _get_file_from_external(
         checksum_logger = logging.getLogger("botocore.httpchecksum")
         checksum_logger.disabled = True  # Disable checksum messages
 
+        logger.info("Moving files to local storage")
         # Move files from remote storage to local filesystem
         with file.open() and external_storage.open(metadata_path) as metadata_file:
             local_storage.save(file.name, file)
@@ -138,6 +150,7 @@ def _move_file_to_external(
         local_storage.delete(local_path / "metadata.yaml")
         return
 
+    logger.info("Moving videos to external storage")
     # Move videos to remote storage
     for video_path in video_paths:
         video_path = video_path[len(str(local_storage.location)) + 1 :]
@@ -220,13 +233,16 @@ def get_video_data(path, topic):
     return data
 
 
+def create_video_filename(topic, save_dir):
+    return os.path.join(save_dir, str(topic).replace("/", "-") + ".mp4")
+
+
 def create_video(data, topic, save_dir):
     # Print data and shape of the first frame for debugging
     height, width, channels = data[0].shape
     # Create a filename based on the topic name
-    filename = os.path.join(
-        save_dir, str(topic).replace("/", "-") + ".mp4"
-    )  # Initialize the video writer
+    filename = create_video_filename(topic, save_dir)
+    # Initialize the video writer
     video = cv2.VideoWriter(
         filename,
         cv2.VideoWriter_fourcc(*"mp4v"),
