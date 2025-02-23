@@ -1,7 +1,4 @@
 import json
-import os
-import shutil
-from django.conf import settings
 from django.test import TestCase
 from cli_commands.RestoreDatabaseCommand import restore_database
 import cli_commands.RestoreDatabaseCommand as RestoreDatabaseCommand
