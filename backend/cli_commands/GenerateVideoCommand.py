@@ -65,7 +65,7 @@ def generate_videos(path: str):
                 if local_storage.exists(filename):
                     continue
             else:
-                if storage.exits(filename):
+                if storage.exists(filename):
                     continue
 
             logger.info(f"Generating video for topic '{topic}'")
@@ -97,32 +97,31 @@ def _get_file_from_external(
         tuple[Storage, Path]: The storage where the files are accessible locally and the path to the folder
     """
     if isinstance(external_storage, FileSystemStorage):
-        local_path = Path(os.path.dirname(file.path))
-        local_storage = external_storage
+        return external_storage, Path(os.path.dirname(file.path))
+
+    if settings.STORE_VIDEO_LOCALLY:
+        # generate videos directly in local folder
+        local_storage = Topic.video.field.storage
     else:
-        if settings.STORE_VIDEO_LOCALLY:
-            # generate videos directly in local folder
-            local_storage = Topic.video.field.storage
-        else:
-            # generate videos in folder for temporary files
-            local_storage = FileSystemStorage(settings.TEMP_FOLDER)
+        # generate videos in folder for temporary files
+        local_storage = FileSystemStorage(settings.TEMP_FOLDER)
 
-        metadata_path = os.path.dirname(file.name) + "/metadata.yaml"
+    metadata_path = os.path.dirname(file.name) + "/metadata.yaml"
 
-        checksum_logger = logging.getLogger("botocore.httpchecksum")
-        checksum_logger.disabled = True  # Disable checksum messages
+    checksum_logger = logging.getLogger("botocore.httpchecksum")
+    checksum_logger.disabled = True  # Disable checksum messages
 
-        logger.info("Moving files to local storage")
-        # Move files from remote storage to local filesystem
-        with file.open() and external_storage.open(metadata_path) as metadata_file:
-            local_storage.save(file.name, file)
-            local_storage.save(metadata_path, metadata_file)
+    logger.info("Moving files to local storage")
+    # Move files from remote storage to local filesystem
+    with file.open() and external_storage.open(metadata_path) as metadata_file:
+        local_storage.save(file.name, file)
+        local_storage.save(metadata_path, metadata_file)
 
-        checksum_logger.disabled = False
+    checksum_logger.disabled = False
 
-        local_path = Path(os.path.dirname(local_storage.path(file.name)))
+    local_path = Path(os.path.dirname(local_storage.path(file.name)))
 
-        return local_storage, local_path
+    return local_storage, local_path
 
 
 def _move_file_to_external(
