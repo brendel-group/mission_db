@@ -11,6 +11,7 @@ from datetime import datetime
 import logging
 from django.core.files.storage.memory import InMemoryStorage
 
+
 class RestoreDatabaseCommandTests(TestCase):
     def setUp(self):
         RestoreDatabaseCommand.storage = InMemoryStorage()
