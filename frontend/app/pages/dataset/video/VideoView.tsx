@@ -48,7 +48,6 @@ export function VideoComponent({
   // Reset state when videoUrl changes
   useEffect(() => {
     setBlobUrl(null);
-    setIsHovered(false);
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
@@ -143,6 +142,7 @@ export function VideoComponent({
       <video
         ref={videoRef}
         src={blobUrl}
+        muted
         style={{
           width: "100%",
           height: "100%",
