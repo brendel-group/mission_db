@@ -1,10 +1,9 @@
 import os
 import logging
-import yaml
 from datetime import datetime
 from .Command import Command
 from django.core.files.storage import DefaultStorage
-from restapi.models import Mission, File
+from restapi.models import Mission
 
 
 class AddFolderCommand(Command):
@@ -28,29 +27,6 @@ class AddFolderCommand(Command):
 
 
 storage = DefaultStorage()
-
-
-def get_duration(path):
-    metadata = load_yaml_metadata(path)
-    duration = get_mcap_duration_from_yaml(metadata)
-    return duration
-
-
-def load_yaml_metadata(yaml_filepath):
-    """Load YAML metadata."""
-    with storage.open(yaml_filepath, "r") as file:
-        return yaml.safe_load(file)
-
-
-def get_mcap_duration_from_yaml(metadata):
-    """Extract duration in seconds from YAML."""
-    nanoseconds = (
-        metadata.get("rosbag2_bagfile_information", {})
-        .get("duration", {})
-        .get("nanoseconds", 0)
-    )
-    return nanoseconds / 1e9
-
 
 def check_mission(name, date):
     """
@@ -78,16 +54,6 @@ def extract_info_from_folder(folder_name):
         )
         return None, None
 
-
-def get_details_id(path):
-    try:
-        file = File.objects.get(file=path)
-        return file
-    except File.DoesNotExist:
-        print(f"No Details found for file '{path}'")
-        return None
-
-
 def add_mission_from_folder(folder_path, location=None, notes=None):
     """
     Add mission to DB with data from filesystem
@@ -107,8 +73,6 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
             try:
                 mission.save()
                 logging.info(f"Mission '{name}' from folder '{folder_name}' added.")
-                robot = None
-                add_details(folder_path, robot, mission)
             except Exception as e:
                 logging.error(f"Error adding mission: {e}")
         else:
@@ -116,46 +80,3 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
     else:
         logging.warning("Skipping folder due to naming issues.")
 
-
-def add_details(mission_path, robot, mission):
-    """
-    iterates through the folders and subfolders to find the mcap files and metadata files
-    this information is then stored in the database
-    """
-    # storage.listdir returns a tuple where the first element is a list of all directories
-    # and the second element a list of all files
-    for folder in storage.listdir(mission_path)[0]:
-        folder_path = os.path.join(mission_path, folder)
-        typ = os.path.basename(folder_path)
-
-        for subfolder in storage.listdir(folder_path)[0]:
-            subfolder_path = os.path.join(folder_path, subfolder)
-
-            mcap_path, metadata = None, None
-            for item in storage.listdir(subfolder_path)[1]:
-                if os.path.join(subfolder_path, item).endswith(".mcap"):
-                    mcap_path = os.path.join(subfolder_path, item)
-                if os.path.join(subfolder_path, item).endswith(".yaml"):
-                    metadata = os.path.join(subfolder_path, item)
-            if mcap_path and metadata:
-                size = storage.size(mcap_path)
-                duration = get_duration(metadata)
-                save_Details(mcap_path, size, duration, robot, mission, typ)
-
-
-def save_Details(path, size, duration, robot, mission, type):
-    if size and duration:
-        file = File(
-            file=path,
-            robot=robot,
-            duration=duration,
-            size=size,
-            mission=mission,
-            type=type,
-        )
-        try:
-            file.save()
-        except Exception as e:
-            logging.error(f"Error Adding Details: {e}")
-    else:
-        logging.warning("Skipping due to issues with the metadata")

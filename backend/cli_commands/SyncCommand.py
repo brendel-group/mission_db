@@ -1,12 +1,11 @@
 import os
 import logging
 from django.core.files.storage import DefaultStorage
-import yaml
 from restapi.serializer import TagSerializer
 from .Command import Command
 from .AddFolderCommand import add_mission_from_folder
 from .DeleteFolderCommand import delete_mission_from_folder
-from restapi.models import Mission, Tag, File
+from restapi.models import Mission, Tag, File, Topic
 import json
 from mcap.reader import make_reader
 
@@ -43,7 +42,7 @@ def sync_files(mission_path, mission):
 
     existing_files = {file.file.name for file in File.objects.filter(mission=mission)}
     current_files = set()
-
+    logging.info(f"Syncing files for mission {mission.name}.")
     # Find all .mcap and metadata files from the mission in the filesystem
     for folder in storage.listdir(mission_path)[0]:
         folder_path = os.path.join(mission_path, folder)
@@ -51,29 +50,22 @@ def sync_files(mission_path, mission):
 
         for subfolder in storage.listdir(folder_path)[0]:
             subfolder_path = os.path.join(folder_path, subfolder)
-            mcap_path, metadata_path = None, None
+            mcap_path = None
 
             for item in storage.listdir(subfolder_path)[1]:
                 item_path = os.path.join(subfolder_path, item)
                 if item_path.endswith(".mcap"):
                     mcap_path = item_path
-                elif item_path.endswith(".yaml"):
-                    metadata_path = item_path
 
-            if mcap_path and metadata_path:
+            if mcap_path:
                 current_files.add(mcap_path)  # Track found files
 
                 # Add new found files to the database
                 if mcap_path not in existing_files:
                     try:
                         size = storage.size(mcap_path)
-                        metadata = load_yaml_metadata(metadata_path)
-                        duration = (
-                            metadata.get("rosbag2_bagfile_information", {})
-                            .get("duration", {})
-                            .get("nanoseconds", 0)
-                            / 1e9
-                        )
+                        metadata = extract_topics_from_mcap(mcap_path)
+                        duration = get_duration_from_mcap(mcap_path)
                         file = File(
                             robot=None,
                             duration=duration,
@@ -82,10 +74,22 @@ def sync_files(mission_path, mission):
                             mission_id=mission.id,
                             type=typ,
                         )
+                        logging.info(
+                            f"Found file {mcap_path} for mission {mission.name}."
+                        )
                         file.save()
                         logging.info(
                             f"Added new file {mcap_path} for mission {mission.name}."
                         )
+                        for i in metadata:
+                            topic = Topic(
+                                file=file,
+                                name=metadata[i]["name"],
+                                type=metadata[i]["type"],
+                                message_count=metadata[i]["message_count"],
+                                frequency=metadata[i]["frequency"],
+                            )
+                            topic.save()
                     except Exception as e:
                         logging.error(f"Error processing {mcap_path}: {e}")
 
@@ -99,12 +103,6 @@ def sync_files(mission_path, mission):
             logging.warning(
                 f"File {file_path} not found in database (already deleted)."
             )
-
-
-def load_yaml_metadata(yaml_filepath):
-    """Loads YAML metadata."""
-    with storage.open(yaml_filepath, "r") as file:
-        return yaml.safe_load(file)
 
 
 def sync_folder():
@@ -189,6 +187,7 @@ def extract_topics_from_mcap(mcap_path: str) -> dict[str:dict]:
             topic_type = schema_map.get(channel.schema_id, "Unknown")
             message_count = channel_message_counts.get(channel.id, 0)
             topic_info[topic] = {
+                "name": topic,
                 "type": topic_type,
                 "message_count": message_count,
                 "frequency": 0
