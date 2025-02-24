@@ -5,6 +5,7 @@ from datetime import datetime
 from .Command import Command
 from django.core.files.storage import DefaultStorage
 from restapi.models import Mission, File
+from mcap.reader import make_reader
 
 
 class AddFolderCommand(Command):
@@ -31,25 +32,35 @@ storage = DefaultStorage()
 
 
 def get_duration(path):
-    metadata = load_yaml_metadata(path)
-    duration = get_mcap_duration_from_yaml(metadata)
+    duration = get_duration_from_mcap(path)
     return duration
 
 
-def load_yaml_metadata(yaml_filepath):
-    """Load YAML metadata."""
-    with storage.open(yaml_filepath, "r") as file:
-        return yaml.safe_load(file)
+def get_duration_from_mcap(mcap_path):
+    with storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        statistics = reader.get_summary().statistics
+        return statistics.message_end_time - statistics.message_start_time
+    
 
-
-def get_mcap_duration_from_yaml(metadata):
-    """Extract duration in seconds from YAML."""
-    nanoseconds = (
-        metadata.get("rosbag2_bagfile_information", {})
-        .get("duration", {})
-        .get("nanoseconds", 0)
-    )
-    return nanoseconds / 1e9
+def extract_topics_from_mcap(mcap_path):
+    with storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        summary = reader.get_summary()
+        schema_map = {schema.id: schema.name for schema in summary.schemas.values()}
+        channel_message_counts = summary.statistics.channel_message_counts
+        duration = get_duration_from_mcap(mcap_path)
+        topic_info = {
+            channel.topic: {
+                "type": schema_map.get(channel.schema_id, "Unknown"),
+                "message_count": channel_message_counts.get(channel.id, 0),
+                "frequency": 0
+                if duration == 0
+                else channel_message_counts.get(channel.id, 0) / (duration * 10**-9),
+            }
+            for channel in summary.channels.values()
+        }
+        return topic_info
 
 
 def check_mission(name, date):
