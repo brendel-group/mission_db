@@ -42,9 +42,7 @@ def get_duration_from_mcap(mcap_path):
 def get_video_topics(mcap_path):
     topics = extract_topics_from_mcap(mcap_path)
     video_topics = [
-        topic
-        for topic in topics
-        if topics[topic]["type"] == "sensor_msgs/msg/Image"
+        topic for topic in topics if topics[topic]["type"] == "sensor_msgs/msg/Image"
     ]
     return video_topics
 
