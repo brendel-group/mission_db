@@ -244,7 +244,7 @@ def create_video(data, topic, save_dir):
     # Initialize the video writer
     video = cv2.VideoWriter(
         filename,
-        cv2.VideoWriter_fourcc(*"mp4v"),
+        cv2.VideoWriter_fourcc(*"avc1"),
         30,
         (width, height),
         isColor=channels == 3,
