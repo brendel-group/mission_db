@@ -3,11 +3,14 @@ import logging
 from django.core.files.storage import DefaultStorage
 from restapi.serializer import TagSerializer
 from .Command import Command
+from .GenerateVideoCommand import generate_videos
 from .AddFolderCommand import add_mission_from_folder
 from .DeleteFolderCommand import delete_mission_from_folder
 from restapi.models import Mission, Tag, File, Topic
 import json
 from mcap.reader import make_reader
+from pathlib import Path
+from django.core.files.base import ContentFile
 
 
 # Create a custom logging handler to track if any log message was emitted
@@ -39,7 +42,8 @@ def sync_files(mission_path, mission):
     - Adds new files if they appear in the filesystem.
     - Removes files from the database if they are missing.
     """
-
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    BASE_DIR = Path.joinpath(BASE_DIR, "media")
     existing_files = {file.file.name for file in File.objects.filter(mission=mission)}
     current_files = set()
     logging.info(f"Syncing files for mission {mission.name}.")
@@ -56,6 +60,7 @@ def sync_files(mission_path, mission):
                 item_path = os.path.join(subfolder_path, item)
                 if item_path.endswith(".mcap"):
                     mcap_path = item_path
+                    generate_videos(mcap_path)
 
             if mcap_path:
                 current_files.add(mcap_path)  # Track found files
@@ -82,20 +87,61 @@ def sync_files(mission_path, mission):
                         logging.error(f"Error processing {mcap_path}: {e}")
                 else:
                     file = File.objects.get(file=mcap_path)
-                for item in metadata:
-                    try:
-                        topic = Topic(
-                            file=file,
-                            name=metadata[item]["name"],
-                            type=metadata[item]["type"],
-                            message_count=metadata[item]["message_count"],
-                            frequency=metadata[item]["frequency"],
-                        )
-                        topic.full_clean()
-                    except Exception as e:
-                        logging.error(e)
-                    else:
-                        topic.save()
+                # Get all video files in this folder
+                videos_in_folder = {
+                    video: os.path.join(subfolder_path, video)
+                    for video in storage.listdir(subfolder_path)[1]
+                    if video.endswith(".mp4")
+                }
+                logging.info(
+                    f"Found {len(videos_in_folder)} video files in folder {subfolder_path}"
+                )
+                # Process each topic in the metadata
+                for topic_name, topic_data in metadata.items():
+                    # Try to find a corresponding video file
+                    matching_video = None
+
+                    for video_filename in videos_in_folder.keys():
+                        # Match by topic name (adjust this logic if needed)
+                        if (
+                            topic_name.replace("/", "-") in video_filename
+                        ):  # Handle path-based topic names
+                            matching_video = videos_in_folder[video_filename]
+                            break
+
+                    if not matching_video:
+                        continue  # Skip this topic if no matching video is found
+
+                    # Ensure the video file exists in storage
+                    video_path = Path.joinpath(BASE_DIR, matching_video)
+                    if not storage.exists(video_path):
+                        logging.error(f"Video {video_filename} not found in storage.")
+                        continue
+
+                    with storage.open(video_path, "rb") as f:
+                        try:
+                            # Create and save Topic **before** adding video
+                            topic = Topic(
+                                file=file,
+                                name=topic_data["name"],
+                                type=topic_data["type"],
+                                message_count=topic_data["message_count"],
+                                frequency=topic_data["frequency"],
+                            )
+                            topic.full_clean()
+                            topic.save()
+
+                            # Save the video file to the topic
+                            topic.video.save(video_filename, ContentFile(f.read()))
+                            topic.save()
+
+                            logging.info(
+                                f"Successfully added video {video_filename} to topic {topic.name}"
+                            )
+                        except Exception as e:
+                            logging.error(
+                                f"Error adding video {video_filename} to topic {topic.name}: {e}"
+                            )
 
     # Remove files that are in DB but no longer in filesystem
     for file_path in existing_files - current_files:
