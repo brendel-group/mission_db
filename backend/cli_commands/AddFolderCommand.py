@@ -2,7 +2,6 @@ import os
 import logging
 from datetime import datetime
 from .Command import Command
-from django.core.files.storage import DefaultStorage
 from restapi.models import Mission, File
 from mcap.reader import make_reader
 
