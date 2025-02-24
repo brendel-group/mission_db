@@ -282,25 +282,13 @@ export function Overview() {
       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f1f3f5")}
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
     >
-      <Table.Td>
-        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-          {row.name}
-        </div>
-      </Table.Td>
-      <Table.Td>
-        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-          {truncateText(row.location, 42)}
-        </div>
-      </Table.Td>
-      <Table.Td>{row.totalDuration}</Table.Td>
-      <Table.Td>{row.totalSize}</Table.Td>
-      <Table.Td>{row.robots}</Table.Td>
-      <Table.Td>{row.date}</Table.Td>
-      <Table.Td>
-        <div style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-          {truncateText(row.notes, 42)}
-        </div>
-      </Table.Td>
+      <Table.Td style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>{row.name}</Table.Td>
+      <Table.Td style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>{truncateText(row.location, 42)}</Table.Td>
+      <Table.Td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>{row.totalDuration}</Table.Td>
+      <Table.Td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>{row.totalSize}</Table.Td>
+      <Table.Td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>{row.robots}</Table.Td>
+      <Table.Td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>{row.date}</Table.Td>
+      <Table.Td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>{truncateText(row.notes, 42)}</Table.Td>
       <Table.Td
         onClick={(e) => e.stopPropagation()}
         style={{ cursor: "default" }}

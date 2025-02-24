@@ -6,6 +6,7 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
+from restapi.models import Topic
 import os
 import random
 import string
@@ -63,10 +64,19 @@ def download(request: HttpRequest, file_path: str):
             raise PermissionDenied
         _ = authenticate(sessionid)
 
+    # open file
     try:
         file = storage.open(file_path)
     except (FileNotFoundError, IsADirectoryError):
-        return HttpResponse(f"File not found: {file_path}", status=404)
+        if file_path.endswith("mp4"):
+            # try to find video in other storage
+            video_storage = Topic.video.field.storage
+            try:
+                file = video_storage.open(file_path)
+            except (FileNotFoundError, IsADirectoryError):
+                return HttpResponse(f"File not found: {file_path}", status=404)
+        else:
+            return HttpResponse(f"File not found: {file_path}", status=404)
 
     if "range" in request.headers:
         return _range_download(request, file)

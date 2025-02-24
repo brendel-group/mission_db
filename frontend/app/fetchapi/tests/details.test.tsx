@@ -1,9 +1,6 @@
 import { FETCH_API_BASE_URL } from "~/config";
-import { DetailViewData, FileData } from "~/data";
-import {
-  GetFilesByMission,
-  getFileData,
-} from "../details";
+import { FileData } from "~/data";
+import { GetFilesByMission, getFileData, updateRobotField } from "../details";
 
 /*
 How to run the tests:
@@ -27,8 +24,6 @@ describe("Fetch API Functions", () => {
       const mockResponse = [
         {
           file_url: "http://example.com/file/download/file1.mcap",
-          video_path: "file1.mp4",
-          video_url: "http://example.com/file/stream/file1.mcap",
           file_path: "file1.mcap",
           duration: "3600",
           size: "1024",
@@ -37,8 +32,6 @@ describe("Fetch API Functions", () => {
         },
         {
           file_url: "http://example.com/file/download/file2.mcap",
-          video_path: "file2.mp4",
-          video_url: "http://example.com/file/stream/file2.mcap",
           file_path: "file2.mcap",
           duration: "1200",
           size: "2621440",
@@ -51,8 +44,6 @@ describe("Fetch API Functions", () => {
         {
           filePath: "file1.mcap",
           fileUrl: new URL("http://example.com/file/download/file1.mcap"),
-          videoPath: "file1.mp4",
-          videoUrl: new URL("http://example.com/file/stream/file1.mcap"),
           duration: "01:00:00",
           size: "1.00 KB",
           robot: "hihi",
@@ -61,8 +52,6 @@ describe("Fetch API Functions", () => {
         {
           filePath: "file2.mcap",
           fileUrl: new URL("http://example.com/file/download/file2.mcap"),
-          videoPath: "file2.mp4",
-          videoUrl: new URL("http://example.com/file/stream/file2.mcap"),
           duration: "00:20:00",
           size: "2.50 MB",
           robot: "haha",
@@ -91,8 +80,6 @@ describe("Fetch API Functions", () => {
       const mockResponse = {
         file_path: "file1.mcap",
         file_url: "http://example.com/file/download/file1.mcap",
-        video_path: "file1.mp4",
-        video_url: "http://example.com/file/stream/file1.mcap",
         duration: "60",
         size: "1024",
         robot: "hihi",
@@ -102,18 +89,17 @@ describe("Fetch API Functions", () => {
       const expectedResponse: FileData = {
         filePath: "file1.mcap",
         fileUrl: new URL("http://example.com/file/download/file1.mcap"),
-        videoPath: "file1.mp4",
-        videoUrl: new URL("http://example.com/file/stream/file1.mcap"),
         duration: "00:01:00",
         size: "1.00 KB",
         robot: "hihi",
         type: "test",
       };
 
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
-      });
+      (fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: jest.fn().mockResolvedValueOnce(mockResponse),
+        });
 
       const details = await getFileData("file1.mcap");
       expect(details).toEqual(expectedResponse);
@@ -123,6 +109,25 @@ describe("Fetch API Functions", () => {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
+        },
+      );
+    });
+
+    test("updateRobotField should update robot field of a file", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+      });
+
+      await updateRobotField("file1.mcap", "newRobot");
+      expect(fetch).toHaveBeenCalledWith(
+        `${FETCH_API_BASE_URL}/file/file1.mcap/update-robot/`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ robot: "newRobot" }),
         },
       );
     });

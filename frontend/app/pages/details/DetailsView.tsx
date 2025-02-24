@@ -23,11 +23,9 @@ const DetailsView: React.FC<DetailsViewProps> = ({
   basePath
 }) => {
   const [location, setLocation] = useState<string>(missionData.location);
-
-  let formattedRobotNames = "";
-
-  if (detailViewData?.robots) 
-    formattedRobotNames = formatRobotNames(detailViewData.robots);
+  const [formattedRobotNames, setFormatRobotNames] = useState<string>(
+    detailViewData?.robots ? formatRobotNames(detailViewData.robots) : ""
+  );
 
   return (
     <AbstractPage
@@ -55,7 +53,11 @@ const DetailsView: React.FC<DetailsViewProps> = ({
             {/* Table */}
             <Grid.Col span={12}>
               {detailViewData && (
-                <ShowDatasets data={detailViewData} basePath={basePath} />
+                <ShowDatasets 
+                  data={detailViewData} 
+                  basePath={basePath} 
+                  onRobotsUpdate={(updatedRobots: string[]) => setFormatRobotNames(formatRobotNames(updatedRobots))}
+                />
               )}
             </Grid.Col>
           </Grid>

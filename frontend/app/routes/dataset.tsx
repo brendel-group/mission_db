@@ -1,13 +1,10 @@
 import { Skeleton } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/node";
-import {
-  MetaFunction,
-  redirect,
-  useLoaderData,
-} from "@remix-run/react";
+import { MetaFunction, redirect, useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { FileData } from "~/data";
+import { FileData, Topic } from "~/data";
 import { getFileData } from "~/fetchapi/details";
+import { getTopicsByFile } from "~/fetchapi/topics";
 import { CreateAppShell } from "~/layout/AppShell";
 import { DatasetView } from "~/pages/dataset/DatasetView";
 import { sessionStorage } from "~/utilities/LoginHandler";
@@ -44,12 +41,17 @@ function Dataset() {
 
   // File
   const [fileData, setFileData] = useState<FileData>();
+  const [fileTopics, setFileTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const file: FileData = await getFileData(fileName);
+        const [file, topics] = await Promise.all([
+          getFileData(fileName),
+          getTopicsByFile(fileName),
+        ]);
         setFileData(file);
+        setFileTopics(topics);
       } catch (e: any) {
         if (e instanceof Error) {
           setError(e.message);
@@ -67,18 +69,9 @@ function Dataset() {
   if (loading) return <Skeleton style={{ height: "30vh" }} />;
   if (error) return <p>Error: {error}</p>;
   if (!fileData) return <p>No data available</p>;
+  if (!fileTopics) return <p>No topics available</p>;
 
-  return (
-    <DatasetView
-      file={fileData.filePath}
-      fileUrl={fileData.fileUrl}
-      video={fileData.videoPath}
-      videoUrl={fileData.videoUrl}
-      duration={fileData.duration}
-      size={fileData.size}
-      robot={fileData.robot}
-    ></DatasetView>
-  );
+  return <DatasetView data={fileData} topics={fileTopics}></DatasetView>;
 }
 
 const App = () => {

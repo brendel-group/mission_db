@@ -19,3 +19,4 @@ moviepy
 dj-rest-auth==7.*
 boto3==1.*
 cryptography
+rosbags

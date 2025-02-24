@@ -6,11 +6,12 @@ from django.core.files.base import ContentFile
 from restapi.models import Mission, Mission_tags
 from datetime import datetime
 import logging
+from django.core.files.storage.memory import InMemoryStorage
 
 
 class RestoreDatabaseCommandTests(TestCase):
     def setUp(self):
-        RestoreDatabaseCommand.storage = RestoreDatabaseCommand.DefaultStorage()
+        RestoreDatabaseCommand.storage = InMemoryStorage()
         self.test_storage = RestoreDatabaseCommand.storage
         self.test_storage.save(
             "2024.12.02_test_mission/test_mission_metadata.json", ContentFile("")
