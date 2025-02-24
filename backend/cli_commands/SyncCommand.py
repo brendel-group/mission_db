@@ -64,7 +64,7 @@ def sync_files(mission_path, mission):
                 if mcap_path not in existing_files:
                     try:
                         size = storage.size(mcap_path)
-                        
+
                         duration = get_duration_from_mcap(mcap_path)
                         file = File(
                             robot=None,
