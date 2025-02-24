@@ -27,7 +27,7 @@ class AddFolderCommand(Command):
         add_mission_from_folder(args.path, args.location, args.notes)
 
 
-storage = DefaultStorage()
+storage = File.file.field.storage
 
 
 def get_duration(path):
@@ -39,7 +39,7 @@ def get_duration_from_mcap(mcap_path):
     with storage.open(mcap_path, "rb") as f:
         reader = make_reader(f)
         statistics = reader.get_summary().statistics
-        return statistics.message_end_time - statistics.message_start_time
+        return (statistics.message_end_time - statistics.message_start_time) / 1**-9
 
 
 def extract_topics_from_mcap(mcap_path):
@@ -141,7 +141,7 @@ def add_details(mission_path, robot, mission):
         for subfolder in storage.listdir(folder_path)[0]:
             subfolder_path = os.path.join(folder_path, subfolder)
 
-            mcap_path = None, None
+            mcap_path = None
             for item in storage.listdir(subfolder_path)[1]:
                 if os.path.join(subfolder_path, item).endswith(".mcap"):
                     mcap_path = os.path.join(subfolder_path, item)
