@@ -41,7 +41,7 @@ def get_duration_from_mcap(mcap_path):
         reader = make_reader(f)
         statistics = reader.get_summary().statistics
         return statistics.message_end_time - statistics.message_start_time
-    
+
 
 def extract_topics_from_mcap(mcap_path):
     with storage.open(mcap_path, "rb") as f:
