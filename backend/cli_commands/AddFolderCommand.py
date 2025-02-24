@@ -1,6 +1,5 @@
 import os
 import logging
-import yaml
 from datetime import datetime
 from .Command import Command
 from django.core.files.storage import DefaultStorage
