@@ -39,15 +39,14 @@ def get_duration_from_mcap(mcap_path):
         return statistics.message_end_time - statistics.message_start_time
 
 
-def get_video_topics(path):
-    # Open the bag file using AnyReader
-    with AnyReader([path], default_typestore=typestore) as reader:
-        # Extract topics that have message type "sensor_msgs/msg/Image"
-        connections = [
-            x.topic for x in reader.connections if x.msgtype == "sensor_msgs/msg/Image"
-        ]
-
-        return connections
+def get_video_topics(mcap_path):
+    topics = extract_topics_from_mcap(mcap_path)
+    video_topics = [
+        topic
+        for topic in topics
+        if topics[topic]["type"] == "sensor_msgs/msg/Image"
+    ]
+    return video_topics
 
 
 def get_video_data(path, topic):
@@ -56,7 +55,7 @@ def get_video_data(path, topic):
     height = 0
     step = 0
     # Open the bag file using AnyReader
-    with AnyReader([bagpath], default_typestore=typestore) as reader:
+    with AnyReader([path], default_typestore=typestore) as reader:
         # Filter connections for the specified topic
         connections = [x for x in reader.connections if x.topic == topic]
         # Iterate through messages in the filtered connections
@@ -112,8 +111,8 @@ def create_video(data, topic, save_dir=str(bagpath)):
 
 if __name__ == "__main__":
     base_path = Path("\\".join(bagpath.split("\\")[:-1]))
-    extract_topics_from_mcap(bagpath)
-    topics = get_video_topics(base_path)
+    topics = get_video_topics(bagpath)
+    print(topics)
     for topic in topics:
-        data = get_video_data(bagpath, topic)
-        create_video(data[0], data[1])
+        data = get_video_data(base_path, topic)
+        create_video(data[0], data[1], base_path)
