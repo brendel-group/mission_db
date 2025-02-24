@@ -59,12 +59,12 @@ def sync_files(mission_path, mission):
 
             if mcap_path:
                 current_files.add(mcap_path)  # Track found files
-
+                metadata = extract_topics_from_mcap(mcap_path)
                 # Add new found files to the database
                 if mcap_path not in existing_files:
                     try:
                         size = storage.size(mcap_path)
-                        metadata = extract_topics_from_mcap(mcap_path)
+                        
                         duration = get_duration_from_mcap(mcap_path)
                         file = File(
                             robot=None,
@@ -74,24 +74,28 @@ def sync_files(mission_path, mission):
                             mission_id=mission.id,
                             type=typ,
                         )
-                        logging.info(
-                            f"Found file {mcap_path} for mission {mission.name}."
-                        )
                         file.save()
                         logging.info(
                             f"Added new file {mcap_path} for mission {mission.name}."
                         )
-                        for i in metadata:
-                            topic = Topic(
-                                file=file,
-                                name=metadata[i]["name"],
-                                type=metadata[i]["type"],
-                                message_count=metadata[i]["message_count"],
-                                frequency=metadata[i]["frequency"],
-                            )
-                            topic.save()
                     except Exception as e:
                         logging.error(f"Error processing {mcap_path}: {e}")
+                else:
+                    file = File.objects.get(file=mcap_path)
+                for item in metadata:
+                    try:
+                        topic = Topic(
+                            file=file,
+                            name=metadata[item]["name"],
+                            type=metadata[item]["type"],
+                            message_count=metadata[item]["message_count"],
+                            frequency=metadata[item]["frequency"],
+                        )
+                        topic.full_clean()
+                    except Exception as e:
+                        logging.error(e)
+                    else:
+                        topic.save()
 
     # Remove files that are in DB but no longer in filesystem
     for file_path in existing_files - current_files:
