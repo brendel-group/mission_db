@@ -104,8 +104,8 @@ class AddDetailsTests(TestCase):
 
         writer.add_message(
             channel_id=channel_id,
-            log_time=5,
-            publish_time=5,
+            log_time=5*10**9,
+            publish_time=5*10**9,
             data=b'{"temperature": 22.5}',
         )
 
@@ -148,7 +148,7 @@ class AddDetailsTests(TestCase):
         file = File.objects.filter(file="2024.12.02_mission1/test/bag/bag.mcap")
         self.assertTrue(file.exists())
         self.assertEqual(len(file), 1)
-        self.assertEqual(file.first().size, 812)
+        self.assertEqual(file.first().size, 823)
         self.assertEqual(file.first().duration, 5)
         self.assertEqual(file.first().type, "test")
 
