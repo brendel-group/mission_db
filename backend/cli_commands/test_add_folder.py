@@ -10,6 +10,8 @@ from datetime import datetime
 import logging
 from django.core.files.base import ContentFile
 from django.core.files.storage.memory import InMemoryStorage
+import io
+from mcap.writer import Writer
 
 
 class ErrorCatchingTests(TestCase):
@@ -71,12 +73,51 @@ class AddMissionTests(TestCase):
 
 
 class AddDetailsTests(TestCase):
+    def create_dummy_mcap(self):
+        """Generate a small in-memory MCAP file"""
+        buffer = io.BytesIO()
+        writer = Writer(buffer)
+
+        writer.start()  # Start writing the MCAP file
+
+        # Define a dummy schema
+        schema_id = writer.register_schema(
+            name="ExampleSchema",
+            encoding="jsonschema",
+            data=b'{"type": "object", "properties": {"temperature": {"type": "number"}}}',
+        )
+
+        # Define a dummy channel
+        channel_id = writer.register_channel(
+            topic="/sensor/temperature",
+            schema_id=schema_id,
+            message_encoding="json",
+        )
+
+        # Write a dummy message
+        writer.add_message(
+            channel_id=channel_id,
+            log_time=0,
+            publish_time=0,
+            data=b'{"temperature": 22.5}',
+        )
+
+        writer.add_message(
+            channel_id=channel_id,
+            log_time=5 * 10**9,
+            publish_time=5 * 10**9,
+            data=b'{"temperature": 22.5}',
+        )
+
+        writer.finish()  # Finish writing the MCAP file
+        return buffer.getvalue()
+
     def setUp(self):
         AddFolderCommand.storage = InMemoryStorage()
         self.test_storage = AddFolderCommand.storage
 
         # create fake files
-        mcap_file = ContentFile("123")
+        mcap_file = ContentFile(self.create_dummy_mcap())
         yaml_file = ContentFile(
             "rosbag2_bagfile_information:\n  duration:\n    nanoseconds: 14694379191"
         )
@@ -107,8 +148,8 @@ class AddDetailsTests(TestCase):
         file = File.objects.filter(file="2024.12.02_mission1/test/bag/bag.mcap")
         self.assertTrue(file.exists())
         self.assertEqual(len(file), 1)
-        self.assertEqual(file.first().size, 3)
-        self.assertEqual(file.first().duration, 14)
+        self.assertEqual(file.first().size, 823)
+        self.assertEqual(file.first().duration, 5)
         self.assertEqual(file.first().type, "test")
 
 
