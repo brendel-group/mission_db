@@ -36,13 +36,6 @@ def get_duration(path):
         return (statistics.message_end_time - statistics.message_start_time) / 1**-9
 
 
-# def get_duration_from_mcap(mcap_path):
-#     with storage.open(mcap_path, "rb") as f:
-#         reader = make_reader(f)
-#         statistics = reader.get_summary().statistics
-#         return (statistics.message_end_time - statistics.message_start_time) / 1**-9
-
-
 def extract_topics_from_mcap(mcap_path):
     with storage.open(mcap_path, "rb") as f:
         reader = make_reader(f)
