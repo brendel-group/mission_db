@@ -1,10 +1,9 @@
 import os
 import logging
-import yaml
 from datetime import datetime
 from .Command import Command
-from django.core.files.storage import DefaultStorage
 from restapi.models import Mission, File
+from mcap.reader import make_reader
 
 
 class AddFolderCommand(Command):
@@ -27,29 +26,34 @@ class AddFolderCommand(Command):
         add_mission_from_folder(args.path, args.location, args.notes)
 
 
-storage = DefaultStorage()
+storage = File.file.field.storage
 
 
 def get_duration(path):
-    metadata = load_yaml_metadata(path)
-    duration = get_mcap_duration_from_yaml(metadata)
-    return duration
+    with storage.open(path, "rb") as f:
+        reader = make_reader(f)
+        statistics = reader.get_summary().statistics
+        return (statistics.message_end_time - statistics.message_start_time) * 10**-9
 
 
-def load_yaml_metadata(yaml_filepath):
-    """Load YAML metadata."""
-    with storage.open(yaml_filepath, "r") as file:
-        return yaml.safe_load(file)
-
-
-def get_mcap_duration_from_yaml(metadata):
-    """Extract duration in seconds from YAML."""
-    nanoseconds = (
-        metadata.get("rosbag2_bagfile_information", {})
-        .get("duration", {})
-        .get("nanoseconds", 0)
-    )
-    return nanoseconds / 1e9
+def extract_topics_from_mcap(mcap_path):
+    with storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        summary = reader.get_summary()
+        schema_map = {schema.id: schema.name for schema in summary.schemas.values()}
+        channel_message_counts = summary.statistics.channel_message_counts
+        duration = get_duration(mcap_path)
+        topic_info = {
+            channel.topic: {
+                "type": schema_map.get(channel.schema_id, "Unknown"),
+                "message_count": channel_message_counts.get(channel.id, 0),
+                "frequency": 0
+                if duration == 0
+                else channel_message_counts.get(channel.id, 0) / duration,
+            }
+            for channel in summary.channels.values()
+        }
+        return topic_info
 
 
 def check_mission(name, date):
@@ -131,15 +135,13 @@ def add_details(mission_path, robot, mission):
         for subfolder in storage.listdir(folder_path)[0]:
             subfolder_path = os.path.join(folder_path, subfolder)
 
-            mcap_path, metadata = None, None
+            mcap_path = None
             for item in storage.listdir(subfolder_path)[1]:
                 if os.path.join(subfolder_path, item).endswith(".mcap"):
                     mcap_path = os.path.join(subfolder_path, item)
-                if os.path.join(subfolder_path, item).endswith(".yaml"):
-                    metadata = os.path.join(subfolder_path, item)
-            if mcap_path and metadata:
+            if mcap_path:
                 size = storage.size(mcap_path)
-                duration = get_duration(metadata)
+                duration = get_duration(mcap_path)
                 save_Details(mcap_path, size, duration, robot, mission, typ)
 
 
