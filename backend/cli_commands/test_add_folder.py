@@ -113,8 +113,9 @@ class AddDetailsTests(TestCase):
         return buffer.getvalue()
 
     def setUp(self):
-        AddFolderCommand.storage = InMemoryStorage()
-        self.test_storage = AddFolderCommand.storage
+        self.test_storage = InMemoryStorage()
+        AddFolderCommand.storage = self.test_storage
+        File.file.field.storage = self.test_storage
 
         # create fake files
         mcap_file = ContentFile(self.create_dummy_mcap())

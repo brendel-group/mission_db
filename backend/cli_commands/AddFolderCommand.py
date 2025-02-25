@@ -30,15 +30,19 @@ class AddFolderCommand(Command):
 storage = File.file.field.storage
 
 
-def get_duration(path, storage: Storage = storage):
-    with storage.open(path, "rb") as f:
+def get_duration(path, file_storage: Storage = None):
+    if not file_storage:
+        file_storage = File.file.field.storage
+    with file_storage.open(path, "rb") as f:
         reader = make_reader(f)
         statistics = reader.get_summary().statistics
         return (statistics.message_end_time - statistics.message_start_time) * 10**-9
 
 
-def extract_topics_from_mcap(mcap_path, storage: Storage = storage):
-    with storage.open(mcap_path, "rb") as f:
+def extract_topics_from_mcap(mcap_path, file_storage: Storage = None):
+    if not file_storage:
+        file_storage = File.file.field.storage
+    with file_storage.open(mcap_path, "rb") as f:
         reader = make_reader(f)
         summary = reader.get_summary()
         schema_map = {schema.id: schema.name for schema in summary.schemas.values()}
