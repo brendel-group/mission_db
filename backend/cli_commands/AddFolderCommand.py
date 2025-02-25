@@ -30,15 +30,17 @@ storage = File.file.field.storage
 
 
 def get_duration(path):
-    duration = get_duration_from_mcap(path)
-    return duration
-
-
-def get_duration_from_mcap(mcap_path):
-    with storage.open(mcap_path, "rb") as f:
+    with storage.open(path, "rb") as f:
         reader = make_reader(f)
         statistics = reader.get_summary().statistics
         return (statistics.message_end_time - statistics.message_start_time) / 1**-9
+
+
+# def get_duration_from_mcap(mcap_path):
+#     with storage.open(mcap_path, "rb") as f:
+#         reader = make_reader(f)
+#         statistics = reader.get_summary().statistics
+#         return (statistics.message_end_time - statistics.message_start_time) / 1**-9
 
 
 def extract_topics_from_mcap(mcap_path):
@@ -47,7 +49,7 @@ def extract_topics_from_mcap(mcap_path):
         summary = reader.get_summary()
         schema_map = {schema.id: schema.name for schema in summary.schemas.values()}
         channel_message_counts = summary.statistics.channel_message_counts
-        duration = get_duration_from_mcap(mcap_path)
+        duration = get_duration(mcap_path)
         topic_info = {
             channel.topic: {
                 "type": schema_map.get(channel.schema_id, "Unknown"),
