@@ -33,7 +33,7 @@ def get_duration(path):
     with storage.open(path, "rb") as f:
         reader = make_reader(f)
         statistics = reader.get_summary().statistics
-        return (statistics.message_end_time - statistics.message_start_time) / 1**-9
+        return (statistics.message_end_time - statistics.message_start_time) * 10**-9
 
 
 def extract_topics_from_mcap(mcap_path):
@@ -49,7 +49,7 @@ def extract_topics_from_mcap(mcap_path):
                 "message_count": channel_message_counts.get(channel.id, 0),
                 "frequency": 0
                 if duration == 0
-                else channel_message_counts.get(channel.id, 0) / (duration * 10**-9),
+                else channel_message_counts.get(channel.id, 0) / duration,
             }
             for channel in summary.channels.values()
         }
