@@ -104,8 +104,8 @@ class AddDetailsTests(TestCase):
 
         writer.add_message(
             channel_id=channel_id,
-            log_time=5*10**9,
-            publish_time=5*10**9,
+            log_time=5 * 10**9,
+            publish_time=5 * 10**9,
             data=b'{"temperature": 22.5}',
         )
 
