@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from .Command import Command
 from restapi.models import Mission, File
+from django.core.files.storage import Storage
 from mcap.reader import make_reader
 
 
@@ -29,14 +30,14 @@ class AddFolderCommand(Command):
 storage = File.file.field.storage
 
 
-def get_duration(path):
+def get_duration(path, storage: Storage = storage):
     with storage.open(path, "rb") as f:
         reader = make_reader(f)
         statistics = reader.get_summary().statistics
         return (statistics.message_end_time - statistics.message_start_time) * 10**-9
 
 
-def extract_topics_from_mcap(mcap_path):
+def extract_topics_from_mcap(mcap_path, storage: Storage = storage):
     with storage.open(mcap_path, "rb") as f:
         reader = make_reader(f)
         summary = reader.get_summary()
