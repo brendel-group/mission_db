@@ -8,6 +8,7 @@ from .Command import Command
 from django.core.files.storage import FileSystemStorage, Storage
 from restapi.models import File, Topic
 from django.conf import settings
+from .AddFolderCommand import extract_topics_from_mcap
 import logging
 
 
@@ -57,6 +58,7 @@ def generate_videos(path: str):
     try:
         # generate videos
         topics = get_video_topics(local_path)
+        topic_data = extract_topics_from_mcap(path, local_storage)
         video_paths: list[str] = []
         for topic in topics:
             filename = create_video_filename(topic, local_path)
@@ -70,7 +72,9 @@ def generate_videos(path: str):
 
             logger.info(f"Generating video for topic '{topic}'")
             data = get_video_data(local_path, topic)
-            video_path = create_video(data, topic, local_path)
+            video_path = create_video(
+                data, topic, local_path, topic_data[topic]["frequency"]
+            )
             video_paths.append(video_path)
 
     except (FileNotFoundError, IsADirectoryError):
@@ -236,7 +240,7 @@ def create_video_filename(topic, save_dir):
     return os.path.join(save_dir, str(topic).replace("/", "-") + ".mp4")
 
 
-def create_video(data, topic, save_dir):
+def create_video(data, topic, save_dir, fps=30):
     # Print data and shape of the first frame for debugging
     height, width, channels = data[0].shape
     # Create a filename based on the topic name
@@ -244,8 +248,8 @@ def create_video(data, topic, save_dir):
     # Initialize the video writer
     video = cv2.VideoWriter(
         filename,
-        cv2.VideoWriter_fourcc(*"mp4v"),
-        30,
+        cv2.VideoWriter_fourcc(*"avc1"),
+        fps,
         (width, height),
         isColor=channels == 3,
     )
