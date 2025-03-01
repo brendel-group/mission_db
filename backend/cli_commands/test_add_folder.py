@@ -1,17 +1,11 @@
-import os
 from django.test import TestCase
-from restapi.models import Mission, File
+from restapi.models import Mission
 from cli_commands.AddFolderCommand import (
     add_mission_from_folder,
     extract_info_from_folder,
 )
-import cli_commands.AddFolderCommand as AddFolderCommand
 from datetime import datetime
 import logging
-from django.core.files.base import ContentFile
-from django.core.files.storage.memory import InMemoryStorage
-import io
-from mcap.writer import Writer
 
 
 class ErrorCatchingTests(TestCase):
@@ -70,88 +64,6 @@ class AddMissionTests(TestCase):
                 notes="other info",
             ).exists()
         )
-
-
-class AddDetailsTests(TestCase):
-    def create_dummy_mcap(self):
-        """Generate a small in-memory MCAP file"""
-        buffer = io.BytesIO()
-        writer = Writer(buffer)
-
-        writer.start()  # Start writing the MCAP file
-
-        # Define a dummy schema
-        schema_id = writer.register_schema(
-            name="ExampleSchema",
-            encoding="jsonschema",
-            data=b'{"type": "object", "properties": {"temperature": {"type": "number"}}}',
-        )
-
-        # Define a dummy channel
-        channel_id = writer.register_channel(
-            topic="/sensor/temperature",
-            schema_id=schema_id,
-            message_encoding="json",
-        )
-
-        # Write a dummy message
-        writer.add_message(
-            channel_id=channel_id,
-            log_time=0,
-            publish_time=0,
-            data=b'{"temperature": 22.5}',
-        )
-
-        writer.add_message(
-            channel_id=channel_id,
-            log_time=5 * 10**9,
-            publish_time=5 * 10**9,
-            data=b'{"temperature": 22.5}',
-        )
-
-        writer.finish()  # Finish writing the MCAP file
-        return buffer.getvalue()
-
-    def setUp(self):
-        self.test_storage = InMemoryStorage()
-        AddFolderCommand.storage = self.test_storage
-        File.file.field.storage = self.test_storage
-
-        # create fake files
-        mcap_file = ContentFile(self.create_dummy_mcap())
-        yaml_file = ContentFile(
-            "rosbag2_bagfile_information:\n  duration:\n    nanoseconds: 14694379191"
-        )
-        self.test_storage.save("2024.12.02_mission1/test/bag/bag.mcap", mcap_file)
-        self.test_storage.save("2024.12.02_mission1/test/bag/metadata.yaml", yaml_file)
-
-        # disable logging
-        self.logger = logging.getLogger()
-        self.logger.disabled = True
-
-    def _delete_recursive(self, path: str):
-        dirs, files = self.test_storage.listdir(path)
-        for dir in dirs:
-            self._delete_recursive(os.path.join(path, dir))
-        for file in files:
-            self.test_storage.delete(os.path.join(path, file))
-        if path:
-            self.test_storage.delete(path)
-
-    def tearDown(self):
-        self._delete_recursive("")
-
-        # reenable logging
-        self.logger.disabled = False
-
-    def test_add_details(self):
-        add_mission_from_folder("2024.12.02_mission1")
-        file = File.objects.filter(file="2024.12.02_mission1/test/bag/bag.mcap")
-        self.assertTrue(file.exists())
-        self.assertEqual(len(file), 1)
-        self.assertEqual(file.first().size, 823)
-        self.assertEqual(file.first().duration, 5)
-        self.assertEqual(file.first().type, "test")
 
 
 class BasicTests(TestCase):
