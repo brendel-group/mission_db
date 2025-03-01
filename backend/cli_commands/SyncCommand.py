@@ -220,7 +220,7 @@ def extract_topics_from_mcap(mcap_path: str) -> dict[str:dict]:
                 "name": topic,
                 "type": topic_type,
                 "message_count": message_count,
-                "frequency": 0 if duration == 0 else message_count / duration,
+                "frequency": 0 if duration == 0 else round(message_count / duration, 2),
             }
         return topic_info
 

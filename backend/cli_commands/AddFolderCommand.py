@@ -2,9 +2,7 @@ import os
 import logging
 from datetime import datetime
 from .Command import Command
-from restapi.models import Mission, File
-from django.core.files.storage import Storage
-from mcap.reader import make_reader
+from restapi.models import Mission
 
 
 class AddFolderCommand(Command):
@@ -25,40 +23,6 @@ class AddFolderCommand(Command):
 
     def command(self, args):
         add_mission_from_folder(args.path, args.location, args.notes)
-
-
-storage = File.file.field.storage
-
-
-def get_duration(path, file_storage: Storage = None):
-    if not file_storage:
-        file_storage = File.file.field.storage
-    with file_storage.open(path, "rb") as f:
-        reader = make_reader(f)
-        statistics = reader.get_summary().statistics
-        return (statistics.message_end_time - statistics.message_start_time) * 10**-9
-
-
-def extract_topics_from_mcap(mcap_path, file_storage: Storage = None):
-    if not file_storage:
-        file_storage = File.file.field.storage
-    with file_storage.open(mcap_path, "rb") as f:
-        reader = make_reader(f)
-        summary = reader.get_summary()
-        schema_map = {schema.id: schema.name for schema in summary.schemas.values()}
-        channel_message_counts = summary.statistics.channel_message_counts
-        duration = get_duration(mcap_path)
-        topic_info = {
-            channel.topic: {
-                "type": schema_map.get(channel.schema_id, "Unknown"),
-                "message_count": channel_message_counts.get(channel.id, 0),
-                "frequency": 0
-                if duration == 0
-                else channel_message_counts.get(channel.id, 0) / duration,
-            }
-            for channel in summary.channels.values()
-        }
-        return topic_info
 
 
 def check_mission(name, date):
@@ -113,45 +77,3 @@ def add_mission_from_folder(folder_path, location=None, notes=None):
             logging.warning("skipping because this mission has already been added")
     else:
         logging.warning("Skipping folder due to naming issues.")
-
-
-def add_details(mission_path, robot, mission):
-    """
-    iterates through the folders and subfolders to find the mcap files and metadata files
-    this information is then stored in the database
-    """
-    # storage.listdir returns a tuple where the first element is a list of all directories
-    # and the second element a list of all files
-    for folder in storage.listdir(mission_path)[0]:
-        folder_path = os.path.join(mission_path, folder)
-        typ = os.path.basename(folder_path)
-
-        for subfolder in storage.listdir(folder_path)[0]:
-            subfolder_path = os.path.join(folder_path, subfolder)
-
-            mcap_path = None
-            for item in storage.listdir(subfolder_path)[1]:
-                if os.path.join(subfolder_path, item).endswith(".mcap"):
-                    mcap_path = os.path.join(subfolder_path, item)
-            if mcap_path:
-                size = storage.size(mcap_path)
-                duration = get_duration(mcap_path)
-                save_Details(mcap_path, size, duration, robot, mission, typ)
-
-
-def save_Details(path, size, duration, robot, mission, type):
-    if size and duration:
-        file = File(
-            file=path,
-            robot=robot,
-            duration=duration,
-            size=size,
-            mission=mission,
-            type=type,
-        )
-        try:
-            file.save()
-        except Exception as e:
-            logging.error(f"Error Adding Details: {e}")
-    else:
-        logging.warning("Skipping due to issues with the metadata")
