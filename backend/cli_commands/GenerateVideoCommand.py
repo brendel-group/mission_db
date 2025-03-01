@@ -105,16 +105,13 @@ def _get_file_from_external(
         # generate videos in folder for temporary files
         local_storage = FileSystemStorage(settings.TEMP_FOLDER)
 
-    metadata_path = os.path.dirname(file.name) + "/metadata.yaml"
-
     checksum_logger = logging.getLogger("botocore.httpchecksum")
     checksum_logger.disabled = True  # Disable checksum messages
 
     logger.info("Moving files to local storage")
     # Move files from remote storage to local filesystem
-    with file.open() and external_storage.open(metadata_path) as metadata_file:
+    with file.open():
         local_storage.save(file.name, file)
-        local_storage.save(metadata_path, metadata_file)
 
     checksum_logger.disabled = False
 
@@ -143,9 +140,8 @@ def _move_file_to_external(
         return
 
     if settings.STORE_VIDEO_LOCALLY:
-        # Delete mcap and metadata.yaml from local_storage
+        # Delete mcap from local_storage
         local_storage.delete(path)
-        local_storage.delete(local_path / "metadata.yaml")
         return
 
     logger.info("Moving videos to external storage")
