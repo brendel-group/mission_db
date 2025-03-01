@@ -14,7 +14,7 @@ whitenoise
 djangorestframework-api-key==3.*
 mcap
 numpy
-opencv-python
+opencv-python --no-binary opencv-python
 moviepy
 dj-rest-auth==7.*
 boto3==1.*

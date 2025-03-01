@@ -1,4 +1,4 @@
-# polybot_mission_db
+# Mission Explorer
 
 ## Documentation
 
@@ -18,10 +18,22 @@ cd mission_db
 
 #### Backend Setup
 
+To compile opencv-python with the support for h264 codec some system packages are required:
+
+#### In Ubuntu:
+```bash
+sudo apt install cmake gcc g++ python3-dev libavcodec-dev libavformat-dev libswscale-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev libgtk-3-dev x264 libx264-dev
+```
+#### In Windows:
+- install cmake
+
+#### both:
+
 ```sh
 cd backend
 pip install -r requirements.txt 
 ```
+This will install all required python packages and compile `opencv-python` which may take up to 30 minutes.
 
 #### Frontend Setup
 
