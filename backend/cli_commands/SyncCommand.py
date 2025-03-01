@@ -99,49 +99,29 @@ def sync_files(mission_path, mission):
                 # Process each topic in the metadata
                 for topic_name, topic_data in metadata.items():
                     # Try to find a corresponding video file
-                    matching_video = None
+                    matching_video = videos_in_folder.get(
+                        topic_name.replace("/", "-") + ".mp4", None
+                    )
 
-                    for video_filename in videos_in_folder.keys():
-                        # Match by topic name (adjust this logic if needed)
-                        if (
-                            topic_name.replace("/", "-") in video_filename
-                        ):  # Handle path-based topic names
-                            matching_video = videos_in_folder[video_filename]
-                            break
-
-                    if not matching_video:
-                        continue  # Skip this topic if no matching video is found
-
-                    # Ensure the video file exists in storage
-                    video_path = Path.joinpath(BASE_DIR, matching_video)
-                    if not storage.exists(video_path):
-                        logging.error(f"Video {video_filename} not found in storage.")
-                        continue
-
-                    with storage.open(video_path, "rb") as f:
-                        try:
-                            # Create and save Topic **before** adding video
-                            topic = Topic(
-                                file=file,
-                                name=topic_data["name"],
-                                type=topic_data["type"],
-                                message_count=topic_data["message_count"],
-                                frequency=topic_data["frequency"],
-                            )
-                            topic.full_clean()
-                            topic.save()
-
-                            # Save the video file to the topic
-                            topic.video.save(video_filename, ContentFile(f.read()))
-                            topic.save()
-
-                            logging.info(
-                                f"Successfully added video {video_filename} to topic {topic.name}"
-                            )
-                        except Exception as e:
-                            logging.error(
-                                f"Error adding video {video_filename} to topic {topic.name}: {e}"
-                            )
+                    try:
+                        # Create and save Topic **before** adding video
+                        topic = Topic(
+                            file=file,
+                            name=topic_data["name"],
+                            type=topic_data["type"],
+                            message_count=topic_data["message_count"],
+                            frequency=topic_data["frequency"],
+                        )
+                        topic.full_clean()
+                        topic.save()
+                        # Save the video file to the topic
+                        if matching_video:
+                            video_storage = Topic.video.field.storage
+                            if video_storage.exists(matching_video):
+                                topic.video = matching_video
+                                topic.save()
+                    except Exception as e:
+                        logging.error(f"Error processing topic {topic_name}: {e}")
 
     # Remove files that are in DB but no longer in filesystem
     for file_path in existing_files - current_files:
