@@ -7,6 +7,8 @@ from cli_commands.SyncCommand import sync_folder, sync_files
 import cli_commands.SyncCommand as SyncCommand
 from django.core.files.base import ContentFile
 from django.core.files.storage.memory import InMemoryStorage
+import io
+from mcap.writer import Writer
 
 
 class SyncFolderArgumentTests(TestCase):
@@ -70,17 +72,52 @@ class SyncFolderArgumentTests(TestCase):
 
 
 class SyncFilesTests(TestCase):
+    def create_dummy_mcap(self):
+        """Generate a small in-memory MCAP file"""
+        buffer = io.BytesIO()
+        writer = Writer(buffer)
+
+        writer.start()  # Start writing the MCAP file
+
+        # Define a dummy schema
+        schema_id = writer.register_schema(
+            name="ExampleSchema",
+            encoding="jsonschema",
+            data=b'{"type": "object", "properties": {"temperature": {"type": "number"}}}',
+        )
+
+        # Define a dummy channel
+        channel_id = writer.register_channel(
+            topic="/sensor/temperature",
+            schema_id=schema_id,
+            message_encoding="json",
+        )
+
+        # Write a dummy message
+        writer.add_message(
+            channel_id=channel_id,
+            log_time=0,
+            publish_time=0,
+            data=b'{"temperature": 22.5}',
+        )
+
+        writer.add_message(
+            channel_id=channel_id,
+            log_time=5 * 10**9,
+            publish_time=5 * 10**9,
+            data=b'{"temperature": 22.5}',
+        )
+
+        writer.finish()  # Finish writing the MCAP file
+        return buffer.getvalue()
+
     def setUp(self):
         SyncCommand.storage = InMemoryStorage()
         self.test_storage = SyncCommand.storage
 
         # create fake files
-        empty_file = ContentFile("")
-        yaml_file = ContentFile(
-            "rosbag2_bagfile_information:\n  duration:\n    nanoseconds: 14694379191"
-        )
-        self.test_storage.save("2024.12.02_mission1/test/bag/bag.mcap", empty_file)
-        self.test_storage.save("2024.12.02_mission1/test/bag/metadata.yaml", yaml_file)
+        mcap_file = ContentFile(self.create_dummy_mcap())
+        self.test_storage.save("2024.12.02_mission1/test/bag/bag.mcap", mcap_file)
 
         self.mission = Mission.objects.create(
             name="mission1", date="2024-12-02", location="test_location"
@@ -109,7 +146,10 @@ class SyncFilesTests(TestCase):
         sync_files("2024.12.02_mission1", self.mission)
         files = File.objects.filter(mission_id=self.mission.id)
         self.assertEqual(files.count(), 1)
-        self.assertEqual(files.first().file, "2024.12.02_mission1/test/bag/bag.mcap")
+        self.assertEqual(
+            files.first().file,
+            os.path.normpath("2024.12.02_mission1/test/bag/bag.mcap"),
+        )
 
     def test_sync_files_removes_missing_files(self):
         """
@@ -126,7 +166,10 @@ class SyncFilesTests(TestCase):
         sync_files("2024.12.02_mission1", self.mission)
         files = File.objects.filter(mission_id=self.mission.id)
         self.assertEqual(files.count(), 1)
-        self.assertEqual(files.first().file, "2024.12.02_mission1/test/bag/bag.mcap")
+        self.assertEqual(
+            files.first().file,
+            os.path.normpath("2024.12.02_mission1/test/bag/bag.mcap"),
+        )
 
     def test_sync_files_handles_exceptions(self):
         """
