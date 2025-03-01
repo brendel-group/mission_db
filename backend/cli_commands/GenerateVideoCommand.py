@@ -70,9 +70,7 @@ def generate_videos(path: str):
 
             logger.info(f"Generating video for topic '{topic}'")
             data = get_video_data(local_path, topic)
-            video_path = create_video(
-                data, topic, local_path
-            )
+            video_path = create_video(data, topic, local_path)
             video_paths.append(video_path)
 
     except (FileNotFoundError, IsADirectoryError):
