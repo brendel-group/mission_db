@@ -53,11 +53,11 @@ def generate_videos(path: str):
     storage = File.file.field.storage
 
     local_storage, local_path = _get_file_from_external(storage, file)
+    video_paths: list[str] = []
 
     try:
         # generate videos
         topics = get_video_topics(local_path)
-        video_paths: list[str] = []
         for topic in topics:
             filename = create_video_filename(topic, local_path)
             # skip existing videos
