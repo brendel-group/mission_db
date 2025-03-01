@@ -2,13 +2,12 @@ import logging
 import os
 from django.test import TestCase
 from unittest.mock import patch
-from restapi.models import File, Mission
-from cli_commands.SyncCommand import sync_folder, sync_files
 import cli_commands.SyncCommand as SyncCommand
 from django.core.files.base import ContentFile
 from django.core.files.storage.memory import InMemoryStorage
 import io
 from mcap.writer import Writer
+from restapi.models import File, Mission
 
 
 class SyncFolderArgumentTests(TestCase):
@@ -58,7 +57,7 @@ class SyncFolderArgumentTests(TestCase):
         Test sync_folder to ensure correct arguments are passed to add_mission_from_folder.
         """
         # Call sync_folder
-        sync_folder()
+        SyncCommand.sync_folder()
 
         # Verify add_mission_from_folder is called with correct arguments
         self.mock_add_mission_from_folder.assert_any_call(
@@ -122,7 +121,6 @@ class SyncFilesTests(TestCase):
         self.mission = Mission.objects.create(
             name="mission1", date="2024-12-02", location="test_location"
         )
-
         self.logger = logging.getLogger()
         self.logger.disabled = True
 
@@ -143,7 +141,7 @@ class SyncFilesTests(TestCase):
         """
         Test sync_files to ensure new files are added to the database.
         """
-        sync_files("2024.12.02_mission1", self.mission)
+        SyncCommand.sync_files("2024.12.02_mission1", self.mission)
         files = File.objects.filter(mission_id=self.mission.id)
         self.assertEqual(files.count(), 1)
         self.assertEqual(
@@ -163,7 +161,7 @@ class SyncFilesTests(TestCase):
             duration=10000000000,
             size=369629523,
         )
-        sync_files("2024.12.02_mission1", self.mission)
+        SyncCommand.sync_files("2024.12.02_mission1", self.mission)
         files = File.objects.filter(mission_id=self.mission.id)
         self.assertEqual(files.count(), 1)
         self.assertEqual(
@@ -179,6 +177,6 @@ class SyncFilesTests(TestCase):
             "cli_commands.SyncCommand.storage.size",
             side_effect=Exception("Test exception"),
         ):
-            sync_files("2024.12.02_mission1", self.mission)
+            SyncCommand.sync_files("2024.12.02_mission1", self.mission)
             files = File.objects.filter(mission_id=self.mission.id)
             self.assertEqual(files.count(), 0)

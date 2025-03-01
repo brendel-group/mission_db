@@ -45,6 +45,7 @@ def sync_files(mission_path, mission):
     BASE_DIR = Path.joinpath(BASE_DIR, "media")
     existing_files = {file.file.name for file in File.objects.filter(mission=mission)}
     current_files = set()
+
     # Find all .mcap and metadata files from the mission in the filesystem
     for folder in storage.listdir(mission_path)[0]:
         folder_path = os.path.join(mission_path, folder)
@@ -59,70 +60,68 @@ def sync_files(mission_path, mission):
                 if item_path.endswith(".mcap"):
                     mcap_path = item_path
 
-            if mcap_path:
-                current_files.add(mcap_path)  # Track found files
-                metadata = extract_topics_from_mcap(mcap_path)
-                # Add new found files to the database
-                if mcap_path not in existing_files:
-                    try:
-                        size = storage.size(mcap_path)
+            if not mcap_path:
+                continue
 
-                        duration = get_duration_from_mcap(mcap_path)
-                        file = File(
-                            robot=None,
-                            duration=duration,
-                            size=size,
-                            file=mcap_path,
-                            mission_id=mission.id,
-                            type=typ,
-                        )
-                        file.save()
-                        # log the name of the added file without the path
-                        logging.info(
-                            f"Added new file {mcap_path} for mission {mission.name}."
-                        )
-                    except Exception as e:
-                        logging.error(f"Error processing {mcap_path}: {e}")
-                else:
-                    file = File.objects.get(file=mcap_path)
+            current_files.add(mcap_path)  # Track found files
+            metadata = extract_topics_from_mcap(mcap_path)
 
-                # generate videos for new file
-                generate_videos(mcap_path)
-
-                # Get all video files in this folder
-                videos_in_folder = {
-                    video: os.path.join(subfolder_path, video)
-                    for video in storage.listdir(subfolder_path)[1]
-                    if video.endswith(".mp4")
-                }
-                # Process each topic in the metadata
-                for topic_name, topic_data in metadata.items():
-                    # Try to find a corresponding video file
-                    matching_video = videos_in_folder.get(
-                        topic_name.replace("/", "-") + ".mp4", None
+            # Add new found files to the database
+            if mcap_path not in existing_files:
+                try:
+                    size = storage.size(mcap_path)
+                    duration = get_duration_from_mcap(mcap_path)
+                    file = File(
+                        robot=None,
+                        duration=duration,
+                        size=size,
+                        file=mcap_path,
+                        mission_id=mission.id,
+                        type=typ,
                     )
+                    file.save()
+                    logging.info(
+                        f"Added new file {mcap_path} for mission {mission.name}."
+                    )
+                    # generate videos for the topics
+                    generate_videos(mcap_path)
 
-                    try:
-                        # Create and save the topic
-                        topic = Topic(
-                            file=file,
-                            name=topic_data["name"],
-                            type=topic_data["type"],
-                            message_count=topic_data["message_count"],
-                            frequency=topic_data["frequency"],
+                    # get all video files in this folder
+                    videos_in_folder = {
+                        video: os.path.join(subfolder_path, video)
+                        for video in storage.listdir(subfolder_path)[1]
+                        if video.endswith(".mp4")
+                    }
+                    # process each topic in the metadata
+                    for topic_name, topic_data in metadata.items():
+                        # Try to find a corresponding video file
+                        matching_video = videos_in_folder.get(
+                            topic_name.replace("/", "-") + ".mp4", None
                         )
-                        if matching_video:
-                            video_storage = Topic.video.field.storage
-                            if video_storage.exists(matching_video):
-                                topic.video = matching_video
-                        # check if topic already exists
-                        if not Topic.objects.filter(
-                            name=topic_data["name"], file=file
-                        ).exists():
-                            topic.full_clean()
-                            topic.save()
-                    except Exception as e:
-                        logging.error(f"Error processing topic {topic_name}: {e}")
+
+                        try:
+                            # Create and save the topic
+                            topic = Topic(
+                                file=file,
+                                name=topic_data["name"],
+                                type=topic_data["type"],
+                                message_count=topic_data["message_count"],
+                                frequency=topic_data["frequency"],
+                            )
+                            if matching_video:
+                                video_storage = Topic.video.field.storage
+                                if video_storage.exists(matching_video):
+                                    topic.video = matching_video
+                            # check if topic already exists
+                            if not Topic.objects.filter(
+                                name=topic_data["name"], file=file
+                            ).exists():
+                                topic.full_clean()
+                                topic.save()
+                        except Exception as e:
+                            logging.error(f"Error processing topic {topic_name}: {e}")
+                except Exception as e:
+                    logging.error(f"Error processing {mcap_path}: {e}")
 
     # Remove files that are in DB but no longer in filesystem
     for file_path in existing_files - current_files:
