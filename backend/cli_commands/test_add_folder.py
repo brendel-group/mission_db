@@ -1,17 +1,11 @@
-import os
 from django.test import TestCase
-from restapi.models import Mission, File
+from restapi.models import Mission
 from cli_commands.AddFolderCommand import (
     add_mission_from_folder,
     extract_info_from_folder,
 )
-import cli_commands.AddFolderCommand as AddFolderCommand
 from datetime import datetime
 import logging
-from django.core.files.base import ContentFile
-from django.core.files.storage.memory import InMemoryStorage
-import io
-from mcap.writer import Writer
 
 
 class ErrorCatchingTests(TestCase):
