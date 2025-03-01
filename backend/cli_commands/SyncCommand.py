@@ -10,7 +10,6 @@ from restapi.models import Mission, Tag, File, Topic
 import json
 from mcap.reader import make_reader
 from pathlib import Path
-from django.core.files.base import ContentFile
 
 
 # Create a custom logging handler to track if any log message was emitted
@@ -46,7 +45,6 @@ def sync_files(mission_path, mission):
     BASE_DIR = Path.joinpath(BASE_DIR, "media")
     existing_files = {file.file.name for file in File.objects.filter(mission=mission)}
     current_files = set()
-    logging.info(f"Syncing files for mission {mission.name}.")
     # Find all .mcap and metadata files from the mission in the filesystem
     for folder in storage.listdir(mission_path)[0]:
         folder_path = os.path.join(mission_path, folder)
@@ -60,7 +58,6 @@ def sync_files(mission_path, mission):
                 item_path = os.path.join(subfolder_path, item)
                 if item_path.endswith(".mcap"):
                     mcap_path = item_path
-                    generate_videos(mcap_path)
 
             if mcap_path:
                 current_files.add(mcap_path)  # Track found files
@@ -80,6 +77,7 @@ def sync_files(mission_path, mission):
                             type=typ,
                         )
                         file.save()
+                        # log the name of the added file without the path
                         logging.info(
                             f"Added new file {mcap_path} for mission {mission.name}."
                         )
@@ -87,15 +85,16 @@ def sync_files(mission_path, mission):
                         logging.error(f"Error processing {mcap_path}: {e}")
                 else:
                     file = File.objects.get(file=mcap_path)
+
+                # generate videos for new file
+                generate_videos(mcap_path)
+
                 # Get all video files in this folder
                 videos_in_folder = {
                     video: os.path.join(subfolder_path, video)
                     for video in storage.listdir(subfolder_path)[1]
                     if video.endswith(".mp4")
                 }
-                logging.info(
-                    f"Found {len(videos_in_folder)} video files in folder {subfolder_path}"
-                )
                 # Process each topic in the metadata
                 for topic_name, topic_data in metadata.items():
                     # Try to find a corresponding video file
@@ -104,7 +103,7 @@ def sync_files(mission_path, mission):
                     )
 
                     try:
-                        # Create and save Topic **before** adding video
+                        # Create and save the topic
                         topic = Topic(
                             file=file,
                             name=topic_data["name"],
@@ -112,14 +111,16 @@ def sync_files(mission_path, mission):
                             message_count=topic_data["message_count"],
                             frequency=topic_data["frequency"],
                         )
-                        topic.full_clean()
-                        topic.save()
-                        # Save the video file to the topic
                         if matching_video:
                             video_storage = Topic.video.field.storage
                             if video_storage.exists(matching_video):
                                 topic.video = matching_video
-                                topic.save()
+                        # check if topic already exists
+                        if not Topic.objects.filter(
+                            name=topic_data["name"], file=file
+                        ).exists():
+                            topic.full_clean()
+                            topic.save()
                     except Exception as e:
                         logging.error(f"Error processing topic {topic_name}: {e}")
 
@@ -220,9 +221,7 @@ def extract_topics_from_mcap(mcap_path: str) -> dict[str:dict]:
                 "name": topic,
                 "type": topic_type,
                 "message_count": message_count,
-                "frequency": 0
-                if duration == 0
-                else message_count / (duration * 10**-9),
+                "frequency": 0 if duration == 0 else message_count / duration,
             }
         return topic_info
 
@@ -231,4 +230,5 @@ def get_duration_from_mcap(mcap_path: str) -> int:
     with storage.open(mcap_path, "rb") as f:
         reader = make_reader(f)
         statistics = reader.get_summary().statistics
-        return statistics.message_end_time - statistics.message_start_time
+        result = statistics.message_end_time - statistics.message_start_time
+        return result // 10**9

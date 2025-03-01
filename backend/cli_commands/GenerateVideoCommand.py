@@ -78,8 +78,6 @@ def generate_videos(path: str):
         return []
     finally:
         _move_file_to_external(storage, local_storage, path, local_path, video_paths)
-
-    logger.info("Succesfully generated all videos and moved files")
     return video_paths
 
 
