@@ -1,13 +1,15 @@
 import os
 import logging
 from django.core.files.storage import DefaultStorage
-import yaml
 from restapi.serializer import TagSerializer
 from .Command import Command
+from .GenerateVideoCommand import generate_videos
 from .AddFolderCommand import add_mission_from_folder
 from .DeleteFolderCommand import delete_mission_from_folder
-from restapi.models import Mission, Tag, File
+from restapi.models import Mission, Tag, File, Topic
 import json
+from mcap.reader import make_reader
+from pathlib import Path
 
 
 # Create a custom logging handler to track if any log message was emitted
@@ -39,7 +41,8 @@ def sync_files(mission_path, mission):
     - Adds new files if they appear in the filesystem.
     - Removes files from the database if they are missing.
     """
-
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    BASE_DIR = Path.joinpath(BASE_DIR, "media")
     existing_files = {file.file.name for file in File.objects.filter(mission=mission)}
     current_files = set()
 
@@ -50,43 +53,75 @@ def sync_files(mission_path, mission):
 
         for subfolder in storage.listdir(folder_path)[0]:
             subfolder_path = os.path.join(folder_path, subfolder)
-            mcap_path, metadata_path = None, None
+            mcap_path = None
 
             for item in storage.listdir(subfolder_path)[1]:
                 item_path = os.path.join(subfolder_path, item)
                 if item_path.endswith(".mcap"):
                     mcap_path = item_path
-                elif item_path.endswith(".yaml"):
-                    metadata_path = item_path
 
-            if mcap_path and metadata_path:
-                current_files.add(mcap_path)  # Track found files
+            if not mcap_path:
+                continue
 
-                # Add new found files to the database
-                if mcap_path not in existing_files:
-                    try:
-                        size = storage.size(mcap_path)
-                        metadata = load_yaml_metadata(metadata_path)
-                        duration = (
-                            metadata.get("rosbag2_bagfile_information", {})
-                            .get("duration", {})
-                            .get("nanoseconds", 0)
-                            / 1e9
+            current_files.add(mcap_path)  # Track found files
+            metadata = extract_topics_from_mcap(mcap_path)
+
+            # Add new found files to the database
+            if mcap_path not in existing_files:
+                try:
+                    size = storage.size(mcap_path)
+                    duration = get_duration_from_mcap(mcap_path)
+                    file = File(
+                        robot=None,
+                        duration=duration,
+                        size=size,
+                        file=mcap_path,
+                        mission_id=mission.id,
+                        type=typ,
+                    )
+                    file.save()
+                    logging.info(
+                        f"Added new file {mcap_path} for mission {mission.name}."
+                    )
+                    # generate videos for the topics
+                    generate_videos(mcap_path)
+
+                    # get all video files in this folder
+                    videos_in_folder = {
+                        video: os.path.join(subfolder_path, video)
+                        for video in storage.listdir(subfolder_path)[1]
+                        if video.endswith(".mp4")
+                    }
+                    # process each topic in the metadata
+                    for topic_name, topic_data in metadata.items():
+                        # Try to find a corresponding video file
+                        matching_video = videos_in_folder.get(
+                            topic_name.replace("/", "-") + ".mp4", None
                         )
-                        file = File(
-                            robot=None,
-                            duration=duration,
-                            size=size,
-                            file=mcap_path,
-                            mission_id=mission.id,
-                            type=typ,
-                        )
-                        file.save()
-                        logging.info(
-                            f"Added new file {mcap_path} for mission {mission.name}."
-                        )
-                    except Exception as e:
-                        logging.error(f"Error processing {mcap_path}: {e}")
+
+                        try:
+                            # Create and save the topic
+                            topic = Topic(
+                                file=file,
+                                name=topic_data["name"],
+                                type=topic_data["type"],
+                                message_count=topic_data["message_count"],
+                                frequency=topic_data["frequency"],
+                            )
+                            if matching_video:
+                                video_storage = Topic.video.field.storage
+                                if video_storage.exists(matching_video):
+                                    topic.video = matching_video
+                            # check if topic already exists
+                            if not Topic.objects.filter(
+                                name=topic_data["name"], file=file
+                            ).exists():
+                                topic.full_clean()
+                                topic.save()
+                        except Exception as e:
+                            logging.error(f"Error processing topic {topic_name}: {e}")
+                except Exception as e:
+                    logging.error(f"Error processing {mcap_path}: {e}")
 
     # Remove files that are in DB but no longer in filesystem
     for file_path in existing_files - current_files:
@@ -98,12 +133,6 @@ def sync_files(mission_path, mission):
             logging.warning(
                 f"File {file_path} not found in database (already deleted)."
             )
-
-
-def load_yaml_metadata(yaml_filepath):
-    """Loads YAML metadata."""
-    with storage.open(yaml_filepath, "r") as file:
-        return yaml.safe_load(file)
 
 
 def sync_folder():
@@ -172,3 +201,33 @@ def sync_folder():
     if not log_tracker.log_occurred:
         logging.info("Nothing was modified, no new metadata was saved")
     logger.removeHandler(log_tracker)
+
+
+def extract_topics_from_mcap(mcap_path: str) -> dict[str:dict]:
+    with storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        schema_map = {
+            schema.id: schema.name for schema in reader.get_summary().schemas.values()
+        }
+        channel_message_counts = reader.get_summary().statistics.channel_message_counts
+        duration = get_duration_from_mcap(mcap_path)
+        topic_info = {}
+        for channel in reader.get_summary().channels.values():
+            topic = channel.topic
+            topic_type = schema_map.get(channel.schema_id, "Unknown")
+            message_count = channel_message_counts.get(channel.id, 0)
+            topic_info[topic] = {
+                "name": topic,
+                "type": topic_type,
+                "message_count": message_count,
+                "frequency": 0 if duration == 0 else round(message_count / duration, 2),
+            }
+        return topic_info
+
+
+def get_duration_from_mcap(mcap_path: str) -> int:
+    with storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        statistics = reader.get_summary().statistics
+        result = statistics.message_end_time - statistics.message_start_time
+        return result // 10**9

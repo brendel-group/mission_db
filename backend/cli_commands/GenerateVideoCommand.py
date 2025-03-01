@@ -8,8 +8,8 @@ from .Command import Command
 from django.core.files.storage import FileSystemStorage, Storage
 from restapi.models import File, Topic
 from django.conf import settings
-from .AddFolderCommand import extract_topics_from_mcap
 import logging
+from mcap.reader import make_reader
 
 
 class GenerateVideosCommand(Command):
@@ -32,6 +32,40 @@ class GenerateVideosCommand(Command):
 
 
 logger = logging.getLogger()
+
+storage = File.file.field.storage
+
+
+def get_duration(path, file_storage: Storage = None):
+    if not file_storage:
+        file_storage = File.file.field.storage
+    with file_storage.open(path, "rb") as f:
+        reader = make_reader(f)
+        statistics = reader.get_summary().statistics
+        return (statistics.message_end_time - statistics.message_start_time) * 10**-9
+
+
+def extract_topics_from_mcap(mcap_path, file_storage: Storage = None):
+    if not file_storage:
+        file_storage = File.file.field.storage
+    with file_storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        summary = reader.get_summary()
+        schema_map = {schema.id: schema.name for schema in summary.schemas.values()}
+        channel_message_counts = summary.statistics.channel_message_counts
+        duration = get_duration(mcap_path)
+        topic_info = {
+            channel.topic: {
+                "name": channel.topic,
+                "type": schema_map.get(channel.schema_id, "Unknown"),
+                "message_count": channel_message_counts.get(channel.id, 0),
+                "frequency": 0
+                if duration == 0
+                else round(channel_message_counts.get(channel.id, 0) / duration, 2),
+            }
+            for channel in summary.channels.values()
+        }
+        return topic_info
 
 
 def generate_videos(path: str):
@@ -83,7 +117,6 @@ def generate_videos(path: str):
     finally:
         _move_file_to_external(storage, local_storage, path, local_path, video_paths)
 
-    logger.info("Succesfully generated all videos and moved files")
     return video_paths
 
 
