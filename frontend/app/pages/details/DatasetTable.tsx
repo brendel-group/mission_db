@@ -207,6 +207,7 @@ export function ShowDatasets({
           })()}
         </Table.Td>
         <Table.Td style={{ whiteSpace: "normal", wordBreak: "break-word" }}>
+          {/* edit robot name button */}
           <Menu
             opened={robotMenuOpened === index}
             onClose={() => {
@@ -226,7 +227,7 @@ export function ShowDatasets({
             <Menu.Dropdown style={{ padding: "10px" }}>
               <Textarea
                 variant="filled"
-                placeholder={data.robots[index]}
+                placeholder={data.robots[index] == null ? "Add robot name" : data.robots[index]}
                 autosize
                 value={fieldValue}
                 error={fieldValue.length > 65536 ? "Name too long" : ""}
