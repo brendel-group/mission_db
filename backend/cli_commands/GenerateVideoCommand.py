@@ -9,6 +9,7 @@ from django.core.files.storage import FileSystemStorage, Storage
 from restapi.models import File, Topic
 from django.conf import settings
 import logging
+from mcap.reader import make_reader
 
 
 class GenerateVideosCommand(Command):
@@ -32,6 +33,40 @@ class GenerateVideosCommand(Command):
 
 logger = logging.getLogger()
 
+storage = File.file.field.storage
+
+
+def get_duration(path, file_storage: Storage = None):
+    if not file_storage:
+        file_storage = File.file.field.storage
+    with file_storage.open(path, "rb") as f:
+        reader = make_reader(f)
+        statistics = reader.get_summary().statistics
+        return (statistics.message_end_time - statistics.message_start_time) * 10**-9
+
+
+def extract_topics_from_mcap(mcap_path, file_storage: Storage = None):
+    if not file_storage:
+        file_storage = File.file.field.storage
+    with file_storage.open(mcap_path, "rb") as f:
+        reader = make_reader(f)
+        summary = reader.get_summary()
+        schema_map = {schema.id: schema.name for schema in summary.schemas.values()}
+        channel_message_counts = summary.statistics.channel_message_counts
+        duration = get_duration(mcap_path)
+        topic_info = {
+            channel.topic: {
+                "name": channel.topic,
+                "type": schema_map.get(channel.schema_id, "Unknown"),
+                "message_count": channel_message_counts.get(channel.id, 0),
+                "frequency": 0
+                if duration == 0
+                else round(channel_message_counts.get(channel.id, 0) / duration, 2),
+            }
+            for channel in summary.channels.values()
+        }
+        return topic_info
+
 
 def generate_videos(path: str):
     """wrapper for generating videos and use django storages\\
@@ -54,10 +89,12 @@ def generate_videos(path: str):
 
     local_storage, local_path = _get_file_from_external(storage, file)
 
+    video_paths: list[str] = []
+
     try:
         # generate videos
         topics = get_video_topics(local_path)
-        video_paths: list[str] = []
+        topic_data = extract_topics_from_mcap(path, local_storage)
         for topic in topics:
             filename = create_video_filename(topic, local_path)
             # skip existing videos
@@ -70,7 +107,9 @@ def generate_videos(path: str):
 
             logger.info(f"Generating video for topic '{topic}'")
             data = get_video_data(local_path, topic)
-            video_path = create_video(data, topic, local_path)
+            video_path = create_video(
+                data, topic, local_path, topic_data[topic]["frequency"]
+            )
             video_paths.append(video_path)
 
     except (FileNotFoundError, IsADirectoryError):
