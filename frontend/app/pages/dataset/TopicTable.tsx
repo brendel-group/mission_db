@@ -85,9 +85,12 @@ return filterData(
 
 export function TopicTable({ topics }: { topics: Topic[] }) {
 const [search, setSearch] = useState('');
-const [sortedData, setSortedData] = useState(topics);
-const [sortBy, setSortBy] = useState<keyof Topic | null>(null);
+const [sortBy, setSortBy] = useState<keyof Topic>('name');
 const [reverseSortDirection, setReverseSortDirection] = useState(false);
+const [sortedData, setSortedData] = useState(() =>
+  sortData(topics, { sortBy: 'name', reversed: false, search: '' })
+);
+
 
 const setSorting = (field: keyof Topic) => {
   const reversed = field === sortBy ? !reverseSortDirection : false;
