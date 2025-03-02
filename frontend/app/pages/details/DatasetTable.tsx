@@ -27,7 +27,6 @@ export function ShowDatasets({
 }) {
   const navigate = useNavigate();
   const clipboard = useClipboard({ timeout: 500 });
-  const missionPathSplitted: string[] = basePath.split("/").slice(-2, -1);
 
   const [searchFor, setSearchFor] = useState<string>("");
 
