@@ -83,7 +83,7 @@ export function ShowDatasets({
         key={file}
         onClick={() =>
           navigate(
-            "/dataset?fileName=" + missionPathSplitted.concat(file).join("/")
+            "/dataset?fileName=" + basePath + file,
           )
         }
         // Change color on mouse hover
