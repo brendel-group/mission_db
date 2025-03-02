@@ -84,7 +84,10 @@ def sync_files(mission_path, mission):
                         f"Added new file {mcap_path} for mission {mission.name}."
                     )
                     # generate videos for the topics
-                    generate_videos(mcap_path)
+                    try:
+                        generate_videos(mcap_path)
+                    except Exception as e:
+                        logging.error(f"Error generating videos: {e}")
 
                     # get all video files in this folder
                     videos_in_folder = {
@@ -120,6 +123,7 @@ def sync_files(mission_path, mission):
                                 topic.save()
                         except Exception as e:
                             logging.error(f"Error processing topic {topic_name}: {e}")
+                    logging.info(f"Added topics for {mcap_path}.")
                 except Exception as e:
                     logging.error(f"Error processing {mcap_path}: {e}")
 
