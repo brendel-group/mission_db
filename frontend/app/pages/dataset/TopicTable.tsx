@@ -43,9 +43,6 @@ const query = search.toLowerCase().trim();
 
 return data.filter((item) =>
   keys(data[0]).some((key) => {
-    if (key === 'id') {
-      return false;
-    }
     const value = item[key];
     if (typeof value === 'number') {
       return value.toString() === query;
@@ -77,10 +74,10 @@ return filterData(
     }
 
     if (payload.reversed) {
-      return b[sortBy].toString().localeCompare(a[sortBy].toString());
+      return (b[sortBy]?.toString() ?? '').localeCompare(a[sortBy]?.toString() ?? '');
     }
 
-    return a[sortBy].toString().localeCompare(b[sortBy].toString());
+    return (a[sortBy]?.toString() ?? '').localeCompare(b[sortBy]?.toString() ?? '');
   }),
   payload.search
 );
