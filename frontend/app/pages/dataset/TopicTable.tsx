@@ -43,9 +43,6 @@ const query = search.toLowerCase().trim();
 
 return data.filter((item) =>
   keys(data[0]).some((key) => {
-    if (key === 'id') {
-      return false;
-    }
     const value = item[key];
     if (typeof value === 'number') {
       return value.toString() === query;
@@ -77,10 +74,10 @@ return filterData(
     }
 
     if (payload.reversed) {
-      return b[sortBy].toString().localeCompare(a[sortBy].toString());
+      return (b[sortBy]?.toString() ?? '').localeCompare(a[sortBy]?.toString() ?? '');
     }
 
-    return a[sortBy].toString().localeCompare(b[sortBy].toString());
+    return (a[sortBy]?.toString() ?? '').localeCompare(b[sortBy]?.toString() ?? '');
   }),
   payload.search
 );
@@ -88,9 +85,12 @@ return filterData(
 
 export function TopicTable({ topics }: { topics: Topic[] }) {
 const [search, setSearch] = useState('');
-const [sortedData, setSortedData] = useState(topics);
-const [sortBy, setSortBy] = useState<keyof Topic | null>(null);
+const [sortBy, setSortBy] = useState<keyof Topic>('name');
 const [reverseSortDirection, setReverseSortDirection] = useState(false);
+const [sortedData, setSortedData] = useState(() =>
+  sortData(topics, { sortBy: 'name', reversed: false, search: '' })
+);
+
 
 const setSorting = (field: keyof Topic) => {
   const reversed = field === sortBy ? !reverseSortDirection : false;

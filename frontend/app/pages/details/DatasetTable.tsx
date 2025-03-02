@@ -27,7 +27,6 @@ export function ShowDatasets({
 }) {
   const navigate = useNavigate();
   const clipboard = useClipboard({ timeout: 500 });
-  const missionPathSplitted: string[] = basePath.split("/").slice(-2, -1);
 
   const [searchFor, setSearchFor] = useState<string>("");
 
@@ -83,7 +82,7 @@ export function ShowDatasets({
         key={file}
         onClick={() =>
           navigate(
-            "/dataset?fileName=" + missionPathSplitted.concat(file).join("/")
+            "/dataset?fileName=" + basePath + file,
           )
         }
         // Change color on mouse hover
