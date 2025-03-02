@@ -107,10 +107,10 @@ const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 
 const rows = sortedData.map((row) => (
   <Table.Tr key={row.name}>
-    <Table.Td>{row.name}</Table.Td>
-    <Table.Td>{row.type}</Table.Td>
-    <Table.Td>{row.message_count}</Table.Td>
-    <Table.Td>{row.frequency}</Table.Td>
+    <Table.Td style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>{row.name}</Table.Td>
+    <Table.Td style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>{row.type}</Table.Td>
+    <Table.Td style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>{row.message_count}</Table.Td>
+    <Table.Td style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>{row.frequency}</Table.Td>
   </Table.Tr>
 ));
 
